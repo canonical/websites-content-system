@@ -1,22 +1,32 @@
-import re
+import json
 import os
+import re
 import subprocess
 
 from webapp.parse_tree import scan_directory
-
+from webapp.redis import Redis
 
 class SiteRepositoryError(Exception):
     """
     Exception raised for errors in the SiteRepository class
     """
 
+# TODO: hide implementation of caching, such that redis connection
+# errors don't cause termination, but will degrade performance
 
 class SiteRepository:
 
     def __init__(self, repository_uri, branch="main", app=None):
+        # Initialize with cache if available
+        redis = Redis(app)
+        if redis.is_available():
+            self.cache = redis
+
         self.repository_uri = repository_uri
         self.branch = branch
         self.app = app
+
+        # Don't run setup if the repository is already available
         self.setup_repository(branch)
 
     def __exec__(self, command_str):
@@ -96,7 +106,7 @@ class SiteRepository:
 
     def clone_repo(self):
         """
-        Clone the repository
+        Clone the repository.
         """
         github_url = self.__create_git_uri__(self.repository_uri)
         self.__check_git_uri__(github_url)
@@ -138,9 +148,26 @@ class SiteRepository:
         # Retrieve updates
         self.pull_updates()
 
-    def parse_templates(self, folder="templates"):
+    def get_tree_from_cache(self):
         """
-        Parse the selected folder to retrieve the templates tree
+        Get the tree from the cache. Return None if cache is not available.
+        """
+        if hasattr(self, "cache"):
+            if cached_tree := self.cache.get(f"{self.repository_uri}/{self.branch}"):
+                return json.loads(cached_tree.decode("utf-8"))
+
+    def set_tree_in_cache(self, tree):
+        """
+        Set the tree in the cache. Silently pass if cache is not available.
+        """
+        if hasattr(self, "cache"):
+            return self.cache.set(
+                f"{self.repository_uri}/{self.branch}", json.dumps(tree)
+            )
+
+    def get_tree_from_disk(self, folder="templates"):
+        """
+        Get the tree from the repository
         """
         # Check if the templates folder exists
         if not os.path.exists(folder):
@@ -149,5 +176,24 @@ class SiteRepository:
         os.chdir(folder)
         # Parse the templates
         tree = scan_directory(os.getcwd())
-        # Return json
-        return {"name": self.repo_name, "templates": tree}
+        return tree
+
+    def get_new_tree(self):
+        """
+        Get the tree from the repository and update the cacahe
+        """
+        tree = self.get_tree_from_disk()
+        # Update the cache
+        self.set_tree_in_cache(tree)
+        return tree
+
+    def get_tree(self, new=False):
+        """
+        Get the tree from the cache or a fresh copy.
+        """
+        # If cache is not available, return a new tree``
+        if not new and (tree := self.get_tree_from_cache()):
+            return tree
+
+        # Return a new tree by default
+        return self.get_new_tree()

@@ -17,3 +17,12 @@ class Redis:
 
     def delete(self, key):
         return self.connect().delete(key)
+
+    def is_available(self):
+        try:
+            self.connect().ping()
+            return True
+        except redis.exceptions.ConnectionError:
+            return False
+        except Exception as e:
+            raise e
