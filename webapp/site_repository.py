@@ -92,6 +92,7 @@ class SiteRepository:
         """
         Clone the repository
         """
+        # TODO: Fix remote branch checkout error
         github_url = self.__create_git_uri__(self.repository_uri)
         self.__check_git_uri__(github_url)
         return self.__run__(f"git clone {github_url}", "Error cloning repository")
