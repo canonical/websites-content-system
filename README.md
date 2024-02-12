@@ -19,7 +19,10 @@ Then install the dependencies.
 $ python -m pip install -r requirements.txt
 ```
 
-Modify the .env file (if required)
+Modify the .env file (if required), and load the variables into the shell environment.
+```
+$ source .env
+```
 
 Start the server.
 ```
