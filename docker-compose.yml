@@ -1,0 +1,27 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    environment:
+      REDIS_HOST: "${REDIS_HOST}"
+      REDIS_PORT: "${REDIS_PORT}"
+      DEVEL: "${DEVEL}"
+      SECRET_KEY: "${SECRET_KEY}"
+      FLASK_DEBUG: "${FLASK_DEBUG}"
+    command: |
+      flask --app webapp/app run
+    ports:
+    - "${PORT}:5000"
+    volumes:
+    - .:/srv
+  redis:
+    image: redis:alpine
+    restart: always
+    ports:
+      - "${REDIS_PORT}:6379"
+    command: redis-server --save 20 1 --loglevel warning
+    volumes: 
+      - cache:/data
+volumes:
+  cache:
+    driver: local
