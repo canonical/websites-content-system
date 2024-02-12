@@ -9,7 +9,7 @@ services:
       SECRET_KEY: "${SECRET_KEY}"
       FLASK_DEBUG: "${FLASK_DEBUG}"
     command: |
-      flask --app webapp/app run
+      flask --app webapp/app run --host=0.0.0.0
     ports:
     - "${PORT}:5000"
     volumes:
