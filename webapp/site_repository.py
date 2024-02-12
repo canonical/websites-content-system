@@ -26,8 +26,9 @@ class SiteRepository:
         self.branch = branch
         self.app = app
 
-        # Don't run setup if the repository is already available
-        self.setup_repository(branch)
+        # Don't run setup if the repository tree is cached
+        if not self.get_tree_from_cache():
+            self.setup_repository(branch)
 
     def __exec__(self, command_str):
         """
