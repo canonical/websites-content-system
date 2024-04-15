@@ -5,6 +5,13 @@ from multiprocessing import Process
 from webapp.site_repository import SiteRepository, SiteRepositoryError
 
 
+def wrapper(app, func, interval):
+    app.logger.info(f"Starting worker for {func.__name__}")
+    while True:
+        time.sleep(interval)
+        return func()
+
+
 class ParserTask:
     """
     Class to run repository tasks
@@ -20,13 +27,7 @@ class ParserTask:
         Run a detached function in a loop, with a delay between runs
         """
 
-        def wrapper():
-            self.app.logger.info(f"Starting worker for {func.__name__}")
-            while True:
-                time.sleep(interval)
-                return func()
-
-        thread = Process(target=wrapper)
+        thread = Process(target=wrapper, args=(self.app, func, interval))
         thread.start()
 
     def start_worker(self):
