@@ -1,5 +1,3 @@
-import json
-
 from flask import jsonify
 from webapp import create_app
 from webapp.redis import Redis
@@ -10,6 +8,7 @@ app = create_app()
 redis = Redis(app)
 
 
+@app.route("/get-tree/<string:uri>", methods=["GET"])
 @app.route("/get-tree/<string:uri>/<string:branch>", methods=["GET"])
 def region(uri, branch="main"):
     # TODO: Make the folder name a url parameter
