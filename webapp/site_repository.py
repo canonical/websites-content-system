@@ -181,13 +181,12 @@ class SiteRepository:
         self.set_tree_in_cache(tree)
         return tree
 
-    def get_tree(self, new=False):
+    def get_tree(self):
         """
         Get the tree from the cache or a fresh copy.
         """
-        # If cache is not available, return a new tree``
-        if not new and (tree := self.get_tree_from_cache()):
+        # Return from cache if available
+        if tree := self.get_tree_from_cache():
             return tree
 
-        # Return a new tree by default
         return self.get_new_tree()

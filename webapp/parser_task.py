@@ -2,7 +2,6 @@ import time
 import yaml
 from multiprocessing import Process
 
-from webapp.cache import Cache
 from webapp.site_repository import SiteRepository, SiteRepositoryError
 
 
@@ -11,9 +10,9 @@ class ParserTask:
     Class to run repository tasks
     """
 
-    def __init__(self, app):
+    def __init__(self, app, cache):
         self.app = app
-        self.cache = Cache(app)
+        self.cache = cache
         self.start_worker()
 
     def __worker_loop__(self, func, interval=30):
@@ -45,7 +44,9 @@ class ParserTask:
             for site in sites_list:
                 self.app.logger.info(f"Loading {site}")
                 try:
-                    site_repository = SiteRepository(site, app=self.app)
+                    site_repository = SiteRepository(
+                        site, app=self.app, cache=self.cache
+                    )
                     site_repository.get_tree()
                 except SiteRepositoryError as e:
                     self.app.logger.error(f"Error loading {site}: {e}")
