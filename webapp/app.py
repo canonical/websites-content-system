@@ -1,20 +1,37 @@
 from flask import jsonify
+from werkzeug.exceptions import NotFound
+
 from webapp import create_app
-from webapp.redis import Redis
-from webapp.site_repository import SiteRepository
+from webapp.cache import Cache
+from webapp.parser_task import ParserTask
+from webapp.site_repository import SiteRepository, SiteRepositoryError
 
 app = create_app()
 
-redis = Redis(app)
+
+@app.errorhandler(NotFound)
+def handle_bad_request(e):
+    return "Site repository not found!", 404
+
+
+# Initialize cache if available
+try:
+    cache = Cache(app)
+except ConnectionError:
+    cache = None
+
+# Start parser task
+parser_task = ParserTask(app)
 
 
 @app.route("/get-tree/<string:uri>", methods=["GET"])
 @app.route("/get-tree/<string:uri>/<string:branch>", methods=["GET"])
 def region(uri, branch="main"):
-    # TODO: Make the folder name a url parameter
-    # TODO: Redirect to the correct site, based on the reponame
+    try:
+        site_repository = SiteRepository(uri, branch, app=app, cache=cache)
+    except SiteRepositoryError as e:
+        return handle_bad_request(e)
 
-    site_repository = SiteRepository(uri, branch, app=app)
     tree = site_repository.get_tree()
 
     return jsonify({"name": uri, "templates": tree})

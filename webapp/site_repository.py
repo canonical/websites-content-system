@@ -4,27 +4,20 @@ import re
 import subprocess
 
 from webapp.parse_tree import scan_directory
-from webapp.redis import Redis
+
 
 class SiteRepositoryError(Exception):
     """
     Exception raised for errors in the SiteRepository class
     """
 
-# TODO: hide implementation of caching, such that redis connection
-# errors don't cause termination, but will degrade performance
 
 class SiteRepository:
-
-    def __init__(self, repository_uri, branch="main", app=None):
-        # Initialize with cache if available
-        redis = Redis(app)
-        if redis.is_available():
-            self.cache = redis
-
+    def __init__(self, repository_uri, branch="main", app=None, cache=None):
         self.repository_uri = repository_uri
         self.branch = branch
         self.app = app
+        self.cache = cache
 
         # Don't run setup if the repository tree is cached
         if not self.get_tree_from_cache():
@@ -153,7 +146,7 @@ class SiteRepository:
         """
         Get the tree from the cache. Return None if cache is not available.
         """
-        if hasattr(self, "cache"):
+        if self.cache:
             if cached_tree := self.cache.get(f"{self.repository_uri}/{self.branch}"):
                 return json.loads(cached_tree.decode("utf-8"))
 
@@ -161,7 +154,7 @@ class SiteRepository:
         """
         Set the tree in the cache. Silently pass if cache is not available.
         """
-        if hasattr(self, "cache"):
+        if self.cache:
             return self.cache.set(
                 f"{self.repository_uri}/{self.branch}", json.dumps(tree)
             )

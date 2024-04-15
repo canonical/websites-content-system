@@ -1,7 +1,9 @@
-import pyyaml
-from webapp.redis import Redis
+import time
+import yaml
+from multiprocessing import Process
 
-from webapp.site_repository import SiteRepository
+from webapp.cache import Cache
+from webapp.site_repository import SiteRepository, SiteRepositoryError
 
 
 class ParserTask:
@@ -10,62 +12,41 @@ class ParserTask:
     """
 
     def __init__(self, app):
-        self.load_repositories()
-        self.run_parser()
         self.app = app
-        self.redis = Redis(app)
+        self.cache = Cache(app)
+        self.start_worker()
 
-    def __run_in_loop__(self, func, interval=30):
+    def __worker_loop__(self, func, interval=30):
         """
-        Run a function in a loop, with a delay between runs
+        Run a detached function in a loop, with a delay between runs
         """
 
-        def wrapper(func, *args, **kwargs):
+        def wrapper():
+            self.app.logger.info(f"Starting worker for {func.__name__}")
             while True:
-                func(*args, **kwargs)
                 time.sleep(interval)
+                return func()
 
-        return wrapper
+        thread = Process(target=wrapper)
+        thread.start()
 
-    def run_parser(self):
+    def start_worker(self):
         """
-        Parse each repository, and save a tree of the templates
+        Initialize each repository on a 60s loop
         """
-
-        def fn():
-            for repo in self.repositories:
-                site_repository = SiteRepository(repo, app=self.app)
-                tree = site_repository.parse_templates()
-                self.save_tree(repo, tree)
-
-        self.__run_in_loop__(fn, interval=60)()
+        self.__worker_loop__(self.load_repositories, 60)
 
     def load_repositories(self):
         """
         Load pre-configured repositories
         """
         with open("sites.yaml", "r") as f:
-            sites_list = pyyaml.load(f)["sites"]
-            repo_org = self.app.config["REPO_ORG"]
-            self.repositories = [f"{repo_url}/{site}" for site in sites_list]
-
-    def save_tree(self, key, data, branch="main"):
-        """
-        Save the templates tree data to a file
-        """
-        # Merge the data with the existing data
-        if old_key := self.redis.get(key):
-            self.redis.set(
-                key,
-                {
-                    **old_key,
-                    branch: data,
-                },
-            )
-        else:
-            self.redis.set(
-                key,
-                {
-                    branch: data,
-                },
-            )
+            sites_list = yaml.safe_load(f)["sites"]
+            for site in sites_list:
+                self.app.logger.info(f"Loading {site}")
+                try:
+                    site_repository = SiteRepository(site, app=self.app)
+                    site_repository.get_tree()
+                except SiteRepositoryError as e:
+                    self.app.logger.error(f"Error loading {site}: {e}")
+                    continue
