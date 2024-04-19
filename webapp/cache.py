@@ -12,7 +12,9 @@ class Cache:
     def connect(self):
         """Return an instance of the redis cache. If not available, throw a ConnectionError."""
         try:
-            return self.connect_redis()
+            r = redis.Redis(host=self.host, port=self.port, db=0)
+            r.ping()
+            return r
         except redis.exceptions.ConnectionError:
             raise ConnectionError("Redis cache is not available")
 
