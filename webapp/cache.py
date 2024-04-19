@@ -1,4 +1,5 @@
 import redis
+import redis.exceptions
 
 
 class Cache:
@@ -15,7 +16,7 @@ class Cache:
             r = redis.Redis(host=self.host, port=self.port, db=0)
             r.ping()
             return r
-        except redis.exceptions.ConnectionError:
+        except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError):
             raise ConnectionError("Redis cache is not available")
 
     def connect_redis(self):
