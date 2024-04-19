@@ -1,8 +1,14 @@
 import time
 import yaml
-from multiprocessing import Process
+from multiprocess import Process
 
 from webapp.site_repository import SiteRepository, SiteRepositoryError
+
+
+def worker(func, interval):
+    while True:
+        time.sleep(interval)
+        func()
 
 
 class ParserTask:
@@ -19,11 +25,6 @@ class ParserTask:
         """
         Run a detached function in a loop, with a delay between runs
         """
-
-        def worker(func, interval):
-            while True:
-                time.sleep(interval)
-                return func()
 
         self.app.logger.info(f"Starting worker for {func.__name__}")
         thread = Process(target=worker, args=(func, interval))
