@@ -29,3 +29,6 @@ def region(uri, branch="main"):
     tree = site_repository.get_tree()
 
     return jsonify({"name": uri, "templates": tree})
+
+
+# TODO: WHEN cache NOT AVAILABLE, should not cause connection errors
