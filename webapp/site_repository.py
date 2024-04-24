@@ -90,13 +90,17 @@ class SiteRepository:
         """
         Delete a local folder
         """
-        return self.__run__(f"rm -rf {self.repo_name}", "Error deleting folder")
+        return self.__run__(
+            f"rm -rf {self.repo_name}", f"Error deleting folder {self.repo_name}"
+        )
 
     def fetch_remote_branches(self):
         """
         Fetch all branches from remote repository
         """
-        return self.__run__(f"git fetch origin {self.branch}", "Error fetching branch")
+        return self.__run__(
+            f"git fetch origin {self.branch}", f"Error fetching branch {self.branch}"
+        )
 
     def clone_repo(self):
         """
@@ -104,14 +108,18 @@ class SiteRepository:
         """
         github_url = self.__create_git_uri__(self.repository_uri)
         self.__check_git_uri__(github_url)
-        return self.__run__(f"git clone {github_url}", "Error cloning repository")
+        return self.__run__(
+            f"git clone {github_url}", f"Error cloning repository {github_url}"
+        )
 
     def checkout_branch(self, branch):
         """
         Checkout the branch
         """
         self.fetch_remote_branches()
-        return self.__run__(f"git checkout {branch}", "Error checking out branch")
+        return self.__run__(
+            f"git checkout {branch}", f"Error checking out branch {branch}"
+        )
 
     def pull_updates(self):
         """
