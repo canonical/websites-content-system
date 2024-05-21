@@ -13,6 +13,7 @@ Thumbs.db
 .spelling
 .vscode
 .idea
+.python-version
 
 # [cache] Cache and backup
 *.bak

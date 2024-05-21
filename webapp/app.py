@@ -2,7 +2,7 @@ from flask import jsonify
 
 from webapp import create_app
 from webapp.cache import Cache
-from webapp.parser_task import ParserTask
+# from webapp.parser_task import ParserTask
 from webapp.site_repository import SiteRepository, SiteRepositoryError
 
 app = create_app()
@@ -15,7 +15,7 @@ except ConnectionError:
     cache = None
 
 # Start parser task
-parser_task = ParserTask(app, cache=cache)
+# parser_task = ParserTask(app, cache=cache)
 
 
 @app.route("/get-tree/<string:uri>", methods=["GET"])
