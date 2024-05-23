@@ -34,7 +34,7 @@ class ParserTask:
         """
         Initialize each repository on a 60s loop
         """
-        self.__worker_loop__(self.load_repositories, 60)
+        self.__worker_loop__(self.load_repositories, 300)
 
     def load_repositories(self):
         """

@@ -1,10 +1,10 @@
-import json
 import re
 from contextlib import suppress
 from pathlib import Path
 
 
 BASE_TEMPLATES = [
+    "base_index.html",
     "templates/base.html",
     "templates/base_no_nav.html",
     "templates/one-column.html",
@@ -21,7 +21,7 @@ def is_index(path):
     return path.name == "index.html"
 
 
-def has_index(path):
+def check_has_index(path):
     return (path / "index.html").exists()
 
 
@@ -62,13 +62,18 @@ def extends_base(path, base="templates"):
     with suppress(FileNotFoundError):
         with path.open("r") as f:
             for line in f.readlines():
-                # TODO: also match single quotes \'
-                if match := re.search('{% extends "(.*)" %}', line):
+                match = re.search('{% extends "(.*)" %}', line)
+                if match:
                     if match.group(1) in BASE_TEMPLATES:
                         return True
                     else:
-                        # HOW DO WE GET IT TO REFER TO BASE PATH?
-                        new_path = append_base_path(base, match.group(1))
+                        # extract absolute path from the parent path
+                        absolute_path = str(path)[0:str(
+                            path).find(base) + len(base)]
+                        # check if the file from which the current file
+                        # extends extends from the base template
+                        new_path = append_base_path(
+                            absolute_path, match.group(1))
                         return extends_base(new_path, base=base)
     return False
 
@@ -154,7 +159,7 @@ def get_tags_rolling_buffer(path):
                         match := re.search(f"{{% block {variant}( *)%}}", line)
                     ):
                         # We remove line contents before the tag
-                        line = line[match.start() :]  # noqa: E203
+                        line = line[match.start():]  # noqa: E203
 
                         buffer.append(line)
                         is_buffering = True
@@ -188,7 +193,7 @@ def get_tags_rolling_buffer(path):
     return tags
 
 
-def is_valid_page(path, extended_path):
+def is_valid_page(path, extended_path, is_index=True):
     """
     Determine if path is a valid page. Pages are valid if:
     - They contain the same extended path as the index html.
@@ -197,11 +202,12 @@ def is_valid_page(path, extended_path):
     if is_template(path):
         return False
 
-    with path.open("r") as f:
-        for line in f.readlines():
-            if match := re.search('{% extends "(.*)" %}', line):
-                if match.group(1) == extended_path:
-                    return True
+    if not is_index and extended_path:
+        with path.open("r") as f:
+            for line in f.readlines():
+                if match := re.search('{% extends "(.*)" %}', line):
+                    if match.group(1) == extended_path:
+                        return True
     # If the file does not share the extended path, check if it extends the
     # base html
     return extends_base(path)
@@ -252,13 +258,17 @@ def scan_directory(path_name, base=None):
     # This will be the base html file extended by the index.html
     extended_path = None
 
+    is_index_page_valid = False
+
     # Check if an index.html file exists in this directory
-    if has_index(node_path):
+    has_index = check_has_index(node_path)
+    if has_index:
         index_path = node_path / "index.html"
         # Get the path extended by the index.html file
         extended_path = get_extended_path(index_path)
         # If the file is valid, add it as a child
-        if is_valid_page(index_path, extended_path):
+        is_index_page_valid = is_valid_page(index_path, extended_path)
+        if is_index_page_valid:
             # Get tags, add as child
             tags = get_tags_rolling_buffer(index_path)
             node = update_tags(node, tags)
@@ -266,15 +276,15 @@ def scan_directory(path_name, base=None):
     # Cycle through other files in this directory
     for child in node_path.iterdir():
         # If the child is a file, check if it is a valid page
-
         if child.is_file() and not is_index(child):
             # If the file is valid, add it as a child
-            if is_valid_page(child, extended_path):
+            if (not has_index or is_index_page_valid) and is_valid_page(child, extended_path, is_index=False):
                 child_tags = get_tags_rolling_buffer(child)
 
                 # If the child has no copydocs link, use the parent's link
                 if not child_tags.get("link") and extended_path:
-                    child_tags["link"] = get_extended_copydoc(extended_path, base=base)
+                    child_tags["link"] = get_extended_copydoc(
+                        extended_path, base=base)
                 node["children"].append(child_tags)
         # If the child is a directory, scan it
         if child.is_dir():

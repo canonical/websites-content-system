@@ -4,6 +4,7 @@ from webapp import create_app
 from webapp.cache import Cache
 from webapp.parser_task import ParserTask
 from webapp.site_repository import SiteRepository, SiteRepositoryError
+from os import environ
 
 app = create_app()
 
@@ -28,7 +29,13 @@ def region(uri, branch="main"):
 
     tree = site_repository.get_tree()
 
-    return jsonify({"name": uri, "templates": tree})
+    response = jsonify({"name": uri, "templates": tree})
+
+    DEVELOPMENT_MODE = environ.get("DEVEL", True)
+    if DEVELOPMENT_MODE:
+        response.headers.add("Access-Control-Allow-Origin", "*")
+
+    return response
 
 
 # TODO: WHEN cache NOT AVAILABLE, should not cause connection errors
