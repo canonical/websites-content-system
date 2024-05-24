@@ -87,9 +87,10 @@ class SiteRepository:
         token = self.app.config["GH_TOKEN"]
 
         # Add token to URI
-        re.sub(
+        uri = re.sub(
             "//github",
             f"//{token}@github",
+            uri,
         )
 
         return f"{repo_org}/{uri}.git"
