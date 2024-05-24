@@ -84,6 +84,14 @@ class SiteRepository:
         Create a github url
         """
         repo_org = self.app.config["REPO_ORG"]
+        token = self.app.config["GH_TOKEN"]
+
+        # Add token to URI
+        re.sub(
+            "//github",
+            f"//{token}@github",
+        )
+
         return f"{repo_org}/{uri}.git"
 
     def delete_local_files(self):
@@ -91,7 +99,8 @@ class SiteRepository:
         Delete a local folder
         """
         return self.__run__(
-            f"rm -rf {self.repo_name}", f"Error deleting folder {self.repo_name}"
+            f"rm -rf {self.repo_name}",
+            f"Error deleting folder {self.repo_name}",
         )
 
     def fetch_remote_branches(self):
@@ -99,7 +108,8 @@ class SiteRepository:
         Fetch all branches from remote repository
         """
         return self.__run__(
-            f"git fetch origin {self.branch}", f"Error fetching branch {self.branch}"
+            f"git fetch origin {self.branch}",
+            f"Error fetching branch {self.branch}",
         )
 
     def clone_repo(self):
@@ -155,7 +165,9 @@ class SiteRepository:
         Get the tree from the cache. Return None if cache is not available.
         """
         if self.cache:
-            if cached_tree := self.cache.get(f"{self.repository_uri}/{self.branch}"):
+            if cached_tree := self.cache.get(
+                f"{self.repository_uri}/{self.branch}"
+            ):
                 return json.loads(cached_tree.decode("utf-8"))
 
     def set_tree_in_cache(self, tree):

@@ -30,7 +30,7 @@ def is_template(path):
     Return True if the file name starts with a template prefix.
 
     TODO: It is possible that valid page uris start with one of these prefixes.
-    Instead, we could match the extended_path in index.html to files in the
+    Instead, we could match the extended_path in index.html to files in the 
     folder, and exclude files whose filename is in the extended path.
     """
     for prefix in TEMPLATE_PREFIXES:
