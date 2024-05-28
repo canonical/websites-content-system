@@ -7,6 +7,8 @@ services:
       DEVEL: "${DEVEL}"
       SECRET_KEY: "${SECRET_KEY}"
       FLASK_DEBUG: "${FLASK_DEBUG}"
+      REPO_ORG: "${REPO_ORG}"
+      GH_TOKEN: "${GH_TOKEN}"
     command: >
       bash -c "
         pip install -r requirements.txt && \
