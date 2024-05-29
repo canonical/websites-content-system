@@ -149,7 +149,9 @@ class SiteRepository:
         Create the repository on disk
         """
         # Switch to the /tmp directory for cloned repositories
-        os.chdir("/tmp")
+
+        os.mkdir("./repositories")
+        os.chdir("./repositories")
         self.repo_name = (
             self.repository_uri.strip("/").split("/")[-1].removesuffix(".git")
         )
