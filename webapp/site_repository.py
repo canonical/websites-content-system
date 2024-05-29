@@ -2,6 +2,7 @@ import json
 import os
 import re
 import subprocess
+from pathlib import Path
 
 from webapp.parse_tree import scan_directory
 
@@ -150,7 +151,7 @@ class SiteRepository:
         """
         # Switch to the /tmp directory for cloned repositories
 
-        os.mkdir("./repositories")
+        Path("./repositories").mkdir(exist_ok=True)
         os.chdir("./repositories")
         self.repo_name = (
             self.repository_uri.strip("/").split("/")[-1].removesuffix(".git")
