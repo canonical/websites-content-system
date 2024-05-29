@@ -9,11 +9,11 @@ from os import environ
 app = create_app()
 
 
-# Initialize cache if available
-# try:
-#     cache = Cache(app)
-# except ConnectionError:
-#     cache = None
+#Initialize cache if available
+try:
+    cache = Cache(app)
+except ConnectionError:
+    cache = None
 cache = None
 
 # Start parser task
@@ -38,5 +38,3 @@ def region(uri, branch="main"):
 
     return response
 
-
-# TODO: WHEN cache NOT AVAILABLE, should not cause connection errors
