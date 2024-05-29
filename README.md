@@ -6,10 +6,10 @@ Backend service for the CMS template parser
 
 ### Environment variables
 
-Before starting, update the environment variables if needed. The default values will work for docker, save the `GH_TOKEN` which must be manually set.
+Before starting, update the environment variables if needed. The default values will work for docker, save the `GH_TOKEN` which must be manually set. You can create a token [here](https://github.com/settings/tokens), by following [these](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) instructions.
 
 ```env
-PORT=8104   
+PORT=8104
 FLASK_DEBUG=true
 SECRET_KEY=secret_key
 DEVEL=True
@@ -30,9 +30,10 @@ $ docker compose up
 
 ### Running Locally
 
-You'll need to set up a [redis](https://redis.io/docs/install/install-redis/) server, and expose the port it runs on. 
+You'll need to set up a [redis](https://redis.io/docs/install/install-redis/) server, and expose the port it runs on.
 
 If you do not want to use a cache, comment out the cache initialization section and explicitly declare the cache as `None`.
+
 ```python
 12:  # Initialize cache if available
 13:  # try:
