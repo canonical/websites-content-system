@@ -10,10 +10,11 @@ app = create_app()
 
 
 # Initialize cache if available
-try:
-    cache = Cache(app)
-except ConnectionError:
-    cache = None
+# try:
+#     cache = Cache(app)
+# except ConnectionError:
+#     cache = None
+cache = None
 
 # Start parser task
 parser_task = ParserTask(app, cache=cache)

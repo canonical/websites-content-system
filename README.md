@@ -4,6 +4,20 @@ Backend service for the CMS template parser
 
 ## Getting it running
 
+### Environment variables
+
+Before starting, update the environment variables if needed. The default values will work for docker, save the `GH_TOKEN` which must be manually set.
+
+```env
+PORT=8104   
+FLASK_DEBUG=true
+SECRET_KEY=secret_key
+DEVEL=True
+REDIS_HOST=0.0.0.0
+REDIS_PORT=6379
+GH_TOKEN=ghp_somepersonaltoken
+```
+
 ### Using docker
 
 You'll need to install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/).
@@ -16,7 +30,17 @@ $ docker compose up
 
 ### Running Locally
 
-You'll need to set up a [redis](https://redis.io/docs/install/install-redis/) server, and expose the port it runs on.
+You'll need to set up a [redis](https://redis.io/docs/install/install-redis/) server, and expose the port it runs on. 
+
+If you do not want to use a cache, comment out the cache initialization section and explicitly declare the cache as `None`.
+```python
+12:  # Initialize cache if available
+13:  # try:
+14:  #     cache = Cache(app)
+15:  # except ConnectionError:
+16:  #     cache = None
+17:  cache = None
+```
 
 Then install the dependencies.
 
