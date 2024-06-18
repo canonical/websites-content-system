@@ -62,7 +62,7 @@ def extends_base(path, base="templates"):
     with suppress(FileNotFoundError):
         with path.open("r") as f:
             for line in f.readlines():
-                match = re.search('{% extends "(.*)" %}', line)
+                match = re.search('{% extends ["\'](.*?)["\'] %}', line)
                 if match:
                     if match.group(1) in BASE_TEMPLATES:
                         return True
@@ -205,7 +205,7 @@ def is_valid_page(path, extended_path, is_index=True):
     if not is_index and extended_path:
         with path.open("r") as f:
             for line in f.readlines():
-                if match := re.search('{% extends "(.*)" %}', line):
+                if match := re.search('{% extends ["\'](.*?)["\'] %}', line):
                     if match.group(1) == extended_path:
                         return True
     # If the file does not share the extended path, check if it extends the
@@ -218,7 +218,7 @@ def get_extended_path(path):
     with path.open("r") as f:
         for line in f.readlines():
             # TODO: also match single quotes \'
-            if match := re.search('{% extends "(.*)" %}', line):
+            if match := re.search('{% extends ["\'](.*?)["\'] %}', line):
                 return match.group(1)
 
 
@@ -280,7 +280,6 @@ def scan_directory(path_name, base=None):
             # If the file is valid, add it as a child
             if (not has_index or is_index_page_valid) and is_valid_page(child, extended_path, is_index=False):
                 child_tags = get_tags_rolling_buffer(child)
-
                 # If the child has no copydocs link, use the parent's link
                 if not child_tags.get("link") and extended_path:
                     child_tags["link"] = get_extended_copydoc(
