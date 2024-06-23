@@ -1,7 +1,7 @@
 import re
 from contextlib import suppress
 from pathlib import Path
-
+import sys
 
 BASE_TEMPLATES = [
     "base_index.html",
@@ -60,21 +60,26 @@ def extends_base(path, base="templates"):
     # TODO: Investigate whether path.read_text performs better than opening
     # a file
     with suppress(FileNotFoundError):
+        print("The Path ",path)
+        sys.stdout.flush()
         with path.open("r") as f:
-            for line in f.readlines():
-                match = re.search('{% extends ["\'](.*?)["\'] %}', line)
-                if match:
-                    if match.group(1) in BASE_TEMPLATES:
-                        return True
-                    else:
-                        # extract absolute path from the parent path
-                        absolute_path = str(path)[0:str(
-                            path).find(base) + len(base)]
-                        # check if the file from which the current file
-                        # extends extends from the base template
-                        new_path = append_base_path(
-                            absolute_path, match.group(1))
-                        return extends_base(new_path, base=base)
+                for line in f.readlines():
+                    match = re.search('{% extends ["\'](.*?)["\'] %}', line)
+                    if match:
+                        if match.group(1) in BASE_TEMPLATES:
+                            return True
+                        else:
+                            # extract absolute path from the parent path
+                            absolute_path = str(path)[0:str(
+                                path).find(base) + len(base)]
+                            # check if the file from which the current file
+                            # extends extends from the base template
+                            new_path = append_base_path(
+                                absolute_path, match.group(1))
+                            return extends_base(new_path, base=base)
+            # except UnicodeDecodeError:
+            #     # If the file is not a text file, we ignore it
+            #     pass
     return False
 
 
@@ -187,8 +192,8 @@ def get_tags_rolling_buffer(path):
                     break
 
     # We add the name from the path
-    raw_name = re.sub(r"(?i)(.html|index.html)", "", str(path))
-    tags["name"] = raw_name.split("/templates")[-1]
+    raw_name = re.sub(r"(?i)(.html|/index.html)", "", str(path))
+    tags["name"] = raw_name.split("/templates",1)[-1]
 
     return tags
 
@@ -249,7 +254,7 @@ def scan_directory(path_name, base=None):
     """
     node_path = Path(path_name)
     node = create_node()
-    node["name"] = node_path.name
+    node["name"] = path_name.split("/templates",1)[-1]
 
     # We get the relative parent for the path
     if base is None:

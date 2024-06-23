@@ -2,6 +2,7 @@ import json
 import os
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 from webapp.parse_tree import scan_directory
@@ -194,6 +195,10 @@ class SiteRepository:
         os.chdir(folder)
         # Parse the templates
         tree = scan_directory(os.getcwd())
+        print("f1 ",os.getcwd())
+        sys.stdout.flush()
+        os.chdir("/srv/")
+
         return tree
 
     def get_new_tree(self):
