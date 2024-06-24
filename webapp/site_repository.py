@@ -3,7 +3,6 @@ import os
 import re
 import subprocess
 from pathlib import Path
-
 from webapp.parse_tree import scan_directory
 
 
@@ -156,13 +155,22 @@ class SiteRepository:
         self.repo_name = (
             self.repository_uri.strip("/").split("/")[-1].removesuffix(".git")
         )
-        # Clone the repository
-        self.clone_repo()
-        os.chdir(self.repo_name)
-        # Checkout the branch
-        self.checkout_branch(branch)
-        # Retrieve updates
-        self.pull_updates()
+        in_repo = False
+        try :
+            # Clone the repository
+            self.clone_repo()
+            os.chdir(self.repo_name)
+            in_repo = True
+            # Checkout the branch
+            self.checkout_branch(branch)
+            # Retrieve updates
+            self.pull_updates()
+        except SiteRepositoryError as e:
+            if in_repo==True:
+                os.chdir("../..")
+            else:
+                os.chdir("..")
+            raise SiteRepositoryError(f"Error setting up repository: {e}")
 
     def get_tree_from_cache(self):
         """
@@ -189,11 +197,19 @@ class SiteRepository:
         """
         # Check if the templates folder exists
         if not os.path.exists(folder):
+            os.chdir("../..")
             raise SiteRepositoryError(f"Templates folder '{folder}' not found")
+        
         # Change directory to the templates folder
         os.chdir(folder)
         # Parse the templates
-        tree = scan_directory(os.getcwd())
+        try:
+            tree = scan_directory(os.getcwd())
+        except Exception as e:
+            raise SiteRepositoryError(f"Error scanning directory: {e}")
+        finally:
+            # Change back to the root directory
+            os.chdir("../../..")
         return tree
 
     def get_new_tree(self):

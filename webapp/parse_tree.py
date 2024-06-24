@@ -1,7 +1,7 @@
 import re
 from contextlib import suppress
 from pathlib import Path
-
+import sys
 
 BASE_TEMPLATES = [
     "base_index.html",
@@ -75,6 +75,7 @@ def extends_base(path, base="templates"):
                         new_path = append_base_path(
                             absolute_path, match.group(1))
                         return extends_base(new_path, base=base)
+                    
     return False
 
 
@@ -187,8 +188,8 @@ def get_tags_rolling_buffer(path):
                     break
 
     # We add the name from the path
-    raw_name = re.sub(r"(?i)(.html|index.html)", "", str(path))
-    tags["name"] = raw_name.split("/templates")[-1]
+    raw_name = re.sub(r"(?i)(.html|/index.html)", "", str(path))
+    tags["name"] = raw_name.split("/templates",1)[-1]
 
     return tags
 
@@ -249,7 +250,7 @@ def scan_directory(path_name, base=None):
     """
     node_path = Path(path_name)
     node = create_node()
-    node["name"] = node_path.name
+    node["name"] = path_name.split("/templates",1)[-1]
 
     # We get the relative parent for the path
     if base is None:
