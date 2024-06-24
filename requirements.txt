@@ -8,4 +8,4 @@ MarkupSafe==2.1.5
 multiprocess==0.70.16
 PyYAML==6.0.1
 redis==5.0.1
-Werkzeug==3.0.1
+Werkzeug==3.0.3
