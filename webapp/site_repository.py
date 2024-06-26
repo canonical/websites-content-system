@@ -5,6 +5,7 @@ import subprocess
 from pathlib import Path
 from webapp.parse_tree import scan_directory
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 class SiteRepositoryError(Exception):
     """
@@ -13,6 +14,10 @@ class SiteRepositoryError(Exception):
 
 
 class SiteRepository:
+
+    # Directory to clone repositories
+    REPOSITORY_DIRECTORY = f"{BASE_DIR}/repositories"
+
     def __init__(self, repository_uri, branch="main", app=None, cache=None):
         self.repository_uri = repository_uri
         self.branch = branch
@@ -100,8 +105,8 @@ class SiteRepository:
         Delete a local folder
         """
         return self.__run__(
-            f"rm -rf {self.repo_name}",
-            f"Error deleting folder {self.repo_name}",
+            f"rm -rf {self.repo_path}",
+            f"Error deleting folder {self.repo_path}",
         )
 
     def fetch_remote_branches(self):
@@ -113,11 +118,11 @@ class SiteRepository:
             f"Error fetching branch {self.branch}",
         )
 
-    def clone_repo(self):
+    def clone_repo(self, repository_uri=None):
         """
         Clone the repository.
         """
-        github_url = self.__create_git_uri__(self.repository_uri)
+        github_url = self.__create_git_uri__(repository_uri)
         self.__check_git_uri__(github_url)
         return self.__run__(
             f"git clone {github_url}", f"Error cloning repository {github_url}"
@@ -148,29 +153,19 @@ class SiteRepository:
         """
         Create the repository on disk
         """
-        # Switch to the /tmp directory for cloned repositories
-
-        Path("./repositories").mkdir(exist_ok=True)
-        os.chdir("./repositories")
-        self.repo_name = (
+        Path(self.REPOSITORY_DIRECTORY).mkdir(parents=True, exist_ok=True)
+        # Switch to the ./repositories directory for cloned repositories
+        os.chdir(self.REPOSITORY_DIRECTORY)
+        self.repo_path = self.REPOSITORY_DIRECTORY + "/" + (
             self.repository_uri.strip("/").split("/")[-1].removesuffix(".git")
         )
-        in_repo = False
-        try :
-            # Clone the repository
-            self.clone_repo()
-            os.chdir(self.repo_name)
-            in_repo = True
-            # Checkout the branch
-            self.checkout_branch(branch)
-            # Retrieve updates
-            self.pull_updates()
-        except SiteRepositoryError as e:
-            if in_repo==True:
-                os.chdir("../..")
-            else:
-                os.chdir("..")
-            raise SiteRepositoryError(f"Error setting up repository: {e}")
+        # Clone the repository
+        self.clone_repo(self.repository_uri)
+        os.chdir(self.repo_path)
+        # Checkout the branch
+        self.checkout_branch(branch)
+        # Retrieve updates
+        self.pull_updates()
 
     def get_tree_from_cache(self):
         """
@@ -191,17 +186,16 @@ class SiteRepository:
                 f"{self.repository_uri}/{self.branch}", json.dumps(tree)
             )
 
-    def get_tree_from_disk(self, folder="templates"):
+    def get_tree_from_disk(self):
         """
         Get the tree from the repository
         """
+        templates_folder = self.repo_path + "/templates"
         # Check if the templates folder exists
-        if not os.path.exists(folder):
-            os.chdir("../..")
-            raise SiteRepositoryError(f"Templates folder '{folder}' not found")
-        
+        if not os.path.exists(templates_folder):
+            raise SiteRepositoryError(f"Templates folder 'templates' not found for repository {self.repository_uri}")
         # Change directory to the templates folder
-        os.chdir(folder)
+        os.chdir(templates_folder)
         # Parse the templates
         try:
             tree = scan_directory(os.getcwd())
