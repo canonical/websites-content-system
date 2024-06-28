@@ -4,6 +4,7 @@ from pathlib import Path
 import sys
 
 BASE_TEMPLATES = [
+    "/base_index.html",
     "base_index.html",
     "templates/base.html",
     "templates/base_no_nav.html",
@@ -30,7 +31,7 @@ def is_template(path):
     Return True if the file name starts with a template prefix.
 
     TODO: It is possible that valid page uris start with one of these prefixes.
-    Instead, we could match the extended_path in index.html to files in the 
+    Instead, we could match the extended_path in index.html to files in the
     folder, and exclude files whose filename is in the extended path.
     """
     for prefix in TEMPLATE_PREFIXES:
@@ -47,12 +48,11 @@ def append_base_path(base, path_name):
     to a path
 
     """
-    path = Path(path_name)
-    # If the path_name has the same prefix as base, we do not
-    # append
-    if path.parts[0] == base:
-        return Path(path_name)
-    return Path(base) / path_name
+    if str(path_name).startswith("/"):
+        path_name = path_name[1:]
+
+    new_path = Path(base) / path_name
+    return new_path.absolute()
 
 
 def extends_base(path, base="templates"):
@@ -62,20 +62,18 @@ def extends_base(path, base="templates"):
     with suppress(FileNotFoundError):
         with path.open("r") as f:
             for line in f.readlines():
-                match = re.search('{% extends ["\'](.*?)["\'] %}', line)
+                match = re.search("{% extends [\"'](.*?)[\"'] %}", line)
                 if match:
                     if match.group(1) in BASE_TEMPLATES:
                         return True
                     else:
                         # extract absolute path from the parent path
-                        absolute_path = str(path)[0:str(
-                            path).find(base) + len(base)]
+                        absolute_path = str(path)[0 : str(path).find(base) + len(base)]
                         # check if the file from which the current file
                         # extends extends from the base template
-                        new_path = append_base_path(
-                            absolute_path, match.group(1))
+                        new_path = append_base_path(absolute_path, match.group(1))
                         return extends_base(new_path, base=base)
-                    
+
     return False
 
 
@@ -120,6 +118,8 @@ def get_extended_copydoc(path, base):
     """
     Get the copydoc for the extended file
     """
+    if str(path).startswith("/"):
+        path = path[1:]
     with base.joinpath(path).open("r") as f:
         file_data = f.read()
         if match := re.search(
@@ -160,7 +160,7 @@ def get_tags_rolling_buffer(path):
                         match := re.search(f"{{% block {variant}( *)%}}", line)
                     ):
                         # We remove line contents before the tag
-                        line = line[match.start():]  # noqa: E203
+                        line = line[match.start() :]  # noqa: E203
 
                         buffer.append(line)
                         is_buffering = True
@@ -189,7 +189,7 @@ def get_tags_rolling_buffer(path):
 
     # We add the name from the path
     raw_name = re.sub(r"(?i)(.html|/index.html)", "", str(path))
-    tags["name"] = raw_name.split("/templates",1)[-1]
+    tags["name"] = raw_name.split("/templates", 1)[-1]
 
     return tags
 
@@ -206,7 +206,7 @@ def is_valid_page(path, extended_path, is_index=True):
     if not is_index and extended_path:
         with path.open("r") as f:
             for line in f.readlines():
-                if match := re.search('{% extends ["\'](.*?)["\'] %}', line):
+                if match := re.search("{% extends [\"'](.*?)[\"'] %}", line):
                     if match.group(1) == extended_path:
                         return True
     # If the file does not share the extended path, check if it extends the
@@ -219,7 +219,7 @@ def get_extended_path(path):
     with path.open("r") as f:
         for line in f.readlines():
             # TODO: also match single quotes \'
-            if match := re.search('{% extends ["\'](.*?)["\'] %}', line):
+            if match := re.search("{% extends [\"'](.*?)[\"'] %}", line):
                 return match.group(1)
 
 
@@ -250,7 +250,7 @@ def scan_directory(path_name, base=None):
     """
     node_path = Path(path_name)
     node = create_node()
-    node["name"] = path_name.split("/templates",1)[-1]
+    node["name"] = path_name.split("/templates", 1)[-1]
 
     # We get the relative parent for the path
     if base is None:
@@ -279,12 +279,13 @@ def scan_directory(path_name, base=None):
         # If the child is a file, check if it is a valid page
         if child.is_file() and not is_index(child):
             # If the file is valid, add it as a child
-            if (not has_index or is_index_page_valid) and is_valid_page(child, extended_path, is_index=False):
+            if (not has_index or is_index_page_valid) and is_valid_page(
+                child, extended_path, is_index=False
+            ):
                 child_tags = get_tags_rolling_buffer(child)
                 # If the child has no copydocs link, use the parent's link
                 if not child_tags.get("link") and extended_path:
-                    child_tags["link"] = get_extended_copydoc(
-                        extended_path, base=base)
+                    child_tags["link"] = get_extended_copydoc(extended_path, base=base)
                 node["children"].append(child_tags)
         # If the child is a directory, scan it
         if child.is_dir():
