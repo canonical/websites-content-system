@@ -4,7 +4,6 @@ from pathlib import Path
 import sys
 
 BASE_TEMPLATES = [
-    "/base_index.html",
     "base_index.html",
     "templates/base.html",
     "templates/base_no_nav.html",
