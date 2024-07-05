@@ -1,0 +1,54 @@
+.l-navigation-bar {
+  .p-panel__logo {
+    display: flex;
+
+    @media (min-width: 620px) {
+      display: none;
+    }
+  }
+}
+
+.l-navigation {
+  .p-panel {
+    margin-left: 12px;
+
+    .p-panel__logo {
+      display: none;
+  
+      @media (min-width: 620px) {
+        display: flex;
+      }
+    }
+
+    .l-navigation__controls,
+    .l-navigation__controls > span {
+      display: flex;
+      position: relative;
+      width: 100%;
+
+      @media (min-width: 620px) {
+        display: none;
+      }
+
+      .l-navigation-collapse-toggle {
+        position: absolute;
+        right: 20px;
+        top: 20px;
+      }
+    }
+
+    .p-panel__content {
+      @media (min-width: 620px) and (max-width: 1920px) {
+        visibility: hidden;
+      }
+    }
+  }
+
+  &:hover {
+    .p-panel__content {
+      @media (min-width: 620px) and (max-width: 1920px) {
+        visibility: visible;
+      }
+    }
+  }
+}

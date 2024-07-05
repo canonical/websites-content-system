@@ -1,0 +1,15 @@
+.l-page-link {
+  &:hover {
+    color: #06c;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+  &.is-active { 
+    color: #06c;
+    font-weight: bold;
+  }
+}
+.p-list-tree__toggle {
+  margin-right: 0;
+  padding-right: 0;
+}
