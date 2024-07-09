@@ -13,8 +13,13 @@ export default defineConfig({
       entry: "./static/client/main.tsx",
       name: "content_system",
     },
-    outDir: "./dist",
+    outDir: "./static/build",
     minify: "esbuild",
+    sourcemap: true,
+  },
+  define: {
+    "process.env.NODE_ENV": '"production"',
+    "process.env": {},
   },
   plugins: [
     react(),
@@ -26,7 +31,6 @@ export default defineConfig({
       },
     }),
   ],
-  server: { port: Number(process.env.VITE_UI_PORT) },
   resolve: {
     alias: { "@": path.resolve(__dirname, "static/client") },
   },

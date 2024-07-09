@@ -1,5 +1,5 @@
 node_modules/
-dist/
+static/build/
 .prettierrc.js
 .eslintrc.js
 env.d.ts

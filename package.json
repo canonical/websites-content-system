@@ -1,12 +1,12 @@
 {
-  "name": "webisites-content-system",
+  "name": "websites-content-system",
   "version": "0.0.1",
   "repository": "git@github.com:canonical/canonicalwebteam.templateparser-backend.git",
   "author": "Canonical Webteam",
   "license": "MIT",
   "scripts": {
-    "build": "yarn run build-css && yarn run build-js",
-    "build-css": "sass static/client/App.scss static/css/styles.css --load-path=node_modules --style=compressed && postcss --map false --use autoprefixer --replace 'static/css/**/*.css'",
+    "build": "yarn run build-js",
+    "build-css": "sass static/client/App.scss static/build/styles.css --load-path=node_modules --style=compressed && postcss --map false --use autoprefixer --replace 'static/build/**/*.css'",
     "build-js": "npx vite build",
     "serve": "./entrypoint 0.0.0.0:${PORT}",
     "start": "yarn run build && concurrently --kill-others --raw 'yarn run watch-static' 'yarn run serve'",
