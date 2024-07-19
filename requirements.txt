@@ -11,4 +11,4 @@ multiprocess==0.70.16
 PyYAML==6.0.1
 redis==5.0.7
 talisker[gunicorn,gevent,flask,prometheus,raven]==0.21.3
-Werkzeug==2.3.8
+Werkzeug==3.0.3
