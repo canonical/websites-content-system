@@ -1,4 +1,4 @@
-FROM ubuntu:jammy 
+FROM ubuntu:noble 
 WORKDIR /srv
 
 # Build stage: Build static files
@@ -12,7 +12,7 @@ RUN yarn build
 
 # Build the production image
 # ===
-FROM ubuntu:jammy
+FROM ubuntu:noble
 
 # Set up environment
 ENV LANG C.UTF-8
