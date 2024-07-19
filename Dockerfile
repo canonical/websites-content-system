@@ -10,7 +10,7 @@ RUN pip3 install -r requirements.txt
 
 # Build stage: Install yarn dependencies
 # ===
-FROM node:19 AS yarn-dependencies
+FROM node:20 AS yarn-dependencies
 WORKDIR /srv
 ADD yarn.lock .
 ADD package.json .

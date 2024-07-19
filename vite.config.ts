@@ -1,10 +1,10 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import AutoImport from "unplugin-auto-import/vite";
-import dotenv from "dotenv";
+import { config } from "dotenv";
 import * as path from "path";
 
-dotenv.config({ path: "./.env" });
+config({ path: "./.env" });
 
 // https://vitejs.dev/config/
 export default defineConfig({

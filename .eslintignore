@@ -1,5 +1,7 @@
 node_modules/
 static/build/
+repositories/
+.venv
 .prettierrc.js
 .eslintrc.js
 env.d.ts

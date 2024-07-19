@@ -4,9 +4,9 @@ import { defineConfig, devices } from "@playwright/test";
  * Read environment variables from file.
  * https://github.com/motdotla/dotenv
  */
-import dotenv from "dotenv";
+import { config } from "dotenv";
 
-dotenv.config({ path: "./.env" });
+config({ path: "./.env" });
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -37,7 +37,7 @@ export default defineConfig({
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 0,
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: `http://localhost:${process.env.VITE_UI_PORT}`,
+    baseURL: `http://0.0.0.0:${process.env.VITE_UI_PORT}`,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
@@ -56,8 +56,8 @@ export default defineConfig({
   ],
   // run the dev server before starting tests
   webServer: {
-    command: "yarnpkg run dev",
-    url: `http://localhost:${process.env.VITE_UI_PORT}`,
+    command: "yarnpkg run serve",
+    url: `http://0.0.0.0:${process.env.VITE_UI_PORT}`,
     reuseExistingServer: !process.env.CI,
   },
 });

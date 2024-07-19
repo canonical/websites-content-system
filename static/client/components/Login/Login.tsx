@@ -9,7 +9,7 @@ const Login = (): JSX.Element => {
     // AuthServices.login("/").then((response) => {
     //   console.log({ response });
     // });
-    window.open("http://0.0.0.0:8104/login?next=localhost:8999");
+    window.open("http://0.0.0.0:8104/login?next=/");
   }, []);
 
   return (
