@@ -1,0 +1,18 @@
+#! /usr/bin/env bash
+
+set -e
+RUN_COMMAND="talisker.gunicorn webapp.app:app -w 2 --name talisker-`hostname`"
+
+if [ "${FLASK_DEBUG}" = true ] || [ "${FLASK_DEBUG}" = 1 ]; then
+    RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
+fi
+
+if [ "${FLASK_APP_ENV}" = "dev" ]; then
+    RUN_COMMAND="${RUN_COMMAND} --bind 0.0.0.0:8104"
+else
+    RUN_COMMAND="${RUN_COMMAND} --bind $1"
+fi
+
+FLASK_APP=webapp.app
+
+${RUN_COMMAND}

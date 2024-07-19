@@ -1,4 +1,4 @@
-from flask import jsonify
+from flask import jsonify, render_template
 
 from webapp import create_app
 from webapp.cache import Cache
@@ -41,3 +41,8 @@ def region(uri, branch="main"):
 
     return response
 
+@app.route("/", defaults={ "path": "" })
+@app.route("/webpage/<path:path>")
+@login_required
+def index(path):
+    return render_template("index.html")

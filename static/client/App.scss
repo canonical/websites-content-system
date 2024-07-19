@@ -1,0 +1,37 @@
+@use "sass:math";
+
+@import "./settings.scss";
+@import "vanilla-framework";
+@include vf-base;
+
+// Patterns
+@include vf-p-grid;
+@include vf-p-headings;
+@include vf-p-links;
+@include vf-p-navigation;
+@include vf-p-side-navigation;
+@include vf-p-buttons;
+@include vf-p-tooltips;
+
+// Icons
+@include vf-p-icons;
+@include vf-p-icons-common;
+
+// Utilities
+@include vf-u-align;
+@include vf-u-hide;
+
+// Layout
+@include vf-l-application;
+@include vf-l-application-panels;
+@include vf-l-full-width;
+@include vf-l-site;
+
+// Local SCSS
+@import "./patterns_icons";
+
+// Components
+@include vf-p-list-tree;
+@import "./components/MainLayout/MainLayout";
+@import "./components/Navigation/Navigation";
+@import "./components/Navigation/NavigationElement/NavigationElement";
