@@ -42,6 +42,7 @@ def region(uri, branch="main"):
     return response
 
 @app.route("/")
+@app.route("/webpage/<path:path>")
 @login_required
-def index():
+def index(path):
     return render_template("index.html")
