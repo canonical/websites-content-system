@@ -2,6 +2,7 @@
 
 @import "./settings.scss";
 @import "vanilla-framework";
+@include vanilla;
 @include vf-base;
 
 // Patterns
@@ -35,3 +36,4 @@
 @import "./components/MainLayout/MainLayout";
 @import "./components/Navigation/Navigation";
 @import "./components/Navigation/NavigationElement/NavigationElement";
+@import "./components/Search/Search";
