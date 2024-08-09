@@ -1,0 +1,24 @@
+domain: cs.canonical.com
+
+image: prod-comms.ps5.docker-registry.canonical.com/cs.canonical.com
+
+env:
+  - name: VALKEY_HOST
+    secretKeyRef:
+      key: host
+      name: webteam-valkey
+
+  - name: VALKEY_PORT
+    secretKeyRef:
+      key: port
+      name: webteam-valkey
+
+  - name: GH_TOKEN
+    secretKeyRef:
+      key: port
+      name: webteam-valkey
+
+  - name: SECRET_KEY
+    secretKeyRef:
+      key: websites-content-system
+      name: secret-keys

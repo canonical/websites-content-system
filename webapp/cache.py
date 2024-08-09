@@ -1,26 +1,30 @@
-import redis
-import redis.exceptions
-
+import valkey
 
 class Cache:
     """Cache interface"""
 
     def __init__(self, app):
-        self.host = app.config["REDIS_HOST"]
-        self.port = app.config["REDIS_PORT"]
+        self.host = app.config["VALKEY_HOST"]
+        self.port = app.config["VALKEY_PORT"]
         self.instance = self.connect()
 
     def connect(self):
-        """Return an instance of the redis cache. If not available, throw a ConnectionError."""
+        """
+        Return an instance of the redis cache. If not available, throw a
+        ConnectionError.
+        """
         try:
-            r = redis.Redis(host=self.host, port=self.port, db=0)
+            r = valkey.Redis(host=self.host, port=self.port, db=0)
             r.ping()
             return r
-        except (redis.exceptions.ConnectionError, redis.exceptions.TimeoutError):
+        except (
+            valkey.exceptions.ConnectionError,
+            valkey.exceptions.TimeoutError,
+        ):
             raise ConnectionError("Redis cache is not available")
 
     def connect_redis(self):
-        return redis.Redis(host=self.host, port=self.port, db=0)
+        return valkey.Redis(host=self.host, port=self.port, db=0)
 
     def get(self, key):
         return self.instance.get(key)
@@ -35,7 +39,7 @@ class Cache:
         try:
             self.instance.ping()
             return True
-        except redis.exceptions.ConnectionError:
+        except valkey.exceptions.ConnectionError:
             return False
         except Exception as e:
             raise e
