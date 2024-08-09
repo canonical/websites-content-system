@@ -38,6 +38,8 @@
     }
 
     .p-panel__content {
+      padding-right: 12px;
+
       @media (min-width: 620px) and (max-width: 1920px) {
         visibility: hidden;
       }
