@@ -13,8 +13,8 @@ PORT=8104
 FLASK_DEBUG=true
 SECRET_KEY=secret_key
 DEVEL=True
-REDIS_HOST=0.0.0.0
-REDIS_PORT=6379
+VALKEY_HOST=0.0.0.0
+VALKEY_PORT=6379
 GH_TOKEN=ghp_somepersonaltoken
 ```
 
@@ -52,8 +52,8 @@ $ python -m pip install -r requirements.txt
 Modify the .env file, and change the following to match your redis instance,
 
 ```
-REDIS_HOST=your-instance-ip
-REDIS_PORT=your-instance-port
+VALKEY_HOST=your-instance-ip
+VALKEY_PORT=your-instance-port
 ```
 
 then load the variables into the shell environment.

@@ -2,8 +2,8 @@ services:
   web:
     build: .
     environment:
-      REDIS_HOST: "${REDIS_HOST}"
-      REDIS_PORT: "${REDIS_PORT}"
+      VALKEY_HOST: "${VALKEY_HOST}"
+      VALKEY_PORT: "${VALKEY_PORT}"
       DEVEL: "${DEVEL}"
       SECRET_KEY: "${SECRET_KEY}"
       FLASK_DEBUG: "${FLASK_DEBUG}"
@@ -24,7 +24,7 @@ services:
     image: redis:alpine
     restart: always
     ports:
-      - "${REDIS_PORT}:6379"
+      - "${VALKEY_PORT}:6379"
     command: redis-server --save 20 1 --loglevel warning
     volumes:
       - cache:/data
