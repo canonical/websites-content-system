@@ -38,7 +38,7 @@ RUN apt-get update && apt-get install --no-install-recommends --yes python3-lib2
 ENV PATH="/root/.local/bin:${PATH}"
 
 # Copy python dependencies
-COPY --from=python-dependencies /root/.local/lib/python3.8/site-packages /root/.local/lib/python3.8/site-packages
+COPY --from=python-dependencies /root/.local/lib/python3.10/site-packages /root/.local/lib/python3.10/site-packages
 COPY --from=python-dependencies /root/.local/bin /root/.local/bin
 
 # Set up environment
