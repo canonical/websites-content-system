@@ -1,37 +1,29 @@
+from os import environ
+
 from flask import jsonify, render_template
 
 from webapp import create_app
-from webapp.cache import Cache
-from webapp.parser_task import ParserTask
-from webapp.site_repository import SiteRepository, SiteRepositoryError
+from webapp.cache import init_cache
 from webapp.sso import init_sso, login_required
-from os import environ
+from webapp.tasks import get_tree_async
 
 app = create_app()
 
 # Initialize SSO
 init_sso(app)
 
-#Initialize cache if available
-try:
-    cache = Cache(app)
-except ConnectionError:
-    cache = None
-cache = None
+# Initialize cache if available
+cache = init_cache(app)
 
-# Start parser task
-parser_task = ParserTask(app, cache=cache)
 
 @app.route("/get-tree/<string:uri>", methods=["GET"])
 @app.route("/get-tree/<string:uri>/<string:branch>", methods=["GET"])
 @login_required
-def region(uri, branch="main"):
-    try:
-        site_repository = SiteRepository(uri, branch, app=app, cache=cache)
-    except SiteRepositoryError as e:
-        return jsonify({"error": str(e)})
-
-    tree = site_repository.get_tree()
+def get_tree(uri, branch="main"):
+    # Get tree if already generated, otherwise queue task
+    # and return empty array.
+    # This prevents concurrent cloning of the same repository.
+    tree = get_tree_async(uri, branch, app, cache)
 
     response = jsonify({"name": uri, "templates": tree})
 
@@ -40,6 +32,7 @@ def region(uri, branch="main"):
         response.headers.add("Access-Control-Allow-Origin", "*")
 
     return response
+
 
 @app.route("/", defaults={ "path": "" })
 @app.route("/webpage/<path:path>")

@@ -1,7 +1,6 @@
 import re
 from contextlib import suppress
 from pathlib import Path
-import sys
 
 BASE_TEMPLATES = [
     "base_index.html",

@@ -77,5 +77,6 @@ tests/cassettes/TestRoutes.test_ceph_docs.yaml
 /test-results/
 /playwright-report/
 /playwright/
-/repositories/
 /static/build
+repositories/
+tree-cache/
