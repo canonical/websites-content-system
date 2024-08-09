@@ -88,7 +88,7 @@ jobs:
       - name: Install dependencies
         run: pip install ruff
       - name: Lint
-        run: ruff check -l 79
+        run: ruff check -- -l 79
 
   run-python:
     name: Run Python
