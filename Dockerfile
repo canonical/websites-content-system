@@ -37,7 +37,8 @@ RUN pip install -r requirements.txt
 
 # Import code, build assets
 RUN rm -rf package.json yarn.lock vite.config.js requirements.txt
-COPY --from=build-css /srv/static/build static
+COPY --from=build-css /srv/static/build/styles.css /srv/static/build/styles.css
+COPY --from=build-js /srv/static/build /srv/static/build
 
 # Set build ID
 ARG BUILD_ID
