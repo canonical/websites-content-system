@@ -15,10 +15,24 @@ env:
 
   - name: GH_TOKEN
     secretKeyRef:
-      key: port
+      key: github
       name: webteam-valkey
 
   - name: SECRET_KEY
     secretKeyRef:
       key: websites-content-system
       name: secret-keys
+
+# Overrides for production
+production:
+  replicas: 1
+  nginxConfigurationSnippet: |
+    more_set_headers "X-Robots-Tag: noindex";
+    more_set_headers "Link: <https://assets.ubuntu.com>; rel=preconnect; crossorigin, <https://assets.ubuntu.com>; rel=preconnect";
+
+# Overrides for staging
+staging:
+  replicas: 1
+  nginxConfigurationSnippet: |
+    more_set_headers "X-Robots-Tag: noindex";
+    more_set_headers "Link: <https://assets.ubuntu.com>; rel=preconnect; crossorigin, <https://assets.ubuntu.com>; rel=preconnect";
