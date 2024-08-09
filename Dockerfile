@@ -1,14 +1,6 @@
 FROM ubuntu:jammy 
 WORKDIR /srv
 
-# Build stage: Install python dependencies
-# ===
-FROM ubuntu:jammy AS python-dependencies
-RUN apt-get update && apt-get install --no-install-recommends --yes git python3-pip python3-setuptools
-COPY . .
-RUN pip3 config set global.disable-pip-version-check true
-RUN pip3 install -r requirements.txt
-
 # Build stage: Install yarn dependencies
 # ===
 FROM node:20 AS yarn-dependencies
@@ -33,13 +25,11 @@ RUN yarn run build-css
 # ===
 FROM ubuntu:jammy
 
-# Install python and import python dependencies
+# Install python dependencies
+# ===
 RUN apt-get update && apt-get install --no-install-recommends --yes python3-lib2to3 python3-setuptools python3-pkg-resources ca-certificates libsodium-dev
-ENV PATH="/root/.local/bin:${PATH}"
-
-# Copy python dependencies
-COPY --from=python-dependencies /root/.local/lib/python3.10/site-packages /root/.local/lib/python3.10/site-packages
-COPY --from=python-dependencies /root/.local/bin /root/.local/bin
+COPY . .
+RUN pip3 install -r requirements.txt
 
 # Set up environment
 ENV LANG C.UTF-8
