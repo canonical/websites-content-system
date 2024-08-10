@@ -14,7 +14,7 @@ const Navigation = (): JSX.Element => {
   return (
     <>
       <header className="l-navigation-bar">
-        <div className="p-panel">
+        <div className="p-panel is-dark">
           <div className="p-panel__header">
             <NavigationBanner />
             <div className="p-panel__controls u-nudge-down--small">
@@ -27,7 +27,7 @@ const Navigation = (): JSX.Element => {
       </header>
       <nav aria-label="main" className={classNames("l-navigation", { "is-collapsed": isCollapsed })} role="navigation">
         <div className="l-navigation__drawer">
-          <div className="p-panel">
+          <div className="p-panel is-dark">
             <div className="p-panel__header is-sticky">
               <NavigationBanner />
               <div className="l-navigation__controls">

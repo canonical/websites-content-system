@@ -14,8 +14,6 @@ const NavigationItems = (): React.ReactNode => {
   const [projects, setProjects] = useState<IPagesResponse["data"][]>([]);
   const [selectedProject, setSelectedProject] = useState<IPagesResponse["data"]>();
 
-  console.log(selectedProject);
-
   useEffect(() => {
     const hasData = data?.every((project) => project?.data);
     if (!isLoading && data?.length && hasData && projects.length !== data.length) {

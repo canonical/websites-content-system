@@ -17,7 +17,7 @@ const NavigationBanner = ({ children }: NavigationBannerProps): JSX.Element => {
         className="p-panel__logo"
         to={homepageLink.url}
       >
-        <img alt="" src="https://assets.ubuntu.com/v1/66303ab2-Canonical%20logo.svg" width="150px" />
+        <img alt="" src="https://assets.ubuntu.com/v1/26e08531-content-system-logo.svg" width="175px" />
       </Link>
       {children}
     </>
