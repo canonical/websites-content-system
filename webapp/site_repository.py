@@ -12,6 +12,12 @@ class SiteRepositoryError(Exception):
     Exception raised for errors in the SiteRepository class
     """
 
+def site_repository_exists(app, repo_path):
+    """
+    Check if the site repository exists
+    """
+    absolute_path = app.config["BASE_DIR"] + "/repositories/" + repo_path
+    return os.path.exists(absolute_path)
 
 class SiteRepository:
 
@@ -200,8 +206,6 @@ class SiteRepository:
         Checkout updates to the repository on the specified branch.
         """
         os.chdir(repo_path)
-        # Retrieve updates
-        self.pull_updates()
         # Checkout the branch
         self.checkout_branch(branch)
 
@@ -209,7 +213,7 @@ class SiteRepository:
         """
         Check if the repository exists
         """
-        return os.path.exists(repo_path)
+        return site_repository_exists(self.app, repo_path)
 
     def setup_repository(self, repository_uri, branch):
         """
