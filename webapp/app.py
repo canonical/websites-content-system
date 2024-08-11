@@ -5,15 +5,18 @@ from flask import jsonify, render_template
 from webapp import create_app
 from webapp.cache import init_cache
 from webapp.sso import init_sso, login_required
-from webapp.tasks import get_tree_async
+from webapp.tasks import get_tree_async, init_tasks
 
 app = create_app()
 
 # Initialize SSO
 init_sso(app)
 
-# Initialize cache if available
+# Initialize cache
 cache = init_cache(app)
+
+# Initialize tasks
+init_tasks(app, cache)
 
 
 @app.route("/get-tree/<string:uri>", methods=["GET"])

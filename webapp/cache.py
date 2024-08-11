@@ -8,9 +8,12 @@ import valkey
 
 def init_cache(app):
     try:
-        cache = FileCache(app)
-    except ConnectionError:
         cache = ValkeyCache(app)
+    except ConnectionError as e:
+        app.logger.info(
+            e, "Valkey cache is not available. Using FileCache instead."
+        )
+        cache = FileCache(app)
     return cache
 
 

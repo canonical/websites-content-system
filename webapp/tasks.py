@@ -1,7 +1,37 @@
 import queue
+import time
 from multiprocessing import Process, Queue
 
+import yaml
+
 from webapp.site_repository import SiteRepository, SiteRepositoryError
+
+
+def init_tasks(app, cache):
+    """
+    Start event loop.
+    """
+    background_queue = Queue()
+    Process(
+        target=load_site_trees,
+        args=(app, cache, background_queue),
+    ).start()
+
+
+def load_site_trees(app, cache, queue):
+    """
+    Load the site trees from the queue.
+    """
+    while True:
+        with open(app.config["BASE_DIR"] + "/" + "sites.yaml") as f:
+            data = yaml.safe_load(f)
+            for site in data["sites"]:
+                Process(
+                    target=load_tree_object_async,
+                    args=(site, "main", app, cache, queue),
+                ).start()
+        # Wait for 30 minutes before enqueuing the next set of trees
+        time.sleep(1800)
 
 
 def load_tree_object_async(uri, branch, app, cache, queue=None):
