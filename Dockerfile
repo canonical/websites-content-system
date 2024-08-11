@@ -5,6 +5,7 @@ WORKDIR /srv
 # ===
 FROM node:20 AS yarn-dependencies
 WORKDIR /srv
+RUN export NODE_ENV=docker
 ADD yarn.lock .
 ADD package.json .
 RUN --mount=type=cache,target=/usr/local/share/.cache/yarn yarn install

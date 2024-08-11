@@ -30,33 +30,26 @@ $ docker compose up
 
 ### Running Locally
 
-You'll need to set up a [redis](https://redis.io/docs/install/install-redis/) server, and expose the port it runs on.
+#### Cache
+The service depends on having a cache from which generated tree json can be sourced.
 
-If you do not want to use a cache, comment out the cache initialization section and explicitly declare the cache as `None`.
+You'll need to set up a [valkey](https://valkey.io/) or [redis](https://redis.io/docs/install/install-redis/) cache, and expose the port it runs on.
+If you do not want to use a dedicated cache, a simple filecache has been included as the default. Data is saved to the `./tree-cache/` directory. 
 
-```python
-12:  # Initialize cache if available
-13:  # try:
-14:  #     cache = Cache(app)
-15:  # except ConnectionError:
-16:  #     cache = None
-17:  cache = None
-```
-
-Then install the dependencies.
+First, install the dependencies.
 
 ```bash
 $ python -m pip install -r requirements.txt
 ```
 
-Modify the .env file, and change the following to match your redis instance,
+Then modify the .env file, and change the following to match your redis instance,
 
 ```
 VALKEY_HOST=your-instance-ip
 VALKEY_PORT=your-instance-port
 ```
 
-then load the variables into the shell environment.
+and load the variables into the shell environment.
 
 ```
 $ source .env
