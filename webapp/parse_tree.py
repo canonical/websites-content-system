@@ -66,10 +66,14 @@ def extends_base(path, base="templates"):
                         return True
                     else:
                         # extract absolute path from the parent path
-                        absolute_path = str(path)[0 : str(path).find(base) + len(base)]
+                        absolute_path = str(path)[
+                            0 : str(path).find(base) + len(base)
+                        ]
                         # check if the file from which the current file
                         # extends extends from the base template
-                        new_path = append_base_path(absolute_path, match.group(1))
+                        new_path = append_base_path(
+                            absolute_path, match.group(1)
+                        )
                         return extends_base(new_path, base=base)
 
     return False
@@ -163,11 +167,12 @@ def get_tags_rolling_buffer(path):
                         buffer.append(line)
                         is_buffering = True
                         variants_mapping[tag] = variant
-                        # current_tag = tag
 
                     # We search for the end of the tag in the existing buffer
                     buffer_string = "".join(buffer)
-                    if is_buffering and re.search("(.*){%( *)endblock", buffer_string):
+                    if is_buffering and re.search(
+                        "(.*){%( *)endblock", buffer_string
+                    ):
                         # We save the buffer contents to the tags dictionary
                         tags[tag] = buffer_string
 
@@ -283,7 +288,9 @@ def scan_directory(path_name, base=None):
                 child_tags = get_tags_rolling_buffer(child)
                 # If the child has no copydocs link, use the parent's link
                 if not child_tags.get("link") and extended_path:
-                    child_tags["link"] = get_extended_copydoc(extended_path, base=base)
+                    child_tags["link"] = get_extended_copydoc(
+                        extended_path, base=base
+                    )
                 node["children"].append(child_tags)
         # If the child is a directory, scan it
         if child.is_dir():

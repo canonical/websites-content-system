@@ -120,11 +120,13 @@ class SiteRepository:
         """
         if not uri.endswith(".git"):
             raise SiteRepositoryError(
-                f"Invalid git uri. {uri} Please confirm that the uri ends with .git"
+                f"Invalid git uri. {uri} Please confirm "
+                "that the uri ends with .git"
             )
         if not uri.startswith("https"):
             raise SiteRepositoryError(
-                f"Invalid git uri. {uri} Please confirm that the uri uses https"
+                f"Invalid git uri. {uri} Please confirm "
+                "that the uri uses https"
             )
 
     def __create_git_uri__(self, uri):
