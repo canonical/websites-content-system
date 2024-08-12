@@ -11,9 +11,13 @@
 
 .l-navigation {
   .p-panel {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     padding: 0 12px;
 
     .p-panel__header {
+      display: block;
       padding-left: 0;
     }
 
@@ -23,12 +27,14 @@
   
       @media (min-width: 620px) {
         display: flex;
+        margin-bottom: 50px;
       }
     }
 
     .l-navigation__controls,
     .l-navigation__controls > span {
       display: flex;
+      margin-bottom: 20px;
       position: relative;
       width: 100%;
 
@@ -44,8 +50,21 @@
     }
 
     .p-panel__content {
+      height: calc(100vh - 280px);
+      overflow: auto;
+
       @media (min-width: 620px) and (max-width: 1920px) {
         visibility: hidden;
+      }
+    }
+
+    .p-panel__footer {
+      margin-top: auto;
+      padding-top: 20px;
+
+      .p-button--base {
+        text-align: left;
+        width: 100%;
       }
     }
   }

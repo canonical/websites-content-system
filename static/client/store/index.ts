@@ -7,7 +7,9 @@ export const useStore = create<IStore>()(
   devtools(
     persist(
       (set) => ({
+        selectedProject: null,
         user: null,
+        setSelectedProject: (s) => set({ selectedProject: s }),
         setUser: (u) => set({ user: u }),
       }),
       {
