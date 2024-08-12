@@ -3,20 +3,10 @@ from os import environ
 from flask import jsonify, render_template
 
 from webapp import create_app
-from webapp.cache import init_cache
-from webapp.sso import init_sso, login_required
-from webapp.tasks import get_tree_async, init_tasks
+from webapp.sso import login_required
+from webapp.tasks import get_tree_async
 
 app = create_app()
-
-# Initialize SSO
-init_sso(app)
-
-# Initialize cache
-cache = init_cache(app)
-
-# Initialize tasks
-init_tasks(app, cache)
 
 
 @app.route("/get-tree/<string:uri>", methods=["GET"])
@@ -26,7 +16,7 @@ def get_tree(uri, branch="main"):
     # Get tree if already generated, otherwise queue task
     # and return empty array.
     # This prevents concurrent cloning of the same repository.
-    tree = get_tree_async(uri, branch, app, cache)
+    tree = get_tree_async(uri, branch, app)
 
     response = jsonify({"name": uri, "templates": tree})
 

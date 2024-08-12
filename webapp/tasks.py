@@ -12,17 +12,17 @@ from webapp.site_repository import (
 # Keep track of generation tasks for each tree.
 TREE_TASKS = {}
 
-def init_tasks(app, cache):
+def init_tasks(app):
     """
     Start event loop.
     """
     Process(
         target=load_site_trees,
-        args=(app, cache),
+        args=(app),
     ).start()
 
 
-def load_site_trees(app, cache):
+def load_site_trees(app):
     """
     Load the site trees from the queue.
     """
@@ -30,12 +30,12 @@ def load_site_trees(app, cache):
         with open(app.config["BASE_DIR"] + "/" + "sites.yaml") as f:
             data = yaml.safe_load(f)
             for site in data["sites"]:
-                add_tree_task(site, "main", app, cache)
+                add_tree_task(site, "main", app)
         # Wait for 30 minutes before enqueuing the next set of trees
         time.sleep(1800)
 
 
-def add_tree_task(uri, branch, app, cache):
+def add_tree_task(uri, branch, app):
     """
     Put the tree object in the queue.
     """
@@ -47,7 +47,9 @@ def add_tree_task(uri, branch, app, cache):
 
     def load_tree():
         try:
-            site_repository = SiteRepository(uri, branch, app=app, cache=cache)
+            site_repository = SiteRepository(
+                uri, branch, app=app, cache=app.config["CACHE"]
+            )
             return site_repository.get_tree()
         except SiteRepositoryError as e:
             app.logger.error(f"Error loading {uri}: {e}")
@@ -61,17 +63,19 @@ def add_tree_task(uri, branch, app, cache):
     return p
 
 
-def get_tree_async(uri, branch, app, cache):
+def get_tree_async(uri, branch, app):
     """
     Async process to enqueue tree generation and caching.
     """
     # If the site repository exists, return the tree.
     if site_repository_exists(app, uri):
-        site_repository = SiteRepository(uri, branch, app=app, cache=cache)
+        site_repository = SiteRepository(
+            uri, branch, app=app, cache=app.config["CACHE"]
+        )
         return site_repository.get_tree()
 
     # Return an empty array if the result is not available in 5s.
-    p = add_tree_task(uri, branch, app, cache)
+    p = add_tree_task(uri, branch, app)
     if response := p.join(timeout=5) is None:
         app.logger.info("Task enqueued")
         return []

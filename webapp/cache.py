@@ -14,6 +14,7 @@ def init_cache(app):
         app.logger.info(
             e, "Valkey cache is not available. Using FileCache instead."
         )
+    app.config["CACHE"] = cache
     return cache
 
 

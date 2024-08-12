@@ -34,7 +34,6 @@ class SiteRepository:
         self.logger = app.logger
         self.cache = cache
         self.repo_path = self.get_repo_path(repository_uri)
-        self.logger.info(f"path: {self.repo_path}")
 
         # Don't run setup if the repository exists
         if not self.repository_exists(repository_uri):
