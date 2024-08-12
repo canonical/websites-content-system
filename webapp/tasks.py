@@ -1,8 +1,11 @@
 import time
 from multiprocessing import Process
+from typing import Dict
 
 import yaml
+from flask import Flask
 
+from webapp.models import Project, User, Webpage, db
 from webapp.site_repository import (
     SiteRepository,
     SiteRepositoryError,
@@ -10,24 +13,24 @@ from webapp.site_repository import (
 )
 
 # Keep track of generation tasks for each tree.
-TREE_TASKS = {}
+TREE_TASKS: Dict[str, Process] = {}
 
-def init_tasks(app):
+def init_tasks(app: Flask):
     """
     Start event loop.
     """
-    # If not running in debug mode, or if running in debug mode but
-    # tasks are enabled, start the event loop.
-    # This is to prevent the event loop from hanging migrations, which
-    # run in debug mode.
-    if not app.config.get("DEBUG") or app.config.get("ENABLE_TASKS"):
+
+    @app.before_request
+    def start_tasks():
+        # Only run once
+        app.before_request_funcs[None].remove(start_tasks)
         Process(
             target=load_site_trees,
             args=(app,),
         ).start()
 
 
-def load_site_trees(app):
+def load_site_trees(app: Flask):
     """
     Load the site trees from the queue.
     """
@@ -40,13 +43,14 @@ def load_site_trees(app):
         time.sleep(1800)
 
 
-def add_tree_task(uri, branch, app):
+def add_tree_task(uri: str, branch: str, app: Flask):
     """
     Put the tree object in the queue.
     """
     # If the tree is already being loaded, return the process.
     if p := TREE_TASKS.get(uri):
-        return p
+        if p.is_alive():
+            return p
 
     app.logger.info(f"Loading {uri}")
 
@@ -68,7 +72,7 @@ def add_tree_task(uri, branch, app):
     return p
 
 
-def get_tree_async(uri, branch, app):
+def get_tree_async(uri: str, branch: str, app: Flask):
     """
     Async process to enqueue tree generation and caching.
     """
@@ -77,7 +81,26 @@ def get_tree_async(uri, branch, app):
         site_repository = SiteRepository(
             uri, branch, app=app, cache=app.config["CACHE"]
         )
-        return site_repository.get_tree()
+        tree = site_repository.get_tree()
+        # Save webpage to database
+        # Get default owner
+        owner = db.session.execute(
+            db.select(User).where(User.name == "Default")
+        ).scalar()
+        # Get default project
+        project = db.session.execute(
+            db.select(Project).where(Project.name == "Default")
+        ).scalar()
+        db.session.execute(
+            db.insert(Webpage),
+            {
+                "url": uri,
+                "name": uri,
+                "owner_id": owner.id,
+                "project_id": project.id,
+            },
+        )
+        return tree
 
     # Return an empty array if the result is not available in 5s.
     p = add_tree_task(uri, branch, app)

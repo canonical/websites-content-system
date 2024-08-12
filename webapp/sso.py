@@ -4,12 +4,11 @@ import flask
 from django_openid_auth.teams import TeamsRequest, TeamsResponse
 from flask_openid import OpenID
 
-
 SSO_LOGIN_URL = "https://login.ubuntu.com"
 SSO_TEAM = "canonical-webmonkeys"
 
 
-def init_sso(app):
+def init_sso(app: flask.Flask):
     open_id = OpenID(
         store_factory=lambda: None,
         safe_roots=[],

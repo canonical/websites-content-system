@@ -1,4 +1,3 @@
-import json
 import os
 import re
 import subprocess
@@ -231,17 +230,14 @@ class SiteRepository:
         """
         if self.cache:
             if cached_tree := self.cache.get(self.cache_key):
-                return json.loads(cached_tree)
+                return cached_tree
 
     def set_tree_in_cache(self, tree):
         """
         Set the tree in the cache. Silently pass if cache is not available.
         """
         if self.cache:
-            return self.cache.set(
-                self.cache_key,
-                json.dumps(tree),
-            )
+            return self.cache.set(self.cache_key, tree)
 
     def get_tree_from_disk(self, repo_path, branch):
         """
