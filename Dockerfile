@@ -20,8 +20,8 @@ WORKDIR /srv
 COPY . .
 
 # Install python and import python dependencies
-RUN apt-get update && apt-get install --no-install-recommends --yes python3-pip ca-certificates git
-RUN pip install -r requirements.txt
+RUN apt-get update && apt-get install --no-install-recommends --yes python3-pip ca-certificates git python3-psycopg2
+RUN pip install -r requirements.txt 
 
 # Import code, build assets
 RUN rm -rf package.json yarn.lock vite.config.js requirements.txt

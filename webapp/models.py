@@ -1,10 +1,22 @@
 import enum
 from datetime import datetime, timezone
 
+from flask_migrate import Migrate
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Column, DateTime, Enum, ForeignKey, Integer, String
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import DeclarativeBase, relationship
 
-from webapp.database import db
+
+class Base(DeclarativeBase):
+    pass
+
+
+db = SQLAlchemy(model_class=Base)
+
+
+def init_db(app):
+    Migrate(app, db)
+    db.init_app(app)
 
 
 class DateTimeMixin(object):

@@ -16,10 +16,15 @@ def init_tasks(app):
     """
     Start event loop.
     """
-    Process(
-        target=load_site_trees,
-        args=(app),
-    ).start()
+    # If not running in debug mode, or if running in debug mode but
+    # tasks are enabled, start the event loop.
+    # This is to prevent the event loop from hanging migrations, which
+    # run in debug mode.
+    if not app.config.get("DEBUG") or app.config.get("ENABLE_TASKS"):
+        Process(
+            target=load_site_trees,
+            args=(app,),
+        ).start()
 
 
 def load_site_trees(app):
