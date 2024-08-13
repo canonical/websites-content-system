@@ -15,17 +15,20 @@ const SiteSelector = (): JSX.Element | null => {
 
   const [projects, setProjects] = useState<IPagesResponse["data"][]>([]);
 
+  // This hook presets the SiteSelector with a value, either from URL or just with the first option
   useEffect(() => {
     if (projects.length && !selectedProject) {
+      // get project name from URL
       const match = location.pathname.match(/\/webpage\/([^/]+)/);
-      let projectFromPath;
+      let projectFromURL;
       if (match) {
-        projectFromPath = projects.find((p) => p.name === match[1]);
+        projectFromURL = projects.find((p) => p.name === match[1]);
       }
-      setSelectedProject(projectFromPath || projects[0]);
+      setSelectedProject(projectFromURL || projects[0]);
     }
   }, [location, projects, selectedProject, setSelectedProject]);
 
+  // This hook sets a list of all projects
   useEffect(() => {
     // check that the data array actually has data in it
     const hasData = data?.every((project) => project?.data);
@@ -37,7 +40,9 @@ const SiteSelector = (): JSX.Element | null => {
   const handleProjectChange = useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
       const project = projects.find((p) => p.name === e.target.value);
-      if (project) setSelectedProject(project);
+      if (project) {
+        setSelectedProject(project);
+      }
     },
     [projects, setSelectedProject],
   );
@@ -52,13 +57,13 @@ const SiteSelector = (): JSX.Element | null => {
 
   return selectedProject ? (
     <Select
-      defaultValue={selectedProject?.name}
       label="SELECT SITE"
       onChange={handleProjectChange}
       options={projects.map((project) => ({
         label: project.name,
         value: project.name,
       }))}
+      value={selectedProject?.name}
     />
   ) : null;
 };

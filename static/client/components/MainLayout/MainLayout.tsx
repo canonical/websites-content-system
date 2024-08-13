@@ -28,7 +28,7 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
             {location.pathname === "/" && (
               <>
                 <h2>Welcome to the Content System</h2>
-                <h4>Please select a page that you are looking for from the left sidebar</h4>
+                <h3 className="p-heading--4">Please select a page that you are looking for from the left sidebar</h3>
               </>
             )}
             {children}

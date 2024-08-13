@@ -23,6 +23,8 @@ const Breadcrumbs = () => {
         });
         setBreadcrumbs(paths);
       }
+    } else {
+      setBreadcrumbs([]);
     }
   }, [location]);
 
