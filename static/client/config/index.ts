@@ -13,6 +13,7 @@ const config = {
       cacheTime: staleTime,
     },
   },
+  ghLink: (project: string) => `https://github.com/canonical/${project}/tree/main/templates`,
 };
 
 export default config;

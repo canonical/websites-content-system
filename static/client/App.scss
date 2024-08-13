@@ -37,6 +37,7 @@
 @import "./components/Navigation/Navigation";
 @import "./components/Navigation/NavigationElement/NavigationElement";
 @import "./components/Search/Search";
+@import "./pages/Webpage/Webpage";
 
 @mixin vf-icon-logout($color) {
   background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 13 13' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='#{vf-url-friendly-color($color)}' fill-rule='nonzero' d='M1.32973 12.4804C0.965955 12.4804 0.653389 12.3507 0.392033 12.0912C0.130678 11.8317 0 11.5213 0 11.1602V1.32972C0 0.965938 0.130678 0.653372 0.392033 0.392017C0.653389 0.130672 0.965955 0 1.32973 0H6.24567V1.32972H1.32973V11.1602H6.24567V12.4804H1.32973ZM9.44857 9.50075L8.49638 8.5674L10.1587 6.90508H4.46668V5.58478H10.1254L8.46305 3.92247L9.41523 2.98912L12.6783 6.2616L9.44857 9.50075Z'/%3E%3C/svg%3E");
