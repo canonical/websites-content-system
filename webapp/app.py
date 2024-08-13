@@ -27,6 +27,14 @@ def get_tree(uri: str, branch="main"):
     if webpage:
         response_data["owner"] = webpage.owner.name
         response_data["status"] = webpage.status.value
+        response_data["stakeholders"] = [
+            {
+                "id": stakeholder.id,
+                "user_id": stakeholder.user_id,
+                "webpage_id": stakeholder.webpage_id,
+            }
+            for stakeholder in webpage.stakeholders
+        ]
 
     response = jsonify(response_data)
 
