@@ -1,5 +1,6 @@
 import { useLocation } from "react-router-dom";
 
+import Breadcrumbs from "@/components/Breadcrumbs";
 import Navigation from "@/components/Navigation";
 import Search from "@/components/Search";
 
@@ -15,14 +16,23 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
       <div className="l-application">
         <Navigation />
         <main className="l-main">
-          <Search />
-          {location.pathname === "/" && (
-            <>
-              <h2>Welcome to the Content System</h2>
-              <h4>Please select a page that you are looking for from the left sidebar</h4>
-            </>
-          )}
-          {children}
+          <div className="row">
+            <div className="col-7">
+              <Breadcrumbs />
+            </div>
+            <div className="col-5">
+              <Search />
+            </div>
+          </div>
+          <div className="row">
+            {location.pathname === "/" && (
+              <>
+                <h2>Welcome to the Content System</h2>
+                <h4>Please select a page that you are looking for from the left sidebar</h4>
+              </>
+            )}
+            {children}
+          </div>
         </main>
       </div>
     </>
