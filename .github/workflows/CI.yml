@@ -102,6 +102,10 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_PASSWORD: postgres
     steps:
       - uses: actions/checkout@v3
       - name: Set up Python 3.10

@@ -28,6 +28,12 @@ services:
     command: redis-server --save 20 1 --loglevel warning
     volumes:
       - cache:/data
+  
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_PASSWORD: postgres
+
 volumes:
   cache:
     driver: local
