@@ -22,8 +22,10 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
   return (
     <div className="l-webpage">
       <div>
-        <p aria-label="page-title">TITLE</p>
-        <h1 className="u-no-padding--top" id="page-title">
+        <p className="p-text--small-caps" id="page-title">
+          Title
+        </p>
+        <h1 aria-labelledby="page-title" className="u-no-padding--top">
           {page.title || "-"}
         </h1>
       </div>
@@ -48,8 +50,10 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
         )}
       </div>
       <div>
-        <p aria-label="page-descr">DESCRIPTION</p>
-        <p id="page-descr">{page.description || "-"}</p>
+        <p className="p-text--small-caps" id="page-descr">
+          Description
+        </p>
+        <p aria-labelledby="page-descr">{page.description || "-"}</p>
       </div>
     </div>
   );

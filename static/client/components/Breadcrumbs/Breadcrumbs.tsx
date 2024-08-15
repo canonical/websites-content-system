@@ -17,7 +17,7 @@ const Breadcrumbs = () => {
         const paths = parts?.map((part) => {
           accumulatedPath = `${accumulatedPath}/${part}`;
           return {
-            name: part.toUpperCase(),
+            name: part,
             link: `/webpage${accumulatedPath}`,
           };
         });
@@ -30,7 +30,13 @@ const Breadcrumbs = () => {
 
   return breadcrumbs.map((bc, index) => (
     <React.Fragment key={`bc-${index}`}>
-      {index < breadcrumbs.length - 1 ? <a href={bc.link}>{bc.name}</a> : <span>{bc.name}</span>}
+      {index < breadcrumbs.length - 1 ? (
+        <a className="p-text--small-caps" href={bc.link}>
+          {bc.name}
+        </a>
+      ) : (
+        <span className="p-text--small-caps">{bc.name}</span>
+      )}
       {index < breadcrumbs.length - 1 && <span>&nbsp;/&nbsp;</span>}
     </React.Fragment>
   ));

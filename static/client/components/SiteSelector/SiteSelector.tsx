@@ -57,7 +57,8 @@ const SiteSelector = (): JSX.Element | null => {
 
   return selectedProject ? (
     <Select
-      label="SELECT SITE"
+      label="Select Site"
+      labelClassName="p-text--small-caps"
       onChange={handleProjectChange}
       options={projects.map((project) => ({
         label: project.name,

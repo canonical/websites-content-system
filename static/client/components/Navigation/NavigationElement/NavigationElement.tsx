@@ -36,7 +36,7 @@ const NavigationElement = ({ page, project, isRoot }: INavigationElementProps): 
   );
 
   useEffect(() => {
-    if (page.name === "/" || location.pathname.indexOf(`${project}${page.name}`) > 0) {
+    if (page.name === "" || location.pathname.indexOf(`${project}${page.name}`) > 0) {
       setExpanded(true);
       setChildrenHidden(false);
     }
