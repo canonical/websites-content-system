@@ -1,23 +1,14 @@
 import NavigationElement from "@/components/Navigation/NavigationElement/NavigationElement";
-import { usePages } from "@/services/api/hooks/pages";
+import { useStore } from "@/store";
 
 const NavigationItems = (): React.ReactNode => {
-  const { data, isLoading } = usePages();
+  const selectedProject = useStore((state) => state.selectedProject);
 
-  if (isLoading) return "...Loading";
-
-  return (
-    <>
-      {data?.length &&
-        data
-          .filter((project) => !!project?.data?.name)
-          .map((project) => (
-            <ul aria-multiselectable="true" className="p-list-tree" key={project.data.name} role="tree">
-              <NavigationElement isRoot page={project.data.templates} project={project.data.name} />
-            </ul>
-          ))}
-    </>
-  );
+  return selectedProject ? (
+    <ul aria-multiselectable="true" className="p-list-tree" key={selectedProject.name} role="tree">
+      <NavigationElement isRoot page={selectedProject.templates} project={selectedProject.name} />
+    </ul>
+  ) : null;
 };
 
 export default NavigationItems;

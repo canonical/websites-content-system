@@ -32,7 +32,7 @@ def get_tree(uri: str, branch="main"):
     return response
 
 
-@app.route("/", defaults={ "path": "" })
+@app.route("/", defaults={"path": ""})
 @app.route("/webpage/<path:path>")
 @login_required
 def index(path):

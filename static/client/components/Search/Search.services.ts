@@ -29,4 +29,11 @@ export const searchForMatches = (value: string, tree: IPagesResponse[]): IMatch[
   return matches;
 };
 
+export const getProjectByName = (
+  data: IPagesResponse[] | undefined,
+  projectName: string,
+): IPagesResponse["data"] | undefined => {
+  return data?.find((project) => project.data.name === projectName)?.data;
+};
+
 export * as SearchServices from "./Search.services";
