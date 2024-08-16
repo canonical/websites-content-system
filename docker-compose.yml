@@ -1,39 +1,41 @@
 services:
   web:
     build: .
-    environment:
-      VALKEY_HOST: "${VALKEY_HOST}"
-      VALKEY_PORT: "${VALKEY_PORT}"
-      DEVEL: "${DEVEL}"
-      SECRET_KEY: "${SECRET_KEY}"
-      FLASK_DEBUG: "${FLASK_DEBUG}"
-      REPO_ORG: "${REPO_ORG}"
-      GH_TOKEN: "${GH_TOKEN}"
-    command: >
-      bash -c "
-        pip install -r requirements.txt && \
-        flask --app webapp/app run --host=0.0.0.0
-        "
+    env_file: ".env"
     ports:
-      - "${PORT}:5000"
+      - "${PORT}:80"
     volumes:
       - .:/srv
     depends_on:
-      - redis
-  redis:
-    image: redis:alpine
+      valkey:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+  valkey:
+    image: valkey/valkey
     restart: always
     ports:
       - "${VALKEY_PORT}:6379"
-    command: redis-server --save 20 1 --loglevel warning
     volumes:
       - cache:/data
-  
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 1s
+      timeout: 3s
+      retries: 10
   postgres:
-    image: postgres:latest
+    image: postgres:16-alpine
+    restart: always
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_PASSWORD: postgres
-
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 1s
+      timeout: 3s
+      retries: 10
+      start_period: 80s
 volumes:
   cache:
     driver: local

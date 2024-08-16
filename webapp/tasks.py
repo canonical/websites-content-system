@@ -1,36 +1,64 @@
 import time
-from multiprocessing import Process
-from typing import Dict
+from multiprocessing import Lock, Process, Queue
 
 import yaml
 from flask import Flask
 
-from webapp.models import Project, User, Webpage, db
-from webapp.site_repository import (
-    SiteRepository,
-    SiteRepositoryError,
-    site_repository_exists,
-)
+from webapp.site_repository import SiteRepository
 
-# Keep track of generation tasks for each tree.
-TREE_TASKS: Dict[str, Process] = {}
+# Crate the task queue
+TASK_QUEUE = Queue()
+# Create the locks for the site trees
+LOCKS = {}
 
 def init_tasks(app: Flask):
     """
-    Start event loop.
+    Start background tasks.
     """
 
-    @app.before_request
+    # @app.before_request
     def start_tasks():
         # Only run once
         app.before_request_funcs[None].remove(start_tasks)
+
+        # Create locks for the preset site trees
+        add_site_locks(LOCKS)
+
+        # Start the event loop
         Process(
-            target=load_site_trees,
-            args=(app,),
+            target=execute_tasks_in_queue,
+            args=(TASK_QUEUE,),
         ).start()
 
+        # Load site trees every 30 minutes
+        Process(
+            target=load_site_trees,
+            args=(app, TASK_QUEUE, LOCKS),
+        ).start()
 
-def load_site_trees(app: Flask):
+def add_site_locks(locks: dict):
+    """
+    Create locks for the site trees. These are used to prevent
+    multiple threads from trying to update the same repository
+    at the same time.
+    """
+    with open("sites.yaml") as f:
+        data = yaml.safe_load(f)
+        for site in data["sites"]:
+            locks[site] = Lock()
+    return locks
+
+
+def execute_tasks_in_queue(queue: Queue):
+    """
+    Start the event loop.
+    """
+    while True:
+        if queue.get():
+            break
+
+
+def load_site_trees(app: Flask, queue: Queue, task_locks: dict):
     """
     Load the site trees from the queue.
     """
@@ -38,74 +66,11 @@ def load_site_trees(app: Flask):
         with open(app.config["BASE_DIR"] + "/" + "sites.yaml") as f:
             data = yaml.safe_load(f)
             for site in data["sites"]:
-                add_tree_task(site, "main", app)
+                # Enqueue the sites for setup
+                queue.put_nowait(
+                    SiteRepository(
+                        site, app, branch="main", task_locks=task_locks
+                    )
+                )
         # Wait for 30 minutes before enqueuing the next set of trees
         time.sleep(1800)
-
-
-def add_tree_task(uri: str, branch: str, app: Flask):
-    """
-    Put the tree object in the queue.
-    """
-    # If the tree is already being loaded, return the process.
-    if p := TREE_TASKS.get(uri):
-        if p.is_alive():
-            return p
-
-    app.logger.info(f"Loading {uri}")
-
-    def load_tree():
-        try:
-            site_repository = SiteRepository(
-                uri, branch, app=app, cache=app.config["CACHE"]
-            )
-            return site_repository.get_tree()
-        except SiteRepositoryError as e:
-            app.logger.error(f"Error loading {uri}: {e}")
-        finally:
-            TREE_TASKS.pop(uri, "")
-
-    # Start the process to load the tree, and add it to the map.
-    p = Process(target=load_tree)
-    p.start()
-    TREE_TASKS[uri] = p
-    return p
-
-
-def get_tree_async(uri: str, branch: str, app: Flask):
-    """
-    Async process to enqueue tree generation and caching.
-    """
-    # If the site repository exists, return the tree.
-    if site_repository_exists(app, uri):
-        site_repository = SiteRepository(
-            uri, branch, app=app, cache=app.config["CACHE"]
-        )
-        tree = site_repository.get_tree()
-        # Save webpage to database
-        # Get default owner
-        owner = db.session.execute(
-            db.select(User).where(User.name == "Default")
-        ).scalar()
-        # Get default project
-        project = db.session.execute(
-            db.select(Project).where(Project.name == "Default")
-        ).scalar()
-        db.session.execute(
-            db.insert(Webpage),
-            {
-                "url": uri,
-                "name": uri,
-                "owner_id": owner.id,
-                "project_id": project.id,
-            },
-        )
-        return tree
-
-    # Return an empty array if the result is not available in 5s.
-    p = add_tree_task(uri, branch, app)
-    if response := p.join(timeout=5) is None:
-        app.logger.info("Task enqueued")
-        return []
-
-    return response

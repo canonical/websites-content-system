@@ -1,18 +1,17 @@
 #! /usr/bin/env bash
 
-set -e
-RUN_COMMAND="talisker.gunicorn webapp.app:app -w 2 --name talisker-`hostname`"
+set -euo pipefail
+export FLASK_APP=webapp.app
 
-if [ "${FLASK_DEBUG}" = true ] || [ "${FLASK_DEBUG}" = 1 ]; then
+RUN_COMMAND="talisker.gunicorn webapp.app:app --name talisker-$(hostname) --bind $1"
+
+if [ -z ${FLASK_DEBUG+x} ]; then
     RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
-fi
-
-if [ "${FLASK_APP_ENV}" = "dev" ]; then
-    RUN_COMMAND="${RUN_COMMAND} --bind 0.0.0.0:8104"
 else
-    RUN_COMMAND="${RUN_COMMAND} --bind $1"
+    RUN_COMMAND="${RUN_COMMAND} -w 2"
 fi
 
-FLASK_APP=webapp.app
+# Run new migrations if needed
+flask db upgrade
 
 ${RUN_COMMAND}

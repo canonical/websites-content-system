@@ -3,9 +3,9 @@ from os import environ
 from flask import jsonify, render_template
 
 from webapp import create_app
-from webapp.models import Webpage, db
+from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
-from webapp.tasks import get_tree_async
+from webapp.tasks import LOCKS
 
 app = create_app()
 
@@ -14,29 +14,16 @@ app = create_app()
 @app.route("/get-tree/<string:uri>/<string:branch>", methods=["GET"])
 @login_required
 def get_tree(uri: str, branch="main"):
-    # Get tree if already generated, otherwise queue task
-    # and return empty array.
-    # This prevents concurrent cloning of the same repository.
-    tree = get_tree_async(uri, branch, app)
-    response_data = {"name": uri, "templates": tree}
+    site_repository = SiteRepository(uri, app, branch=branch, task_locks=LOCKS)
+    # Get the site tree asynchronously
+    tree = site_repository.get_tree_async()
 
-    # Return owner id, owner name, stakeholders, and status if webpage exists.
-    webpage = db.session.execute(
-        db.select(Webpage).where(Webpage.url == uri)
-    ).scalar()
-    if webpage:
-        response_data["owner"] = webpage.owner.name
-        response_data["status"] = webpage.status.value
-        response_data["stakeholders"] = [
-            {
-                "id": stakeholder.id,
-                "user_id": stakeholder.user_id,
-                "webpage_id": stakeholder.webpage_id,
-            }
-            for stakeholder in webpage.stakeholders
-        ]
-
-    response = jsonify(response_data)
+    response = jsonify(
+        {
+            "name": uri,
+            "templates": tree,
+        }
+    )
 
     DEVELOPMENT_MODE = environ.get("DEVEL", True)
     if DEVELOPMENT_MODE:

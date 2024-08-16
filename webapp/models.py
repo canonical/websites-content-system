@@ -16,7 +16,7 @@ class Base(DeclarativeBase):
 db = SQLAlchemy(model_class=Base)
 
 
-def get_or_create(session: Session, model: Base, **kwargs):
+def get_or_create(session: Session, model: Base, commit=True, **kwargs):
     """
     Return an instance of the specified model if it exists, otherwise create a
     new instance.
@@ -30,12 +30,14 @@ def get_or_create(session: Session, model: Base, **kwargs):
     """
     instance = session.query(model).filter_by(**kwargs).first()
     if instance:
-        return instance
+        return instance, False
     else:
         instance = model(**kwargs)
         session.add(instance)
-        session.commit()
-        return instance
+        # Allow adding multiple instances before committing
+        if commit:
+            session.commit()
+        return instance, True
 
 
 class DateTimeMixin(object):

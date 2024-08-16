@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
@@ -10,17 +11,40 @@ from flask import Flask
 
 def init_cache(app: Flask):
     try:
-        cache = ValkeyCache(app)
-    except ConnectionError as e:
         cache = FileCache(app)
+    except ConnectionError as e:
+        cache = ValkeyCache(app)
         app.logger.info(
             e, "Valkey cache is not available. Using FileCache instead."
         )
     app.config["CACHE"] = cache
     return cache
 
+class Cache(ABC):
+    """Abstract Cache class"""
 
-class ValkeyCache:
+    @abstractmethod
+    def get(self, key: str):
+        """Get a value from the cache"""
+        pass
+
+    @abstractmethod
+    def set(self, key: str, value: Any):
+        """Set a value in the cache"""
+        pass
+
+    @abstractmethod
+    def delete(self, key: str):
+        """Delete a value from the cache"""
+        pass
+
+    @abstractmethod
+    def is_available(self):
+        """Check if the cache is available"""
+        pass
+
+
+class ValkeyCache(Cache):
     """Cache interface"""
 
     CACHE_PREFIX = "WEBSITES-CONTENT-SYSTEM"
@@ -90,7 +114,7 @@ class FileCacheError(Exception):
     """
 
 
-class FileCache:
+class FileCache(Cache):
     """Cache interface"""
 
     CACHE_DIR = "tree-cache"
@@ -102,6 +126,9 @@ class FileCache:
         # Create directory
         Path(self.cache_path).mkdir(parents=True, exist_ok=True)
         self.connect()
+
+    def is_available(self):
+        return os.path.exists(self.cache_path)
 
     def connect(self):
         """
@@ -124,6 +151,9 @@ class FileCache:
         # Delete the file if it exists
         if Path(self.cache_path + "/" + key).exists():
             os.remove(self.cache_path + "/" + key)
+        # Create base directory if it does not exist
+        if not Path(self.cache_path).exists():
+            Path(self.cache_path).mkdir(parents=True, exist_ok=True)
         with open(self.cache_path + "/" + key, "w") as f:
             f.write(data)
 
