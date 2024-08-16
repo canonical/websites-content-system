@@ -16,10 +16,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 6379:6379
       postgres:
         image: postgres:latest
         env:
           POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
     env: 
       DISABLE_SSO: True
       SECRET_KEY: secret_key 
@@ -48,9 +52,6 @@ jobs:
         run: npx playwright install --with-deps
       - name: Run Playwright tests
         run: |
-          set -a
-          source .env
-          set +a
           yarn playwright test
       - uses: actions/upload-artifact@v3
         if: always()
