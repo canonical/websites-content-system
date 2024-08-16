@@ -11,9 +11,9 @@ from flask import Flask
 
 def init_cache(app: Flask):
     try:
-        cache = FileCache(app)
-    except ConnectionError as e:
         cache = ValkeyCache(app)
+    except ConnectionError as e:
+        cache = FileCache(app)
         app.logger.info(
             e, "Valkey cache is not available. Using FileCache instead."
         )
