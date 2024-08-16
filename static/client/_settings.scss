@@ -1,10 +1,5 @@
 @use "sass:math";
 
-// Define any custom Vanilla settings here. Example:
-
-// $grid-max-width: math.div(1920, 16) * 1rem;
-
 // Other settings
 $breakpoint-xx-large: 1920px;
 $side-navigation-z-index: 103;
-$application-layout--breakpoint-side-nav-expanded: $breakpoint-xx-large;

@@ -3,8 +3,14 @@
     display: flex;
     margin: 0;
 
-    @media (min-width: 620px) {
+    @media (min-width: $breakpoint-small) {
       display: none;
+    }
+
+    @media (max-width: $breakpoint-small) {
+      .l-logo__collapsed {
+        display: none;
+      }
     }
   }
 }
@@ -19,13 +25,35 @@
     .p-panel__header {
       display: block;
       padding-left: 0;
+
+      .l-site-selector,
+      .l-site-selector__label {
+        @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
+          visibility: hidden;
+        }
+      }
+
+      .l-logo__collapsed {
+        left: 0;
+        position: absolute;
+        top: 0;
+
+        @media (min-width: $breakpoint-large) {
+          display: none;
+        }
+
+        :global(.l-navigation):hover &,
+        :global(.l-navigation):focus-within & {
+          display: none;
+        }
+      }
     }
 
     .p-panel__logo {
       display: none;
       margin: 0;
   
-      @media (min-width: 620px) {
+      @media (min-width: $breakpoint-small) {
         display: flex;
         margin-bottom: 50px;
       }
@@ -38,7 +66,7 @@
       position: relative;
       width: 100%;
 
-      @media (min-width: 620px) {
+      @media (min-width: $breakpoint-small) {
         display: none;
       }
 
@@ -53,7 +81,7 @@
       height: calc(100vh - 280px);
       overflow: auto;
 
-      @media (min-width: 620px) and (max-width: 1920px) {
+      @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
         visibility: hidden;
       }
     }
@@ -62,16 +90,23 @@
       margin-top: auto;
       padding-top: 20px;
 
-      .p-button--base {
-        text-align: left;
+      .p-side-navigation__link {
+        justify-content: flex-start;
+        padding-left: 40px;
         width: 100%;
+
+        .p-side-navigation__icon {
+          left: 1rem;
+        }
       }
     }
   }
 
   &:hover {
-    .p-panel__content {
-      @media (min-width: 620px) and (max-width: 1920px) {
+    @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
+      .p-panel__content,
+      .p-panel__header .l-site-selector,
+      .p-panel__header .l-site-selector__label {
         visibility: visible;
       }
     }

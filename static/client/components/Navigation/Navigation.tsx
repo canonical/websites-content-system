@@ -43,10 +43,10 @@ const Navigation = (): JSX.Element => {
             <div className="p-panel__content">
               <NavigationItems />
             </div>
-            <div className="p-panel__footer">
-              <Button appearance="base" onClick={logout}>
-                <i className="p-icon--logout is-light" />
-                <span>&nbsp;&nbsp;Log out</span>
+            <div className="p-panel__footer p-side-navigation--icons">
+              <Button appearance="base" className="p-side-navigation__link" onClick={logout}>
+                <i className="p-icon--logout is-light p-side-navigation__icon" />
+                <span className="p-side-navigation__label">Log out</span>
               </Button>
             </div>
           </div>

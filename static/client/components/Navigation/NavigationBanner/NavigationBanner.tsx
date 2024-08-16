@@ -17,7 +17,18 @@ const NavigationBanner = ({ children }: NavigationBannerProps): JSX.Element => {
         className="p-panel__logo"
         to={homepageLink.url}
       >
-        <img alt="" src="https://assets.ubuntu.com/v1/26e08531-content-system-logo.svg" width="175px" />
+        <img
+          alt=""
+          className="is-fading-when-collapsed"
+          src="https://assets.ubuntu.com/v1/26e08531-content-system-logo.svg"
+          width="175px"
+        />
+        <img
+          alt=""
+          className="l-logo__collapsed"
+          src="https://assets.ubuntu.com/v1/6e28b173-canonical-brand-tile.png"
+          width="22px"
+        />
       </Link>
       {children}
     </>
