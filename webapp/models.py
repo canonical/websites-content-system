@@ -124,8 +124,6 @@ def init_db(app: Flask):
     Migrate(app, db)
     db.init_app(app)
 
-    app.logger.info("ENV: ", app.config)
-
     # Create default project and user
     @app.before_request
     def create_default_project():
