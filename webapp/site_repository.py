@@ -226,14 +226,6 @@ class SiteRepository:
         # Checkout updates to the repository on the specified branch
         self.checkout_updates()
 
-    def reset_repository_to_main(self):
-        """
-        Reset the repository to the main branch.
-        """
-        return self.__run__(
-            "git reset --hard HEAD", "Error resetting repository to main"
-        )
-
     def checkout_updates(self):
         """
         Checkout updates to the repository on the specified branch.
