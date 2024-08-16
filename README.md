@@ -100,9 +100,3 @@ $ flask --app webapp/app run --debug
     "title": null
   }
 }
-```
-## Notes
-Background tasks are not enabled in debug mode by default, as they cause migrations to hang. They can be enabled by setting `ENABLE_TASKS`.
-```bash
-export ENABLE_TASKS=True
-```
