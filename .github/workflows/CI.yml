@@ -93,7 +93,6 @@ jobs:
   run-python:
     name: Run Python
     runs-on: ubuntu-latest
-
     services:
       valkey:
         image: valkey/valkey
@@ -135,10 +134,14 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 6379:6379
       postgres:
         image: postgres:latest
         env:
           POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v4
 
@@ -147,6 +150,14 @@ jobs:
 
       - name: Run image
         run: |
-          docker run --env-file .env --network host websites-content-system &
-          sleep 1
+          docker run \
+          -p 8104:8104 \
+          -e SECRET_KEY=secret_key \
+          -e VALKEY_HOST=localhost \
+          -e VALKEY_PORT=6379 \
+          -e GH_TOKEN=token \
+          -e REPO_ORG=https://github.com/canonical \
+          -e SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/postgres \
+          --network host \
+          websites-content-system & sleep 1
           curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost
