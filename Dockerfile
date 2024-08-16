@@ -1,6 +1,3 @@
-FROM ubuntu:noble 
-WORKDIR /srv
-
 # Build stage: Build static files
 # ===
 FROM node:20 AS build
@@ -15,7 +12,7 @@ RUN yarn build
 FROM ubuntu:noble
 
 # Set up environment
-ENV LANG C.UTF-8
+ENV LANG=C.UTF-8
 WORKDIR /srv
 COPY . .
 
@@ -32,7 +29,7 @@ COPY --from=build /srv/static/build /srv/static/build
 
 # Set build ID
 ARG BUILD_ID
-ENV TALISKER_REVISION_ID "${BUILD_ID}"
+ENV TALISKER_REVISION_ID="${BUILD_ID}"
 
 # Setup commands to run web service
 ENTRYPOINT ["./entrypoint"]
