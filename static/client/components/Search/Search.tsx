@@ -49,6 +49,7 @@ const Search = (): JSX.Element => {
     <div className="l-search-container">
       {
         <SearchBox
+          className="l-search-box"
           disabled={!(data?.length && data[0]?.data)}
           onChange={handleChange}
           placeholder="Search a webpage"

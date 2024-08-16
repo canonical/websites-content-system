@@ -28,18 +28,22 @@ const Breadcrumbs = () => {
     }
   }, [location]);
 
-  return breadcrumbs.map((bc, index) => (
-    <React.Fragment key={`bc-${index}`}>
-      {index < breadcrumbs.length - 1 ? (
-        <a className="p-text--small-caps" href={bc.link}>
-          {bc.name}
-        </a>
-      ) : (
-        <span className="p-text--small-caps">{bc.name}</span>
-      )}
-      {index < breadcrumbs.length - 1 && <span>&nbsp;/&nbsp;</span>}
-    </React.Fragment>
-  ));
+  return (
+    <div className="l-breadcrumbs">
+      {breadcrumbs.map((bc, index) => (
+        <React.Fragment key={`bc-${index}`}>
+          {index < breadcrumbs.length - 1 ? (
+            <a className="p-text--small-caps" href={bc.link}>
+              {bc.name}
+            </a>
+          ) : (
+            <span className="p-text--small-caps">{bc.name}</span>
+          )}
+          {index < breadcrumbs.length - 1 && <span>&nbsp;/&nbsp;</span>}
+        </React.Fragment>
+      ))}
+    </div>
+  );
 };
 
 export default Breadcrumbs;

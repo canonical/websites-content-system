@@ -24,6 +24,7 @@ const MainLayout = ({ children }: IMainLayoutProps): JSX.Element => {
               <Search />
             </div>
           </div>
+          <hr />
           <div className="row">
             {location.pathname === "/" && (
               <>
