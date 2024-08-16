@@ -30,11 +30,16 @@ $ docker compose up
 
 ### Running Locally
 
-#### Cache
-The service depends on having a cache from which generated tree json can be sourced.
+#### Cache and Database
+The service depends on having a cache from which generated tree json can be sourced, as well as a postgres database.
 
 You'll need to set up a [valkey](https://valkey.io/) or [redis](https://redis.io/docs/install/install-redis/) cache, and expose the port it runs on.
 If you do not want to use a dedicated cache, a simple filecache has been included as the default. Data is saved to the `./tree-cache/` directory. 
+
+```bash
+docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
+docker run -d -p 6379:6379 valkey/valkey
+```
 
 First, install the dependencies.
 
@@ -42,11 +47,13 @@ First, install the dependencies.
 $ python -m pip install -r requirements.txt
 ```
 
-Then modify the .env file, and change the following to match your redis instance,
+Then modify the .env file, and change the following to match your valkey and postgres instances. The config below works for dotrun as well.
 
 ```
-VALKEY_HOST=your-instance-ip
-VALKEY_PORT=your-instance-port
+# .env
+VALKEY_HOST=localhost
+VALKEY_PORT=5379
+SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/postgres
 ```
 
 and load the variables into the shell environment.
@@ -59,6 +66,20 @@ Start the server.
 
 ```
 $ flask --app webapp/app run --debug
+```
+
+#### Locally, with dotrun
+You can optionally use dotrun to start the service. When the 1.1.0-rc1 branch is merged, then we can use dotrun without the `--release` flag.
+
+```
+$ dotrun --release 1.1.0-rc1 build && dotrun --release 1.1.0-rc1 serve
+```
+
+### Note for using dotrun on mac
+Since macs don't support host mode on docker, you'll have to get the valkey and postgres ip addresses manually from the running docker containers, and replace the host values in the .env file *before* running dotrun
+```bash
+$ docker inspect <valkey-container-id> | grep IPAddress
+$ docker inspect <postgres-container-id> | grep IPAddress
 ```
 
 ## API Requests
@@ -100,4 +121,3 @@ $ flask --app webapp/app run --debug
     "title": null
   }
 }
-```

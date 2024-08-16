@@ -1,12 +1,15 @@
 import json
 import os
 import shutil
+from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any
 
 import valkey
+from flask import Flask
 
 
-def init_cache(app):
+def init_cache(app: Flask):
     try:
         cache = ValkeyCache(app)
     except ConnectionError as e:
@@ -14,15 +17,39 @@ def init_cache(app):
         app.logger.info(
             e, "Valkey cache is not available. Using FileCache instead."
         )
+    app.config["CACHE"] = cache
     return cache
 
+class Cache(ABC):
+    """Abstract Cache class"""
 
-class ValkeyCache:
+    @abstractmethod
+    def get(self, key: str):
+        """Get a value from the cache"""
+        pass
+
+    @abstractmethod
+    def set(self, key: str, value: Any):
+        """Set a value in the cache"""
+        pass
+
+    @abstractmethod
+    def delete(self, key: str):
+        """Delete a value from the cache"""
+        pass
+
+    @abstractmethod
+    def is_available(self):
+        """Check if the cache is available"""
+        pass
+
+
+class ValkeyCache(Cache):
     """Cache interface"""
 
     CACHE_PREFIX = "WEBSITES-CONTENT-SYSTEM"
 
-    def __init__(self, app):
+    def __init__(self, app: Flask):
         self.host = app.config["VALKEY_HOST"]
         self.port = app.config["VALKEY_PORT"]
         self.logger = app.logger
@@ -46,16 +73,29 @@ class ValkeyCache:
         ):
             raise ConnectionError("Valkey cache is not available")
 
-    def __get_prefixed_key__(self, key):
+    def __get_prefixed_key__(self, key: str):
         return f"{self.CACHE_PREFIX}_{key}"
 
-    def get(self, key):
-        return self.instance.get(self.__get_prefixed_key__(key))
+    def __serialize__(self, value: Any):
+        """Save files to the cache as JSON"""
+        return json.dumps(value)
 
-    def set(self, key, value):
+    def __deserialize__(self, value: str):
+        """Deserialize cached JSON"""
+        try:
+            return json.loads(value)
+        except TypeError:
+            return value
+
+    def get(self, key: str):
+        value = self.instance.get(self.__get_prefixed_key__(key))
+        return self.__deserialize__(value)
+
+    def set(self, key: str, value: str):
+        value = self.__serialize__(value)
         return self.instance.set(self.__get_prefixed_key__(key), value)
 
-    def delete(self, key):
+    def delete(self, key: str):
         return self.instance.delete(key)
 
     def is_available(self):
@@ -74,18 +114,21 @@ class FileCacheError(Exception):
     """
 
 
-class FileCache:
+class FileCache(Cache):
     """Cache interface"""
 
     CACHE_DIR = "tree-cache"
     CACHE_PREFIX = "WEBSITES_CONTENT_SYSTEM"
 
-    def __init__(self, app):
+    def __init__(self, app: Flask):
         self.cache_path = app.config["BASE_DIR"] + "/" + self.CACHE_DIR
         self.logger = app.logger
         # Create directory
         Path(self.cache_path).mkdir(parents=True, exist_ok=True)
         self.connect()
+
+    def is_available(self):
+        return os.path.exists(self.cache_path)
 
     def connect(self):
         """
@@ -100,7 +143,7 @@ class FileCache:
         if not path_exists and path_writable:
             raise ConnectionError("Cache directory is not writable")
 
-    def save_to_file(self, key, value):
+    def save_to_file(self, key: str, value: Any):
         """
         Dump the python object to JSON and save it to a file.
         """
@@ -108,10 +151,13 @@ class FileCache:
         # Delete the file if it exists
         if Path(self.cache_path + "/" + key).exists():
             os.remove(self.cache_path + "/" + key)
+        # Create base directory if it does not exist
+        if not Path(self.cache_path).exists():
+            Path(self.cache_path).mkdir(parents=True, exist_ok=True)
         with open(self.cache_path + "/" + key, "w") as f:
             f.write(data)
 
-    def load_from_file(self, key):
+    def load_from_file(self, key: str):
         """
         Load the JSON data from a file and return the python object.
         """
@@ -122,16 +168,16 @@ class FileCache:
             data = f.read()
         return json.loads(data)
 
-    def __get_prefixed_key__(self, key):
+    def __get_prefixed_key__(self, key: str):
         return f"{self.CACHE_PREFIX}_{key}"
 
-    def get(self, key):
+    def get(self, key: str):
         return self.load_from_file(self.__get_prefixed_key__(key))
 
-    def set(self, key, value):
+    def set(self, key: str, value: Any):
         return self.save_to_file(self.__get_prefixed_key__(key), value)
 
-    def delete(self, key):
+    def delete(self, key: str):
         """
         Delete the file from the cache directory.
         """

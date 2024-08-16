@@ -3,32 +3,27 @@ from os import environ
 from flask import jsonify, render_template
 
 from webapp import create_app
-from webapp.cache import init_cache
-from webapp.sso import init_sso, login_required
-from webapp.tasks import get_tree_async, init_tasks
+from webapp.site_repository import SiteRepository
+from webapp.sso import login_required
+from webapp.tasks import LOCKS
 
 app = create_app()
-
-# Initialize SSO
-init_sso(app)
-
-# Initialize cache
-cache = init_cache(app)
-
-# Initialize tasks
-init_tasks(app, cache)
 
 
 @app.route("/get-tree/<string:uri>", methods=["GET"])
 @app.route("/get-tree/<string:uri>/<string:branch>", methods=["GET"])
 @login_required
-def get_tree(uri, branch="main"):
-    # Get tree if already generated, otherwise queue task
-    # and return empty array.
-    # This prevents concurrent cloning of the same repository.
-    tree = get_tree_async(uri, branch, app, cache)
+def get_tree(uri: str, branch="main"):
+    site_repository = SiteRepository(uri, app, branch=branch, task_locks=LOCKS)
+    # Get the site tree asynchronously
+    tree = site_repository.get_tree_async()
 
-    response = jsonify({"name": uri, "templates": tree})
+    response = jsonify(
+        {
+            "name": uri,
+            "templates": tree,
+        }
+    )
 
     DEVELOPMENT_MODE = environ.get("DEVEL", True)
     if DEVELOPMENT_MODE:
