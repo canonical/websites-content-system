@@ -3,15 +3,27 @@
 set -euo pipefail
 export FLASK_APP=webapp.app
 
-RUN_COMMAND="talisker.gunicorn webapp.app:app --name talisker-$(hostname) --bind $1"
+activate() {
+    # Create or activate virtualenv
+    if [ ! -d ./.venv ]; then
+        python3 -m venv .venv
+    fi
+    . ./.venv/bin/activate
+}
 
-if [ -z ${FLASK_DEBUG+x} ]; then
-    RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
-else
-    RUN_COMMAND="${RUN_COMMAND} -w 2"
-fi
+{
+    activate
 
-# Run new migrations if needed
-flask db upgrade
+    RUN_COMMAND="talisker.gunicorn webapp.app:app --name talisker-$(hostname) --bind $1"
 
-${RUN_COMMAND}
+    if [ -z ${FLASK_DEBUG+x} ]; then
+        RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
+    else
+        RUN_COMMAND="${RUN_COMMAND} -w 2"
+    fi
+
+    # Run new migrations if needed
+    flask db upgrade
+
+    ${RUN_COMMAND}
+}
