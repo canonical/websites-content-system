@@ -114,7 +114,8 @@ def update_deleted_webpages(app: Flask, queue: Queue, task_locks: dict):
         select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE)
     )
 
-    for webpage in webpages_to_delete:
+    for row in webpages_to_delete:
+        webpage = row[0]
         site_repository = SiteRepository(
             webpage.project.name, app, task_locks=task_locks
         ).get_new_tree()
@@ -139,9 +140,10 @@ def update_new_webpages(app: Flask, queue: Queue, task_locks: dict):
         select(Webpage).where(Webpage.status == WebpageStatus.NEW)
     )
 
-    for webpage in new_webpages:
+    for row in new_webpages:
+        webpage = row[0]
         site_repository = SiteRepository(
-            webpage[0].project.name, app, task_locks=task_locks
+            webpage.project.name, app, task_locks=task_locks
         ).get_tree()
         # Update the status if the webpage exists in the current tree structure
         if webpage.name in site_repository.get_webpages():
