@@ -41,6 +41,7 @@ class SiteRepository:
         app: Flask,
         branch="main",
         task_locks: dict = None,
+        db: SQLAlchemy = None,
     ):
         base_dir = app.config["BASE_DIR"]
         self.REPOSITORY_DIRECTORY = f"{base_dir}/repositories"
@@ -51,6 +52,10 @@ class SiteRepository:
         self.logger = app.logger
         self.cache = app.config["CACHE"]
         self.repo_path = self.get_repo_path(repository_uri)
+
+        # If a database is provided, use it
+        if db:
+            self.db = db
 
         # If a locks dictionary is provided, use it
         if task_locks:

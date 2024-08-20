@@ -13,7 +13,7 @@ class Base(DeclarativeBase):
     pass
 
 
-db = SQLAlchemy(model_class=Base)
+db = SQLAlchemy(model_class=Base, engine_options={"poolclass": None})
 
 
 def get_or_create(session: Session, model: Base, commit=True, **kwargs):
@@ -78,7 +78,7 @@ class Webpage(db.Model, DateTimeMixin):
     parent_id: int = Column(Integer, ForeignKey("webpages.id"))
     owner_id: int = Column(Integer, ForeignKey("users.id"))
     status: WebpageStatus = Column(
-        Enum(WebpageStatus), server_default=WebpageStatus.AVAILABLE.value
+        Enum(WebpageStatus), default=WebpageStatus.NEW
     )
 
     project = relationship("Project", back_populates="webpages")

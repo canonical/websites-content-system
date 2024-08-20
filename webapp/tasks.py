@@ -4,6 +4,7 @@ from multiprocessing import Lock, Process, Queue
 
 import yaml
 from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import delete, select
 
 from webapp.models import Webpage, WebpageStatus, db
@@ -37,18 +38,18 @@ def init_tasks(app: Flask):
         # Load site trees every 30 minutes
         Process(
             target=load_site_trees,
-            args=(app, TASK_QUEUE, LOCKS),
+            args=(app, db, TASK_QUEUE, LOCKS),
         ).start()
 
         # Update webpages every 30 minutes
         Process(
             target=update_deleted_webpages,
-            args=(app, TASK_QUEUE, LOCKS),
+            args=(app, db, TASK_QUEUE, LOCKS),
         ).start()
 
         Process(
             target=update_new_webpages,
-            args=(app, TASK_QUEUE, LOCKS),
+            args=(app, db, TASK_QUEUE, LOCKS),
         ).start()
 
 
@@ -90,8 +91,10 @@ def execute_tasks_in_queue(queue: Queue):
     queue.get()
 
 
-@scheduled_task(delay=30)
-def load_site_trees(app: Flask, queue: Queue, task_locks: dict):
+@scheduled_task(delay=5)
+def load_site_trees(
+    app: Flask, db: SQLAlchemy, queue: Queue, task_locks: dict
+):
     """
     Load the site trees from the queue.
     """
@@ -100,17 +103,22 @@ def load_site_trees(app: Flask, queue: Queue, task_locks: dict):
         data = yaml.safe_load(f)
         for site in data["sites"]:
             # Enqueue the sites for setup
-            queue.put_nowait(SiteRepository(site, app, task_locks=task_locks))
+            site_repository = SiteRepository(
+                site, app, db=db, task_locks=task_locks
+            )
+            queue.put(site_repository.get_tree())
 
 
-@scheduled_task(delay=30)
-def update_deleted_webpages(app: Flask, queue: Queue, task_locks: dict):
+@scheduled_task(delay=5)
+def update_deleted_webpages(
+    app: Flask, database: SQLAlchemy, queue: Queue, task_locks: dict
+):
     """
     Webpages that have TO_DELETE status and do not exist in the parsed tree
     structure will be deleted.
     """
     app.logger.info("Running scheduled task: update_deleted_webpages")
-    webpages_to_delete = db.session.execute(
+    webpages_to_delete = database.session.execute(
         select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE)
     )
 
@@ -118,25 +126,27 @@ def update_deleted_webpages(app: Flask, queue: Queue, task_locks: dict):
         webpage = row[0]
         site_repository = SiteRepository(
             webpage.project.name, app, task_locks=task_locks
-        ).get_new_tree()
+        )
         site_webpages = site_repository.get_webpages()
         # Delete if the webpage doesn't exist in the current tree structure
         if webpage.name not in site_webpages:
             queue.put(
-                db.session.execute(
+                database.session.execute(
                     delete(Webpage).where(Webpage.id == webpage.id)
                 )
             )
 
 
-@scheduled_task(delay=30)
-def update_new_webpages(app: Flask, queue: Queue, task_locks: dict):
+@scheduled_task(delay=5)
+def update_new_webpages(
+    app: Flask, database: SQLAlchemy, queue: Queue, task_locks: dict
+):
     """
     Webpages that have NEW status and exist in the parsed tree structure
     will have their status updated to AVAILABLE.
     """
     app.logger.info("Running scheduled task: update_new_webpages")
-    new_webpages = db.session.execute(
+    new_webpages = database.session.execute(
         select(Webpage).where(Webpage.status == WebpageStatus.NEW)
     )
 
@@ -144,9 +154,9 @@ def update_new_webpages(app: Flask, queue: Queue, task_locks: dict):
         webpage = row[0]
         site_repository = SiteRepository(
             webpage.project.name, app, task_locks=task_locks
-        ).get_tree()
+        )
         # Update the status if the webpage exists in the current tree structure
         if webpage.name in site_repository.get_webpages():
             webpage.status = WebpageStatus.AVAILABLE
-            db.session.add(webpage)
+            database.session.add(webpage)
             queue.put(db.session.commit())
