@@ -15,7 +15,7 @@ app = create_app()
 @login_required
 def get_tree(uri: str, branch="main"):
     site_repository = SiteRepository(uri, app, branch=branch, task_locks=LOCKS)
-    # Get the site tree asynchronously
+    # Getting the site tree here ensures that both the cache and db are updated
     tree = site_repository.get_tree_async()
 
     response = jsonify(

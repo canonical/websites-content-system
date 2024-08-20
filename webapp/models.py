@@ -55,7 +55,7 @@ class DateTimeMixin(object):
 class WebpageStatus(enum.Enum):
     NEW = "NEW"
     TO_DELETE = "TO_DELETE"
-    DONE = "DONE"
+    AVAILABLE = "AVAILABLE"
 
 
 class Project(db.Model, DateTimeMixin):
@@ -77,7 +77,9 @@ class Webpage(db.Model, DateTimeMixin):
     copy_doc_link: str = Column(String)
     parent_id: int = Column(Integer, ForeignKey("webpages.id"))
     owner_id: int = Column(Integer, ForeignKey("users.id"))
-    status: WebpageStatus = Column(Enum(WebpageStatus), server_default="NEW")
+    status: WebpageStatus = Column(
+        Enum(WebpageStatus), server_default=WebpageStatus.AVAILABLE.value
+    )
 
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")

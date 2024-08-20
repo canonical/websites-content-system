@@ -302,6 +302,7 @@ class SiteRepository:
 
         # Update the cache
         self.set_tree_in_cache(tree)
+        self.logger.info(f"Tree loaded for {self.repository_uri}")
         return tree
 
     def get_tree(self):
@@ -351,7 +352,9 @@ class SiteRepository:
         },
         """
         # Get or create the default project and owner
-        project, _ = get_or_create(db.session, Project, name="Default")
+        project, _ = get_or_create(
+            db.session, Project, name=self.repository_uri
+        )
         owner, _ = get_or_create(db.session, User, name="Default")
 
         def save_child_templates_to_db(parent_id, children):
@@ -447,3 +450,21 @@ class SiteRepository:
         # If a lock doesn't exist, create one
         self.LOCKS[self.repository_uri] = Lock()
         return self.LOCKS[self.repository_uri]
+
+    def get_webpages(self):
+        """
+        Return a list of webpages from the associated parsed tree.
+        """
+        tree = self.get_tree()
+        webpages = []
+
+        def add_pages_to_list(tree, page_list: list):
+            # Append root node name
+            page_list.append(tree["name"])
+            for child in tree["children"]:
+                # If child nodes exist, add their names to the list
+                if child.get("children"):
+                    add_pages_to_list(child, page_list)
+
+        add_pages_to_list(tree, webpages)
+        return webpages
