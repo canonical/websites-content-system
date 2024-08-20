@@ -1,4 +1,3 @@
-import enum
 from datetime import datetime, timezone
 
 from flask import Flask
@@ -52,11 +51,7 @@ class DateTimeMixin(object):
     )
 
 
-class WebpageStatus(enum.Enum):
-    NEW = "NEW"
-    TO_DELETE = "TO_DELETE"
-    AVAILABLE = "AVAILABLE"
-
+webpage_statuses = ("NEW", "TO_DELETE", "AVAILABLE")
 
 class Project(db.Model, DateTimeMixin):
     __tablename__ = "projects"
@@ -77,8 +72,8 @@ class Webpage(db.Model, DateTimeMixin):
     copy_doc_link: str = Column(String)
     parent_id: int = Column(Integer, ForeignKey("webpages.id"))
     owner_id: int = Column(Integer, ForeignKey("users.id"))
-    status: WebpageStatus = Column(
-        Enum(WebpageStatus), default=WebpageStatus.NEW
+    status: str = Column(
+        Enum(webpage_statuses, name="webpagestatus"), default="NEW"
     )
 
     project = relationship("Project", back_populates="webpages")

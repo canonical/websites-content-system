@@ -7,7 +7,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import delete, select
 
-from webapp.models import Webpage, WebpageStatus, db
+from webapp.models import Webpage, db
 from webapp.site_repository import SiteRepository
 
 # Crate the task queue
@@ -119,7 +119,7 @@ def update_deleted_webpages(
     """
     app.logger.info("Running scheduled task: update_deleted_webpages")
     webpages_to_delete = database.session.execute(
-        select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE)
+        select(Webpage).where(Webpage.status == "TO_DELETE")
     )
 
     for row in webpages_to_delete:
@@ -147,7 +147,7 @@ def update_new_webpages(
     """
     app.logger.info("Running scheduled task: update_new_webpages")
     new_webpages = database.session.execute(
-        select(Webpage).where(Webpage.status == WebpageStatus.NEW)
+        select(Webpage).where(Webpage.status == "NEW")
     )
 
     for row in new_webpages:
@@ -157,6 +157,6 @@ def update_new_webpages(
         )
         # Update the status if the webpage exists in the current tree structure
         if webpage.name in site_repository.get_webpages():
-            webpage.status = WebpageStatus.AVAILABLE
+            webpage.status = "AVAILABLE"
             database.session.add(webpage)
             queue.put(db.session.commit())
