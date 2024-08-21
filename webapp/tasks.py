@@ -7,7 +7,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import delete, select
 
-from webapp.models import Webpage, db
+from webapp.models import Webpage, WebpageStatus, db
 from webapp.site_repository import SiteRepository
 
 # Crate the task queue
@@ -93,7 +93,7 @@ def execute_tasks_in_queue(queue: Queue):
 
 @scheduled_task(delay=5)
 def load_site_trees(
-    app: Flask, db: SQLAlchemy, queue: Queue, task_locks: dict
+    app: Flask, database: SQLAlchemy, queue: Queue, task_locks: dict
 ):
     """
     Load the site trees from the queue.
@@ -104,7 +104,7 @@ def load_site_trees(
         for site in data["sites"]:
             # Enqueue the sites for setup
             site_repository = SiteRepository(
-                site, app, db=db, task_locks=task_locks
+                site, app, db=database, task_locks=task_locks
             )
             queue.put(site_repository.get_tree())
 
@@ -119,7 +119,7 @@ def update_deleted_webpages(
     """
     app.logger.info("Running scheduled task: update_deleted_webpages")
     webpages_to_delete = database.session.execute(
-        select(Webpage).where(Webpage.status == "TO_DELETE")
+        select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE)
     )
 
     for row in webpages_to_delete:
@@ -147,7 +147,7 @@ def update_new_webpages(
     """
     app.logger.info("Running scheduled task: update_new_webpages")
     new_webpages = database.session.execute(
-        select(Webpage).where(Webpage.status == "NEW")
+        select(Webpage).where(Webpage.status == WebpageStatus.NEW)
     )
 
     for row in new_webpages:
@@ -156,7 +156,7 @@ def update_new_webpages(
             webpage.project.name, app, task_locks=task_locks
         )
         # Update the status if the webpage exists in the current tree structure
-        if webpage.name in site_repository.get_webpages():
-            webpage.status = "AVAILABLE"
+        if webpage.url in site_repository.get_webpages():
+            webpage.status = WebpageStatus.AVAILABLE
             database.session.add(webpage)
-            queue.put(db.session.commit())
+            queue.put(database.session.commit())

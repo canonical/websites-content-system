@@ -368,41 +368,42 @@ class SiteRepository:
             """
             for child in children:
                 if child.get("name"):
-                    # Get an existing instance or create a new one
+                    # Get an existing page for this project or create a new one
                     child_page, created = get_or_create(
                         db.session,
                         Webpage,
-                        name=f"{self.repository_uri} {child['name']}",
+                        name=child["name"],
                         url=child["name"],
-                        title=child["title"],
-                        description=child["description"],
-                        copy_doc_link=child["link"],
-                        parent_id=parent_id,
-                        project_id=project.id,
-                        owner_id=owner.id,
                         commit=False,
                     )
-                    # If instance exists, don't update the owner or project
-                    if not created:
-                        child_page.name = child["name"]
-                        child_page.url = child["name"]
+                    # If instance is new, update the fields
+                    if created:
                         child_page.title = child["title"]
                         child_page.description = child["description"]
                         child_page.copy_doc_link = child["link"]
                         child_page.parent_id = parent_id
+                        child_page.owner_id = owner.id
+                        child_page.project_id = project.id
                 if children := child.get("children"):
                     save_child_templates_to_db(child_page.id, children)
 
-        # Create a webpage for the base template
-        base_page = Webpage(
+        # Get the webpage for the base template
+        base_page, created = get_or_create(
+            db.session,
+            Webpage,
+            commit=False,
             name=self.repository_uri,
-            title="/",
-            description=tree["description"],
-            copy_doc_link=tree["link"],
-            url=tree["name"],
-            project_id=project.id,
         )
+        # If the base page is new, update the fields
+        if created:
+            base_page.title = tree["title"]
+            base_page.description = tree["description"]
+            base_page.copy_doc_link = tree["link"]
+            base_page.url = "/"
+            base_page.project_id = project.id
+            base_page.owner_id = owner.id
         db.session.add(base_page)
+
         # Save child templates to the database
         save_child_templates_to_db(base_page.id, tree["children"])
 
@@ -467,6 +468,7 @@ class SiteRepository:
             # Append root node name
             page_list.append(tree["name"])
             for child in tree["children"]:
+                page_list.append(child["name"])
                 # If child nodes exist, add their names to the list
                 if child.get("children"):
                     add_pages_to_list(child, page_list)
