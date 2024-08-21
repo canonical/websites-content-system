@@ -376,14 +376,18 @@ class SiteRepository:
                         url=child["name"],
                         commit=False,
                     )
-                    # If instance is new, update the fields
+
+                    # If instance is new, update the owner and project fields
                     if created:
-                        child_page.title = child["title"]
-                        child_page.description = child["description"]
-                        child_page.copy_doc_link = child["link"]
-                        child_page.parent_id = parent_id
                         child_page.owner_id = owner.id
                         child_page.project_id = project.id
+
+                    # Update the fields
+                    child_page.title = child["title"]
+                    child_page.description = child["description"]
+                    child_page.copy_doc_link = child["link"]
+                    child_page.parent_id = parent_id
+
                 if children := child.get("children"):
                     save_child_templates_to_db(child_page.id, children)
 
