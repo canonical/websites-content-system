@@ -1,4 +1,5 @@
 import functools
+import os
 import time
 from multiprocessing import Lock, Process, Queue
 
@@ -14,7 +15,8 @@ from webapp.site_repository import SiteRepository
 TASK_QUEUE = Queue()
 # Create the locks for the site trees
 LOCKS = {}
-
+# Default delay between runs for scheduled tasks
+TASK_DELAY = int(os.getenv("TASK_DELAY", 5))
 
 def init_tasks(app: Flask):
     """
@@ -35,13 +37,13 @@ def init_tasks(app: Flask):
             args=(TASK_QUEUE,),
         ).start()
 
-        # Load site trees every 30 minutes
+        # Load site trees
         Process(
             target=load_site_trees,
             args=(app, db, TASK_QUEUE, LOCKS),
         ).start()
 
-        # Update webpages every 30 minutes
+        # Update webpages
         Process(
             target=update_deleted_webpages,
             args=(app, db, TASK_QUEUE, LOCKS),
@@ -91,7 +93,7 @@ def execute_tasks_in_queue(queue: Queue):
     queue.get()
 
 
-@scheduled_task(delay=5)
+@scheduled_task(delay=TASK_DELAY)
 def load_site_trees(
     app: Flask, database: SQLAlchemy, queue: Queue, task_locks: dict
 ):
@@ -109,7 +111,7 @@ def load_site_trees(
             queue.put(site_repository.get_tree())
 
 
-@scheduled_task(delay=5)
+@scheduled_task(delay=TASK_DELAY)
 def update_deleted_webpages(
     app: Flask, database: SQLAlchemy, queue: Queue, task_locks: dict
 ):
@@ -137,7 +139,7 @@ def update_deleted_webpages(
             )
 
 
-@scheduled_task(delay=5)
+@scheduled_task(delay=TASK_DELAY)
 def update_new_webpages(
     app: Flask, database: SQLAlchemy, queue: Queue, task_locks: dict
 ):
