@@ -336,8 +336,6 @@ class SiteRepository:
                     self.get_new_tree()
                 except Exception as e:
                     logger.error(f"Error loading tree: {e}")
-                    # Clean the repository if an error occurs
-                    self.delete_local_files()
                 finally:
                     lock.release()
 
@@ -379,20 +377,39 @@ class SiteRepository:
         webpage.copy_doc_link = node["link"]
         webpage.parent_id = parent_id
 
+        db.session.add(webpage)
+        db.session.flush()
+
         # Add the webpage fields to the tree
-        return {**node, **webpage.__dict__}
+        webpage_dict = webpage.__dict__
+        webpage_dict.pop("_sa_instance_state", None)
+
+        # Convert non-json serializable datetime fields
+        webpage_dict["status"] = webpage_dict["status"].value
+        webpage_dict["created_at"] = webpage_dict["created_at"].isoformat()
+        webpage_dict["updated_at"] = webpage_dict["updated_at"].isoformat()
+
+        # Return a dict with the webpage fields
+        return {**node, **webpage_dict}
 
     def __create_webpages_for_children__(
-        self, db, tree, project, owner, parent_id
+        self, db, children, project, owner, parent_id
     ):
         """
         Recursively create webpages for each child in the tree.
         """
-        self.__create_webpage_for_node__(db, tree, project, owner, parent_id)
-        for child in tree["children"]:
-            self.__create_webpages_for_children__(
+        for child in children:
+            # Create a webpage for the root node
+            webpage_dict = self.__create_webpage_for_node__(
                 db, child, project, owner, parent_id
             )
+            # Update the child node with the webpage fields
+            child.update(webpage_dict)
+            if child.get("children"):
+                # Create webpages for the children recursively
+                self.__create_webpages_for_children__(
+                    db, child["children"], project, owner, webpage_dict["id"]
+                )
 
     def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
         """
@@ -405,16 +422,16 @@ class SiteRepository:
         owner, _ = get_or_create(db.session, User, name="Default")
 
         # Create a webpage for the root node
-        webpage = self.__create_webpage_for_node__(
+        webpage_dict = self.__create_webpage_for_node__(
             db, tree, project, owner, None
         )
 
         # Create webpages for the children recursively
         self.__create_webpages_for_children__(
-            db, tree, project, owner, webpage.id
+            db, webpage_dict["children"], project, owner, webpage_dict["id"]
         )
-
-        return tree
+        db.session.commit()
+        return webpage_dict
 
     def __wait_for_tree__(self, timeout=5):
         """
