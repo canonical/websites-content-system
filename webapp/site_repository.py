@@ -8,7 +8,6 @@ from typing import Callable, TypedDict
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.exc import SQLAlchemyError
 
 from webapp.models import Project, User, Webpage, db, get_or_create
 from webapp.parse_tree import scan_directory
@@ -223,7 +222,10 @@ class SiteRepository:
         if not self.repository_exists():
             # Switch to the ./repositories directory for cloned repositories
             os.chdir(self.REPOSITORY_DIRECTORY)
-            self.__configure_git__()
+            try:
+                self.__configure_git__()
+            except SiteRepositoryError as e:
+                self.logger.error(e)
             self.clone_repo(self.repository_uri)
             # Configure git immediately after cloning
             os.chdir(self.repo_path)
@@ -299,11 +301,12 @@ class SiteRepository:
         database.
 
         """
-        # Generate the tree from the repository
-        tree = self.get_tree_from_disk()
+        # Generate the base tree from the repository
+        base_tree = self.get_tree_from_disk()
 
-        # Save the tree metadata to the database
-        self.save_tree_to_db(self.db, tree)
+        # Save the tree metadata to the database and return an updated tree
+        # that has all fields
+        tree = self.create_webpages_for_tree(self.db, base_tree)
 
         # Update the cache
         self.set_tree_in_cache(tree)
@@ -344,78 +347,74 @@ class SiteRepository:
             args=(lock, self.logger),
         ).start()
 
-    def save_tree_to_db(self, db: SQLAlchemy, tree: Tree):
+    def __create_webpage_for_node__(
+        self,
+        db: SQLAlchemy,
+        node: dict,
+        project: Project,
+        owner: User,
+        parent_id: int,
+    ):
         """
-        Save the tree to the database.
+        Create a webpage from a node in the tree.
+        """
+        # Get a webpage for this name and project, or create a new one
+        webpage, created = get_or_create(
+            db.session,
+            Webpage,
+            name=node["name"],
+            url=node["name"],
+            project_id=project.id,
+            commit=False,
+        )
 
-        "templates": {
-            name -> Webpage.name
-            title -> Webpage.title
-            description -> Webpage.description
-            link -> Webpage.copydoc_link
-            ../"id" -> Webpage.parent_id
-        },
+        # If instance is new, update the owner and project fields
+        if created:
+            webpage.owner_id = owner.id
+            webpage.project_id = project.id
+
+        # Update the fields
+        webpage.title = node["title"]
+        webpage.description = node["description"]
+        webpage.copy_doc_link = node["link"]
+        webpage.parent_id = parent_id
+
+        # Add the webpage fields to the tree
+        return {**node, **webpage.__dict__}
+
+    def __create_webpages_for_children__(
+        self, db, tree, project, owner, parent_id
+    ):
         """
-        # Get or create the default project and owner
+        Recursively create webpages for each child in the tree.
+        """
+        self.__create_webpage_for_node__(db, tree, project, owner, parent_id)
+        for child in tree["children"]:
+            self.__create_webpages_for_children__(
+                db, child, project, owner, parent_id
+            )
+
+    def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
+        """
+        Create webpages for each node in the tree.
+        """
+        # Get the default project and owner for new webpages
         project, _ = get_or_create(
             db.session, Project, name=self.repository_uri
         )
         owner, _ = get_or_create(db.session, User, name="Default")
 
-        def save_child_templates_to_db(parent_id, children):
-            """
-            Recursively save child templates to the database.
-            """
-            for child in children:
-                if child.get("name"):
-                    # Get an existing page for this project or create a new one
-                    child_page, created = get_or_create(
-                        db.session,
-                        Webpage,
-                        name=child["name"],
-                        url=child["name"],
-                        commit=False,
-                    )
-
-                    # If instance is new, update the owner and project fields
-                    if created:
-                        child_page.owner_id = owner.id
-                        child_page.project_id = project.id
-
-                    # Update the fields
-                    child_page.title = child["title"]
-                    child_page.description = child["description"]
-                    child_page.copy_doc_link = child["link"]
-                    child_page.parent_id = parent_id
-
-                if children := child.get("children"):
-                    save_child_templates_to_db(child_page.id, children)
-
-        # Get the webpage for the base template
-        base_page, created = get_or_create(
-            db.session,
-            Webpage,
-            commit=False,
-            name=self.repository_uri,
+        # Create a webpage for the root node
+        webpage = self.__create_webpage_for_node__(
+            db, tree, project, owner, None
         )
-        # If the base page is new, update the fields
-        if created:
-            base_page.title = tree["title"]
-            base_page.description = tree["description"]
-            base_page.copy_doc_link = tree["link"]
-            base_page.url = "/"
-            base_page.project_id = project.id
-            base_page.owner_id = owner.id
-        db.session.add(base_page)
 
-        # Save child templates to the database
-        save_child_templates_to_db(base_page.id, tree["children"])
+        # Create webpages for the children recursively
+        self.__create_webpages_for_children__(
+            db, tree, project, owner, webpage.id
+        )
 
-        try:
-            db.session.commit()
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            raise SiteRepositoryError(f"Error saving tree to database: {e}")
+        return tree
 
     def __wait_for_tree__(self, timeout=5):
         """
