@@ -376,18 +376,22 @@ class SiteRepository:
         webpage.description = node["description"]
         webpage.copy_doc_link = node["link"]
         webpage.parent_id = parent_id
+        # Preload relationships
+        webpage.reviewers
+        webpage.jira_tasks
 
         db.session.add(webpage)
         db.session.flush()
 
-        # Add the webpage fields to the tree
+        # Remove unnecessary fields
         webpage_dict = webpage.__dict__
         webpage_dict.pop("_sa_instance_state", None)
+        webpage_dict.pop("copy_doc_link", None)
 
-        # Convert non-json serializable datetime fields
-        webpage_dict["status"] = webpage_dict["status"].value
-        webpage_dict["created_at"] = webpage_dict["created_at"].isoformat()
-        webpage_dict["updated_at"] = webpage_dict["updated_at"].isoformat()
+        # Serialize object fields
+        webpage_dict["status"] = webpage.status.value
+        webpage_dict["created_at"] = webpage.created_at.isoformat()
+        webpage_dict["updated_at"] = webpage.updated_at.isoformat()
 
         # Return a dict with the webpage fields
         return {**node, **webpage_dict}

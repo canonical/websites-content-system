@@ -80,7 +80,7 @@ class Webpage(db.Model, DateTimeMixin):
 
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")
-    reviewer = relationship("Reviewer", back_populates="webpages")
+    reviewers = relationship("Reviewer", back_populates="webpages")
     jira_tasks = relationship("JiraTask", back_populates="webpages")
 
 
