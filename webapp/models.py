@@ -80,7 +80,7 @@ class Webpage(db.Model, DateTimeMixin):
 
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")
-    stakeholders = relationship("Stakeholder", back_populates="webpages")
+    reviewer = relationship("Reviewer", back_populates="webpages")
     jira_tasks = relationship("JiraTask", back_populates="webpages")
 
 
@@ -93,19 +93,19 @@ class User(db.Model, DateTimeMixin):
     jira_account_id: str = Column(String)
 
     webpages = relationship("Webpage", back_populates="owner")
-    stakeholders = relationship("Stakeholder", back_populates="user")
+    reviewers = relationship("Reviewer", back_populates="user")
     jira_tasks = relationship("JiraTask", back_populates="user")
 
 
-class Stakeholder(db.Model, DateTimeMixin):
-    __tablename__ = "stakeholders"
+class Reviewer(db.Model, DateTimeMixin):
+    __tablename__ = "reviewers"
 
     id: int = Column(Integer, primary_key=True)
     user_id: int = Column(Integer, ForeignKey("users.id"))
     webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
 
-    user = relationship("User", back_populates="stakeholders")
-    webpages = relationship("Webpage", back_populates="stakeholders")
+    user = relationship("User", back_populates="reviewers")
+    webpages = relationship("Webpage", back_populates="reviewers")
 
 
 class JiraTask(db.Model, DateTimeMixin):
