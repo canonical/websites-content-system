@@ -26,5 +26,6 @@ def versioned_static(filename):
 
     return f"{static_url}/{filename}?v={file_hash.hexdigest()[:7]}"
 
+
 def base_context():
     return dict(versioned_static=versioned_static)

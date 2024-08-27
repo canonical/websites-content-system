@@ -13,7 +13,7 @@ class Base(DeclarativeBase):
     pass
 
 
-db = SQLAlchemy(model_class=Base)
+db = SQLAlchemy(model_class=Base, engine_options={"poolclass": None})
 
 
 def get_or_create(session: Session, model: Base, commit=True, **kwargs):
@@ -55,7 +55,7 @@ class DateTimeMixin(object):
 class WebpageStatus(enum.Enum):
     NEW = "NEW"
     TO_DELETE = "TO_DELETE"
-    DONE = "DONE"
+    AVAILABLE = "AVAILABLE"
 
 
 class Project(db.Model, DateTimeMixin):
@@ -64,6 +64,7 @@ class Project(db.Model, DateTimeMixin):
     id: int = Column(Integer, primary_key=True)
     name: str = Column(String, nullable=False)
     webpages = relationship("Webpage", back_populates="project")
+
 
 class Webpage(db.Model, DateTimeMixin):
     __tablename__ = "webpages"
@@ -77,11 +78,11 @@ class Webpage(db.Model, DateTimeMixin):
     copy_doc_link: str = Column(String)
     parent_id: int = Column(Integer, ForeignKey("webpages.id"))
     owner_id: int = Column(Integer, ForeignKey("users.id"))
-    status: WebpageStatus = Column(Enum(WebpageStatus), server_default="NEW")
+    status: str = Column(Enum(WebpageStatus), default=WebpageStatus.NEW)
 
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")
-    stakeholders = relationship("Stakeholder", back_populates="webpages")
+    reviewers = relationship("Reviewer", back_populates="webpages")
     jira_tasks = relationship("JiraTask", back_populates="webpages")
 
 
@@ -94,19 +95,19 @@ class User(db.Model, DateTimeMixin):
     jira_account_id: str = Column(String)
 
     webpages = relationship("Webpage", back_populates="owner")
-    stakeholders = relationship("Stakeholder", back_populates="user")
+    reviewers = relationship("Reviewer", back_populates="user")
     jira_tasks = relationship("JiraTask", back_populates="user")
 
 
-class Stakeholder(db.Model, DateTimeMixin):
-    __tablename__ = "stakeholders"
+class Reviewer(db.Model, DateTimeMixin):
+    __tablename__ = "reviewers"
 
     id: int = Column(Integer, primary_key=True)
     user_id: int = Column(Integer, ForeignKey("users.id"))
     webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
 
-    user = relationship("User", back_populates="stakeholders")
-    webpages = relationship("Webpage", back_populates="stakeholders")
+    user = relationship("User", back_populates="reviewers")
+    webpages = relationship("Webpage", back_populates="reviewers")
 
 
 class JiraTask(db.Model, DateTimeMixin):
@@ -121,6 +122,7 @@ class JiraTask(db.Model, DateTimeMixin):
 
     webpages = relationship("Webpage", back_populates="jira_tasks")
     user = relationship("User", back_populates="jira_tasks")
+
 
 def init_db(app: Flask):
     Migrate(app, db)
