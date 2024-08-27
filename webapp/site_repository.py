@@ -416,13 +416,16 @@ class SiteRepository:
             project_dict = {}
 
         # Serialize reviewers fields
-        reviewers_list = []
-        for reviewer in reviewers:
-            reviewer_dict = reviewer.__dict__.copy()
-            reviewer_dict.pop("_sa_instance_state", None)
-            reviewer_dict["created_at"] = reviewer.created_at.isoformat()
-            reviewer_dict["updated_at"] = reviewer.updated_at.isoformat()
-            reviewers_list.append(reviewer_dict)
+        if reviewers:
+            reviewers_list = []
+            for reviewer in reviewers:
+                reviewer_dict = reviewer.__dict__.copy()
+                reviewer_dict.pop("_sa_instance_state", None)
+                reviewer_dict["created_at"] = reviewer.created_at.isoformat()
+                reviewer_dict["updated_at"] = reviewer.updated_at.isoformat()
+                reviewers_list.append(reviewer_dict)
+        else:
+            reviewers_list = []
 
         # Serialize object fields
         webpage_dict["status"] = webpage.status.value
