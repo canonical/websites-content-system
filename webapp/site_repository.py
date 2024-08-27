@@ -393,6 +393,7 @@ class SiteRepository:
         webpage_dict.pop("project_id", None)
         owner = webpage_dict.pop("owner", None)
         project = webpage_dict.pop("project", None)
+        reviewers = webpage_dict.pop("reviewers", None)
 
         # Serialize owner fields
         if owner:
@@ -414,12 +415,22 @@ class SiteRepository:
         else:
             project_dict = {}
 
+        # Serialize reviewers fields
+        reviewers_list = []
+        for reviewer in reviewers:
+            reviewer_dict = reviewer.__dict__.copy()
+            reviewer_dict.pop("_sa_instance_state", None)
+            reviewer_dict["created_at"] = reviewer.created_at.isoformat()
+            reviewer_dict["updated_at"] = reviewer.updated_at.isoformat()
+            reviewers_list.append(reviewer_dict)
+
         # Serialize object fields
         webpage_dict["status"] = webpage.status.value
         webpage_dict["created_at"] = webpage.created_at.isoformat()
         webpage_dict["updated_at"] = webpage.updated_at.isoformat()
         webpage_dict["owner"] = owner_dict
         webpage_dict["project"] = project_dict
+        webpage_dict["reviewers"] = reviewers_list
 
         # Return a dict with the webpage fields
         return {**node, **webpage_dict}
