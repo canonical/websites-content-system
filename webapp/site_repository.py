@@ -419,6 +419,7 @@ class SiteRepository:
         webpage_dict["created_at"] = webpage.created_at.isoformat()
         webpage_dict["updated_at"] = webpage.updated_at.isoformat()
         webpage_dict["owner"] = owner_dict
+        webpage_dict["project"] = project_dict
 
         # Return a dict with the webpage fields
         return {**node, **webpage_dict}
