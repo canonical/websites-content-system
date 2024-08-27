@@ -379,19 +379,40 @@ class SiteRepository:
         # Preload relationships
         webpage.reviewers
         webpage.jira_tasks
+        webpage.owner
+        webpage.project
 
         db.session.add(webpage)
         db.session.flush()
 
         # Remove unnecessary fields
-        webpage_dict = webpage.__dict__
+        webpage_dict = webpage.__dict__.copy()
         webpage_dict.pop("_sa_instance_state", None)
         webpage_dict.pop("copy_doc_link", None)
+        webpage_dict.pop("owner_id", None)
+        webpage_dict.pop("project_id", None)
+        owner = webpage_dict.pop("owner", None)
+        project = webpage_dict.pop("project", None)
+
+        # Serialize owner fields
+        owner_dict = owner.__dict__.copy()
+        owner_dict["created_at"] = owner.created_at.isoformat()
+        owner_dict["updated_at"] = owner.updated_at.isoformat()
+        if owner_dict["_sa_instance_state"]:
+            owner_dict.pop("_sa_instance_state", None)
+
+        # Serialize project fields
+        project_dict = project.__dict__.copy()
+        project_dict["created_at"] = project.created_at.isoformat()
+        project_dict["updated_at"] = project.updated_at.isoformat()
+        if project_dict["_sa_instance_state"]:
+            project_dict.pop("_sa_instance_state", None)
 
         # Serialize object fields
         webpage_dict["status"] = webpage.status.value
         webpage_dict["created_at"] = webpage.created_at.isoformat()
         webpage_dict["updated_at"] = webpage.updated_at.isoformat()
+        webpage_dict["owner"] = owner_dict
 
         # Return a dict with the webpage fields
         return {**node, **webpage_dict}
