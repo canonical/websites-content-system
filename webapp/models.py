@@ -57,12 +57,14 @@ class WebpageStatus(enum.Enum):
     TO_DELETE = "TO_DELETE"
     AVAILABLE = "AVAILABLE"
 
+
 class Project(db.Model, DateTimeMixin):
     __tablename__ = "projects"
 
     id: int = Column(Integer, primary_key=True)
     name: str = Column(String, nullable=False)
     webpages = relationship("Webpage", back_populates="project")
+
 
 class Webpage(db.Model, DateTimeMixin):
     __tablename__ = "webpages"
@@ -120,6 +122,7 @@ class JiraTask(db.Model, DateTimeMixin):
 
     webpages = relationship("Webpage", back_populates="jira_tasks")
     user = relationship("User", back_populates="jira_tasks")
+
 
 def init_db(app: Flask):
     Migrate(app, db)

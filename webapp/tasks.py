@@ -18,6 +18,7 @@ LOCKS = {}
 # Default delay between runs for scheduled tasks
 TASK_DELAY = int(os.getenv("TASK_DELAY", 5))
 
+
 def init_tasks(app: Flask):
     """
     Start background tasks.
