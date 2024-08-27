@@ -395,11 +395,14 @@ class SiteRepository:
         project = webpage_dict.pop("project", None)
 
         # Serialize owner fields
-        owner_dict = owner.__dict__.copy()
-        owner_dict["created_at"] = owner.created_at.isoformat()
-        owner_dict["updated_at"] = owner.updated_at.isoformat()
-        if owner_dict["_sa_instance_state"]:
-            owner_dict.pop("_sa_instance_state", None)
+        if owner:
+            owner_dict = owner.__dict__.copy()
+            owner_dict["created_at"] = owner.created_at.isoformat()
+            owner_dict["updated_at"] = owner.updated_at.isoformat()
+            if owner_dict["_sa_instance_state"]:
+                owner_dict.pop("_sa_instance_state", None)
+        else:
+            owner_dict = {}
 
         # Serialize project fields
         project_dict = project.__dict__.copy()
