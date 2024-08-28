@@ -93,6 +93,10 @@ class User(db.Model, DateTimeMixin):
     name: str = Column(String, nullable=False)
     email: str = Column(String)
     jira_account_id: str = Column(String)
+    team: str = Column(String)
+    department: str = Column(String)
+    hrc_id: int = Column(Integer)
+    job_title: str = Column(String)
 
     webpages = relationship("Webpage", back_populates="owner")
     reviewers = relationship("Reviewer", back_populates="user")
