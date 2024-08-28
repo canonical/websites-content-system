@@ -6,8 +6,8 @@ from webapp import create_app
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
 from webapp.tasks import LOCKS
-
-from webapp.models import get_or_create, db, Webpage, User
+from webapp.models import get_or_create, db, Reviewer, Webpage
+from webapp.helper import get_or_create_user_id
 
 import requests
 
@@ -79,6 +79,34 @@ def get_users(username: str):
         return jsonify({"error": "Failed to fetch users"}), 500
 
 
+@app.route('/set-reviewers', methods=['POST'])
+@login_required
+def set_reviewers():
+    data = request.get_json()
+
+    users = data.get("user_structs")
+    webpage_id = data.get("webpage_id")
+
+    user_ids = []
+    for user in users:
+        user_ids.append(get_or_create_user_id(user))
+
+    # Remove all existing reviewers for the webpage
+    existing_reviewers = Reviewer.query.filter_by(webpage_id=webpage_id).all()
+    for reviewer in existing_reviewers:
+        db.session.delete(reviewer)
+    db.session.commit()
+
+    # Create new reviewer rows
+    for user_id in user_ids:
+        get_or_create(db.session,
+                      Reviewer,
+                      user_id=user_id,
+                      webpage_id=webpage_id)
+
+    return jsonify({"message": "Successfully set reviewers"}), 200
+
+
 @app.route('/set-owner', methods=['POST'])
 @login_required
 def set_owner():
@@ -86,21 +114,7 @@ def set_owner():
 
     user = data.get("user_struct")
     webpage_id = data.get("webpage_id")
-    user_hrc_id = user.get("id")
-
-    # If user does not exist, create a new user in the "users" table
-    user_exists = User.query.filter_by(hrc_id=user_hrc_id).first()
-    if not user_exists:
-        user_exists, _ = get_or_create(db.session,
-                                       User,
-                                       name=user.get("name"),
-                                       email=user.get("email"),
-                                       team=user.get("team"),
-                                       department=user.get("department"),
-                                       job_title=user.get("jobTitle"),
-                                       hrc_id=user_hrc_id)
-
-    user_id = user_exists.id
+    user_id = get_or_create_user_id(user)
 
     # Set owner_id of the webpage to the user_id
     webpage = Webpage.query.filter_by(id=webpage_id).first()
