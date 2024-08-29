@@ -15,8 +15,8 @@
     "watch": "watch -p 'static/client/**/*.{js,jsx,ts,tsx,scss}' -c 'yarn run build'"
   },
   "dependencies": {
-    "@canonical/react-components": "0.59.0",
-    "axios": "1.7.2",
+    "@canonical/react-components": "0.60.0",
+    "axios": "1.7.4",
     "classnames": "2.5.1",
     "formik": "2.4.6",
     "react": "18.3.1",
@@ -32,7 +32,7 @@
     "@testing-library/react": "14.0.0",
     "@testing-library/react-hooks": "8.0.1",
     "@testing-library/user-event": "14.4.3",
-    "@types/react": "18.3.3",
+    "@types/react": "18.3.4",
     "@types/react-dom": "18.3.0",
     "@typescript-eslint/eslint-plugin": "5.57.1",
     "@typescript-eslint/parser": "5.57.1",
@@ -53,7 +53,7 @@
     "npm-package-json-lint": "8.0.0",
     "postcss": "8.4.39",
     "postcss-cli": "10.1.0",
-    "prettier": "3.3.2",
+    "prettier": "3.3.3",
     "sass": "1.77.6",
     "sass-loader": "13.2.2",
     "stylelint": "15.4.0",

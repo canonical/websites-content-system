@@ -49,7 +49,7 @@ def upgrade():
         sa.Column("owner_id", sa.Integer(), nullable=True),
         sa.Column(
             "status",
-            sa.Enum("NEW", "TO_DELETE", "DONE", name="webpagestatus"),
+            sa.Enum("NEW", "TO_DELETE", "AVAILABLE", name="webpagestatus"),
             server_default="NEW",
             nullable=True,
         ),
