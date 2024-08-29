@@ -72,7 +72,7 @@ $ flask --app webapp/app run --debug
 You can optionally use dotrun to start the service. When the 1.1.0-rc1 branch is merged, then we can use dotrun without the `--release` flag.
 
 ```
-$ dotrun --release 1.1.0-rc1 build && dotrun --release 1.1.0-rc1 serve
+$ dotrun build && dotrun
 ```
 
 ### Note for using dotrun on mac

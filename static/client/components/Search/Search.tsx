@@ -7,10 +7,13 @@ import { SearchServices } from "./Search.services";
 import type { IMatch } from "./Search.types";
 
 import { usePages } from "@/services/api/hooks/pages";
+import { useStore } from "@/store";
 
 const Search = (): JSX.Element => {
   const { data } = usePages();
   const navigate = useNavigate();
+  const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
+
   const [matches, setMatches] = useState<IMatch[]>([]);
 
   const searchRef = useRef(null);
@@ -32,15 +35,21 @@ const Search = (): JSX.Element => {
       if (searchRef?.current) {
         (searchRef.current as any).value = "";
       }
+      // if the selected webpage has a different project, propagate to the rest of the app via the store
+      if (selectedItem.project !== selectedProject?.name) {
+        const project = SearchServices.getProjectByName(data, selectedItem.project);
+        if (project) setSelectedProject(project);
+      }
       navigate(`/webpage/${selectedItem.project}${selectedItem.name}`);
     },
-    [navigate, searchRef],
+    [data, navigate, searchRef, selectedProject, setSelectedProject],
   );
 
   return (
     <div className="l-search-container">
       {
         <SearchBox
+          className="l-search-box"
           disabled={!(data?.length && data[0]?.data)}
           onChange={handleChange}
           placeholder="Search a webpage"

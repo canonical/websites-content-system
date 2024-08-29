@@ -1,3 +1,13 @@
 .l-main {
   padding: 20px;
+
+  .l-breadcrumbs {
+    @media (max-width: $breakpoint-large) {
+      margin-bottom: 1rem;
+    }
+  }
+
+  .l-search-box {
+    margin-bottom: 0.5rem;
+  }
 }
