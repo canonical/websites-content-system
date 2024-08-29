@@ -14,5 +14,5 @@ Flask-Migrate==4.0.7
 Flask-SQLAlchemy==3.1.1
 talisker[gunicorn,gevent,flask,prometheus,raven]==0.21.3
 valkey==6.0.0b1
-Werkzeug==2.3.8
+Werkzeug==3.0.3
 requests==2.32.2
