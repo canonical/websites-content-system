@@ -1,11 +1,13 @@
 from os import environ
 
-from flask import jsonify, render_template
+from flask import jsonify, render_template, request
 
 from webapp import create_app
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
 from webapp.tasks import LOCKS
+
+from webapp.models import get_or_create, db, Webpage, User
 
 import requests
 
@@ -44,22 +46,9 @@ def index(path):
 @app.route('/get-users/<username>', methods=['GET'])
 @login_required
 def get_users(username: str):
-    first_name_query = """
+    query = """
     query($name: String!) {
-        employees(filter: { firstName: $name }) {
-            id
-            name
-            email
-            team
-            department
-            jobTitle
-        }
-    }
-    """
-
-    last_name_query = """
-    query($name: String!) {
-        employees(filter: { surname: $name }) {
+        employees(filter: { contains: { name: $name }}) {
             id
             name
             email
@@ -74,30 +63,49 @@ def get_users(username: str):
         "Authorization": "token " + environ.get("DIRECTORY_API_TOKEN")
     }
 
-    formattedUsername = username.strip().title()
-
     # Currently directory-api only supports strict comparison of field values,
     # so we have to send two requests instead of one for first and last names
-    first_name_response = requests.post(
+    response = requests.post(
         "https://directory.wpe.internal/graphql/", json={
-            'query': first_name_query,
-            'variables': {'name': formattedUsername},
+            'query': query,
+            'variables': {'name': username.strip()},
         }, headers=headers, verify=False)
 
-    last_name_response = requests.post(
-        "https://directory.wpe.internal/graphql/", json={
-            'query': last_name_query,
-            'variables': {'name': formattedUsername},
-        }, headers=headers, verify=False)
-
-    if (first_name_response.status_code == 200 and
-            last_name_response.status_code == 200):
-        first_name_data = first_name_response.json().get('data', {}).get(
+    if (response.status_code == 200):
+        users = response.json().get('data', {}).get(
             'employees', [])
-        last_name_data = last_name_response.json().get('data', {}).get(
-            'employees', [])
-        users = {emp['id']: emp for emp in first_name_data +
-                 last_name_data}.values()
         return jsonify(list(users))
     else:
         return jsonify({"error": "Failed to fetch users"}), 500
+
+
+@app.route('/set-owner', methods=['POST'])
+@login_required
+def set_owner():
+    data = request.get_json()
+
+    user = data.get("user_struct")
+    webpage_id = data.get("webpage_id")
+    user_hrc_id = user.get("id")
+
+    # If user does not exist, create a new user in the "users" table
+    user_exists = User.query.filter_by(hrc_id=user_hrc_id).first()
+    if not user_exists:
+        user_exists, _ = get_or_create(db.session,
+                                       User,
+                                       name=user.get("name"),
+                                       email=user.get("email"),
+                                       team=user.get("team"),
+                                       department=user.get("department"),
+                                       job_title=user.get("jobTitle"),
+                                       hrc_id=user_hrc_id)
+
+    user_id = user_exists.id
+
+    # Set owner_id of the webpage to the user_id
+    webpage = Webpage.query.filter_by(id=webpage_id).first()
+    if webpage:
+        webpage.owner_id = user_id
+        db.session.commit()
+
+    return jsonify({"message": "Successfully set owner"}), 200
