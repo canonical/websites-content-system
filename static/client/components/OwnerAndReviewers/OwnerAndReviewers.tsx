@@ -5,6 +5,7 @@ import Reviewers from "./Reviewers";
 const OwnerAndReviewers = ({ page }: IOwnerAndReviewersProps): JSX.Element => (
   <>
     <Owner page={page} />
+    <div className="u-sv3" />
     <Reviewers page={page} />
   </>
 );

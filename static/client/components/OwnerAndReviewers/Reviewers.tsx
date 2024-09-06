@@ -24,7 +24,9 @@ const Reviewers = ({ page }: IOwnerAndReviewersProps): JSX.Element => {
 
   const selectReviewer = useCallback(
     (option: IUser) => {
-      if (!currentReviewers.find((r) => r.id === option.id)) {
+      // check if a person with the same email already exists
+      // proceed with setting the reviewer only if not
+      if (!currentReviewers.find((r) => r.email === option.email)) {
         const newReviewers = [...currentReviewers, option];
         PagesServices.setReviewers(newReviewers, page.id);
         setOptions([]);
@@ -37,17 +39,15 @@ const Reviewers = ({ page }: IOwnerAndReviewersProps): JSX.Element => {
   );
 
   return (
-    <>
-      <CustomSearchAndFilter
-        label="Reviewers"
-        onChange={handleChange}
-        onRemove={handleRemoveReviewer}
-        onSelect={selectReviewer}
-        options={options}
-        placeholder="Select reviewers"
-        selectedOptions={currentReviewers}
-      />
-    </>
+    <CustomSearchAndFilter
+      label="Reviewers"
+      onChange={handleChange}
+      onRemove={handleRemoveReviewer}
+      onSelect={selectReviewer}
+      options={options}
+      placeholder="Select reviewers"
+      selectedOptions={currentReviewers}
+    />
   );
 };
 

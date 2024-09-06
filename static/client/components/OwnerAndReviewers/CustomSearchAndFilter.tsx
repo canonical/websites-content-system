@@ -1,3 +1,4 @@
+// the existing SearchAndFilter component provided by react-components did not provide ability to have dynamic options
 import { useCallback, useEffect, useRef, useState } from "react";
 
 import type { ICustomSearchAndFilterProps } from "./OwnerAndReviewers.types";
