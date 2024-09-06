@@ -423,6 +423,13 @@ class SiteRepository:
                 reviewer_dict.pop("_sa_instance_state", None)
                 reviewer_dict["created_at"] = reviewer.created_at.isoformat()
                 reviewer_dict["updated_at"] = reviewer.updated_at.isoformat()
+                # Expand the user object
+                reviewer_user_dict = reviewer.user.__dict__.copy()
+                reviewer_user_dict.pop("created_at")
+                reviewer_user_dict.pop("updated_at")
+                if reviewer_user_dict["_sa_instance_state"]:
+                    reviewer_user_dict.pop("_sa_instance_state", None)
+                reviewer_dict = {**reviewer_dict, **reviewer_user_dict}
                 reviewers_list.append(reviewer_dict)
         else:
             reviewers_list = []
