@@ -13,6 +13,8 @@
 @include vf-p-side-navigation;
 @include vf-p-buttons;
 @include vf-p-tooltips;
+@include vf-p-chip;
+@include vf-p-search-and-filter;
 
 // Icons
 @include vf-p-icons;
@@ -46,4 +48,9 @@
 .p-icon--logout {
   @extend %icon;
   @include vf-icon-logout(#ffffff);
+}
+
+// allow SearchAndFilter component increase height when there are several options selected (in Reviewers)
+.p-search-and-filter__search-container {
+  height: auto !important;
 }

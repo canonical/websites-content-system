@@ -46,26 +46,26 @@ const Search = (): JSX.Element => {
   );
 
   return (
-    <div className="l-search-container">
-      {
-        <SearchBox
-          className="l-search-box"
-          disabled={!(data?.length && data[0]?.data)}
-          onChange={handleChange}
-          placeholder="Search a webpage"
-          ref={searchRef}
-        />
-      }
-      {matches.length >= 0 && (
-        <ul className="l-search-dropdown">
-          {matches.map((match) => (
-            <li className="l-search-item" onClick={handleSelect(match)}>
-              {match.name} - {match.title}
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    <>
+      <SearchBox
+        className="l-search-box"
+        disabled={!(data?.length && data[0]?.data)}
+        onChange={handleChange}
+        placeholder="Search a webpage"
+        ref={searchRef}
+      />
+      <div className="l-search-container">
+        {matches.length >= 0 && (
+          <ul className="l-search-dropdown">
+            {matches.map((match) => (
+              <li className="l-search-item" onClick={handleSelect(match)}>
+                {match.name} - {match.title}
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
   );
 };
 
