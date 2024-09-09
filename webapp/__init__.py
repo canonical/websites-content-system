@@ -2,6 +2,7 @@ from flask import Flask
 
 from webapp.cache import init_cache
 from webapp.context import base_context
+from webapp.jira import init_jira
 from webapp.models import init_db
 from webapp.sso import init_sso
 from webapp.tasks import init_tasks
@@ -25,5 +26,8 @@ def create_app():
 
     # Initialize tasks
     init_tasks(app)
+
+    # Initialize JIRA
+    init_jira(app)
 
     return app
