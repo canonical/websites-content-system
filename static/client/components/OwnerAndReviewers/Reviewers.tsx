@@ -17,9 +17,11 @@ const Reviewers = ({ page }: IOwnerAndReviewersProps): JSX.Element => {
 
   const handleRemoveReviewer = useCallback(
     (option?: IUser) => () => {
-      setCurrentReviewers((prev) => prev.filter((r) => r.id !== option?.id));
+      const newReviewers = currentReviewers.filter((r) => r.id !== option?.id);
+      setCurrentReviewers(newReviewers);
+      PagesServices.setReviewers(newReviewers, page.id);
     },
-    [],
+    [currentReviewers, page],
   );
 
   const selectReviewer = useCallback(

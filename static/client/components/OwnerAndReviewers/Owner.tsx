@@ -18,8 +18,9 @@ const Owner = ({ page }: IOwnerAndReviewersProps): JSX.Element => {
   const handleRemoveOwner = useCallback(
     () => () => {
       setCurrentOwner(null);
+      PagesServices.setOwner({}, page.id);
     },
-    [],
+    [page],
   );
 
   const selectOwner = useCallback(

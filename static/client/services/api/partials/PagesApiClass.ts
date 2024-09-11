@@ -9,7 +9,7 @@ export class PagesApiClass extends BasicApiClass {
     return this.callApi<IPagesResponse>(ENDPOINTS.getPagesTree(domain), REST_TYPES.GET);
   }
 
-  public setOwner(user: IUser, webpageId: number): Promise<void> {
+  public setOwner(user: IUser | {}, webpageId: number): Promise<void> {
     return this.callApi(ENDPOINTS.setOwner, REST_TYPES.POST, {
       user_struct: user,
       webpage_id: webpageId,

@@ -1,5 +1,5 @@
 // the existing SearchAndFilter component provided by react-components did not provide ability to have dynamic options
-import { useCallback, useEffect, useRef, useState } from "react";
+import { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 
 import type { ICustomSearchAndFilterProps } from "./OwnerAndReviewers.types";
 
@@ -34,6 +34,20 @@ const CustomSearchAndFilter = ({
     [onSelect],
   );
 
+  // a callback that closes an options dropdown when focus is not on an input field
+  const handleInputBlur = useCallback(() => {
+    setDropdownHidden(true);
+    setContainerExpanded(false);
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  }, []);
+
+  // this callback is needed for handleSelect to have higher priority than handleInputBlur when selecting an option
+  const handleOptionMouseDown = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+  }, []);
+
   return (
     <div className="p-search-and-filter">
       <p className="p-text--small-caps" id="owner-input">
@@ -60,6 +74,7 @@ const CustomSearchAndFilter = ({
             className="p-search-and-filter__input"
             id="search"
             name="search"
+            onBlur={handleInputBlur}
             onChange={onChange}
             placeholder={placeholder}
             ref={inputRef}
@@ -71,7 +86,7 @@ const CustomSearchAndFilter = ({
         <div className="p-filter-panel-section">
           <div aria-expanded="false" className="p-filter-panel-section__chips">
             {options.map((option) => (
-              <button className="p-chip" onClick={handleSelect(option)}>
+              <button className="p-chip" onClick={handleSelect(option)} onMouseDown={handleOptionMouseDown}>
                 <span className="p-chip__value">{option.name}</span>
               </button>
             ))}

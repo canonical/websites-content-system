@@ -6,7 +6,7 @@ export const getPages = async (domain: string): Promise<IPagesResponse> => {
   return api.pages.getPages(domain);
 };
 
-export const setOwner = async (user: IUser, webpageId: number): Promise<void> => {
+export const setOwner = async (user: IUser | {}, webpageId: number): Promise<void> => {
   return api.pages.setOwner(user, webpageId);
 };
 
