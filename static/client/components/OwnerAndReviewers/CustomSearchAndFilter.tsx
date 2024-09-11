@@ -59,14 +59,17 @@ const CustomSearchAndFilter = ({
         data-active="true"
         data-empty="true"
       >
-        {selectedOptions.map((option) => (
-          <span className="p-chip">
-            <span className="p-chip__value">{option.name}</span>
-            <button className="p-chip__dismiss" onClick={onRemove(option)}>
-              Dismiss
-            </button>
-          </span>
-        ))}
+        {selectedOptions.map(
+          (option) =>
+            option && (
+              <span className="p-chip">
+                <span className="p-chip__value">{option.name}</span>
+                <button className="p-chip__dismiss" onClick={onRemove(option)}>
+                  Dismiss
+                </button>
+              </span>
+            ),
+        )}
         <form className="p-search-and-filter__box" data-overflowing="false">
           <input
             aria-labelledby="owner-input"
