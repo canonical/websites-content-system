@@ -23,6 +23,11 @@ env:
       key: websites-content-system
       name: secret-keys
 
+  - name: DIRECTORY_API_TOKEN
+    secretKeyRef:
+      key: token
+      name: directory-api
+
 # Overrides for production
 production:
   replicas: 1
