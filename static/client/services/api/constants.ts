@@ -1,6 +1,8 @@
 export const ENDPOINTS = {
   getPagesTree: (domain: string) => `/get-tree/${domain}`,
-  login: (url: string) => `/login?next=${url}`,
+  getUsers: (inputStr: string) => `/get-users/${inputStr}`,
+  setOwner: "/set-owner",
+  setReviewers: "/set-reviewers",
 };
 
 export const REST_TYPES = {

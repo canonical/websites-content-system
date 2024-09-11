@@ -1,13 +1,13 @@
-import { AuthApiClass } from "./partials/AuthApiClass";
 import { PagesApiClass } from "./partials/PagesApiClass";
+import { UsersApiClass } from "./partials/UsersApiClass";
 
 class ApiClass {
   public pages: PagesApiClass;
-  public auth: AuthApiClass;
+  public users: UsersApiClass;
 
   constructor() {
     this.pages = new PagesApiClass();
-    this.auth = new AuthApiClass();
+    this.users = new UsersApiClass();
   }
 }
 

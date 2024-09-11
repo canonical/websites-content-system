@@ -4,6 +4,7 @@ import { Button } from "@canonical/react-components";
 
 import { type IWebpageProps } from "./Webpage.types";
 
+import OwnerAndReviewers from "@/components/OwnerAndReviewers";
 import config from "@/config";
 
 const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
@@ -49,11 +50,16 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
           </>
         )}
       </div>
-      <div>
-        <p className="p-text--small-caps" id="page-descr">
-          Description
-        </p>
-        <p aria-labelledby="page-descr">{page.description || "-"}</p>
+      <div className="row">
+        <div className="col-7">
+          <p className="p-text--small-caps" id="page-descr">
+            Description
+          </p>
+          <p aria-labelledby="page-descr">{page.description || "-"}</p>
+        </div>
+        <div className="col-5">
+          <OwnerAndReviewers page={page} />
+        </div>
       </div>
     </div>
   );

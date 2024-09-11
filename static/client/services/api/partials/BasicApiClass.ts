@@ -13,7 +13,7 @@ export class BasicApiClass {
     this.timeout = 5 * 60 * 1000;
     this.headers = {
       Accept: "application/json",
-      "Content-Type": "application/x-www-form-urlencoded",
+      "Content-Type": "application/json",
     };
   }
 
