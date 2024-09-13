@@ -18,14 +18,18 @@ def validate_input(model):
     return decorator
 
 
-{
+class ChangesRequestModel(BaseModel):
+    due_date: str
+    reporter_id: int
+    webpage_id: int
+    type: int
+    description: str
+
+
+changes = {
     "due_date": "2022-01-01",
     "reporter_id": 1,
     "webpage_id": 1,
     "type": 0,
     "description": "This is a description",
 }
-
-
-class ResponseModel(BaseModel):
-    message: str = "OK"

@@ -6,10 +6,9 @@ from flask_pydantic import validate
 
 from webapp import create_app
 from webapp.helper import get_or_create_user_id
-from webapp.models import JiraTask, Reviewer, Webpage, db, get_or_create
+from webapp.models import Reviewer, Webpage, db, get_or_create
 from webapp.schemas import (
     ChangesRequestModel,
-    ResponseModel,
 )
 from webapp.site_repository import SiteRepository
 from webapp.sso import login_required
@@ -104,7 +103,9 @@ def set_reviewers():
 
     # Create new reviewer rows
     for user_id in user_ids:
-        get_or_create(db.session, Reviewer, user_id=user_id, webpage_id=webpage_id)
+        get_or_create(
+            db.session, Reviewer, user_id=user_id, webpage_id=webpage_id
+        )
 
     return jsonify({"message": "Successfully set reviewers"}), 200
 
@@ -131,26 +132,12 @@ def set_owner():
 # @login_required
 @validate()
 def request_changes(body: ChangesRequestModel):
-    # Make a request to JIRA to create a task
-    jira = app.config["JIRA"]
-    try:
-        issue = jira.create_issue(
-            due_date=body.due_date,
-            reporter=body.reporter_id,
-            webpage_id=body.webpage_id,
-            issue_type=body.type,
-            description=body.description,
-        )
-    except Exception as e:
-        return jsonify(ResponseModel(message=str(e)).model_dump(), 500)
+    from webapp.helper import create_jira_task
 
-    # Create jira task in the database
-    get_or_create(
-        db.session,
-        JiraTask,
-        jira_id=issue["id"],
-        webpage_id=body.webpage_id,
-        user_id=body.reporter_id,
-        status=issue["status"],
-    )
-    return jsonify(ResponseModel().model_dump(), 200)
+    # Make a request to JIRA to create a task
+    try:
+        create_jira_task(app, body.model_dump())
+    except Exception as e:
+        return jsonify(e), 500
+
+    return jsonify("Task created successfully"), 201

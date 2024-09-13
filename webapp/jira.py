@@ -36,10 +36,20 @@ class JIRATaskResponseModel(BaseModel):
 
 
 class Jira:
-    headers = {"Accept": "application/json", "Content-Type": "application/json"}
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json",
+    }
+    EPIC = "10000"
+    SUBTASK = "10013"
 
     def __init__(
-        self, url: str, email: str, token: str, labels: str, copy_updates_epic: str
+        self,
+        url: str,
+        email: str,
+        token: str,
+        labels: str,
+        copy_updates_epic: str,
     ):
         """
         Initialize the Jira object.
@@ -56,13 +66,15 @@ class Jira:
         self.labels = labels
         self.copy_updates_epic = copy_updates_epic
 
-    def __request__(self, method: str, url: str, data: dict = {}, params: dict = {}):
-        if data == {}:
-            data = None
+    def __request__(
+        self, method: str, url: str, data: dict = {}, params: dict = {}
+    ):
+        if data:
+            data = json.dumps(data)
         response = requests.request(
             method,
             url,
-            data=json.dumps(data),
+            data=data,
             headers=self.headers,
             auth=self.auth,
             params=params,
@@ -74,7 +86,7 @@ class Jira:
                 f" {response.status_code}. Response: {response.text}"
             )
 
-        json.loads(response.text)
+        return response.json()
 
     def get_reporter_jira_id(self, user_id):
         """
@@ -98,7 +110,7 @@ class Jira:
         # Update the user in the database
         # user.jira_account_id = jira_user["accountId"]
         # db.session.commit()
-        return jira_user["accountId"]
+        return jira_user
 
     def find_user(self, query: str):
         """
@@ -113,10 +125,10 @@ class Jira:
         return self.__request__(
             method="GET",
             url=f"{self.url}/rest/api/3/user/search",
-            params={"query": f"{query}"},
+            params={"query": query},
         )
 
-    def create_subtask(
+    def create_task(
         self,
         summary: str,
         issue_type: int,
@@ -126,25 +138,23 @@ class Jira:
         due_date: datetime,
     ):
         """
-        Creates a subtask in Jira.
+        Creates a task or subtask in Jira.
 
         Args:
-            summary (str): The summary of the subtask.
-            issue_type (int): The ID of the issue type for the subtask.
-            description (str): The description of the subtask.
-            parent (str): The key of the parent issue. If None, the subtask will be
-                created without a parent.
-            reporter (str): The ID of the reporter of the subtask.
-            due_date (datetime): The due date of the subtask.
+            summary (str): The summary of the task.
+            issue_type (int): The ID of the issue type for the task.
+            description (str): The description of the task.
+            parent (str): The key of the parent issue. If None, the task will
+                be created without a parent.
+            reporter (str): The ID of the reporter of the task.
+            due_date (datetime): The due date of the task.
 
         Returns:
-            dict: The response from the Jira API containing information about the
-                created subtask.
+            dict: The response from the Jira API containing information about
+                the created task.
         """
-        if not parent:
-            parent = None
-        else:
-            parent = {"key": self.copy_updates_epic}
+        if parent:
+            parent = {"key": parent}
 
         payload = {
             "fields": {
@@ -189,7 +199,8 @@ class Jira:
         """Creates a new issue in Jira.
 
         Args:
-            issue_type (int): The type of the issue. 0 for Epic, 1 or 2 for Task.
+            issue_type (int): The type of the issue. 0 for Epic, 1 or 2 for
+                Task.
             description (str): The description of the issue.
             reporter (str): The ID of the reporter.
             webpage_id (int): The ID of the webpage.
@@ -199,8 +210,11 @@ class Jira:
             dict: The response from the Jira API.
         """
         # Get the webpage
-        webpage = Webpage.query.filter_by(id=webpage_id).first()
-        if not webpage:
+        try:
+            webpage = Webpage.query.filter_by(id=webpage_id).first()
+            if not webpage:
+                raise Exception
+        except Exception:
             raise Exception(f"Webpage with ID {webpage_id} not found")
 
         # Get the reporter ID
@@ -208,13 +222,12 @@ class Jira:
 
         # Determine the correct issue type
         if issue_type == 0:
-            issue_type_id = "10002"  # Epic
             parent = None
             summary = f"Copy update {webpage.name}"
             # Create epic
-            epic = self.create_subtask(
+            epic = self.create_task(
                 summary=None,
-                issue_type=issue_type_id,
+                issue_type=self.EPIC,
                 description=description,
                 parent=parent,
                 reporter=reporter,
@@ -222,16 +235,17 @@ class Jira:
             )
             # Create subtasks for this epic
             for subtask_name in ["UX", "Visual", "Dev"]:
-                self.create_subtask(
+                self.create_task(
                     summary=f"{subtask_name}-{summary}",
-                    issue_type=issue_type_id,
+                    issue_type=self.SUBTASK,  # Task
                     description=description,
                     parent=epic["id"],
                     reporter=reporter,
                     due_date=due_date,
                 )
+            return epic
+
         elif issue_type == 1 or issue_type == 2:
-            issue_type_id = "10001"  # Task
             parent = {"key": self.copy_updates_epic}
 
         # Determine summary message
@@ -242,9 +256,9 @@ class Jira:
         elif issue_type == 2:
             summary = f"New webpage for {webpage.name}"
 
-        return self.create_subtask(
+        return self.create_task(
             summary=summary,
-            issue_type=issue_type_id,
+            issue_type=self.SUBTASK,
             description=description,
             parent=parent,
             reporter=reporter,
