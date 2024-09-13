@@ -24,12 +24,3 @@ class ChangesRequestModel(BaseModel):
     webpage_id: int
     type: int
     description: str
-
-
-changes = {
-    "due_date": "2022-01-01",
-    "reporter_id": 1,
-    "webpage_id": 1,
-    "type": 0,
-    "description": "This is a description",
-}
