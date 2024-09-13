@@ -159,11 +159,11 @@ jobs:
           -e GH_TOKEN=token \
           -e REPO_ORG=https://github.com/canonical \
           -e SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/postgres \
-          -e JIRA_EMAIL=example@canonical.com
-          -e JIRA_TOKEN=jiratoken
-          -e JIRA_URL=https://example.atlassian.net
-          -e JIRA_LABELS=somelabel
-          -e JIRA_COPY_UPDATES_EPIC=WD-9999999
+          -e JIRA_EMAIL=example@canonical.com \
+          -e JIRA_TOKEN=jiratoken \
+          -e JIRA_URL=https://example.atlassian.net \
+          -e JIRA_LABELS=somelabel \
+          -e JIRA_COPY_UPDATES_EPIC=WD-9999999 \
           --network host \
           websites-content-system & sleep 1
           curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost
