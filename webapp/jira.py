@@ -83,13 +83,13 @@ class Jira:
             params=params,
         )
 
-        if response.status_code != 200:
-            raise Exception(
-                "Failed to make a request to Jira. Status code:"
-                f" {response.status_code}. Response: {response.text}"
-            )
+        if response.status_code == 200 or response.status_code == 201:
+            return response.json()
 
-        return response.json()
+        raise Exception(
+            "Failed to make a request to Jira. Status code:"
+            f" {response.status_code}. Response: {response.text}"
+        )
 
     def get_reporter_jira_id(self, user_id):
         """
@@ -183,7 +183,10 @@ class Jira:
                 "duedate": due_date,
                 "parent": parent,
                 "project": {"id": "10492"},  # Web and Design-ENG
-                "components": [{"id": "12655"}],  # Sites tribe
+                "components": [
+                    {"id": "12655"},
+                    {"id": "12628"},
+                ],  # Sites Tribe, Infrastructure
             },
             "update": {},
         }
@@ -239,34 +242,35 @@ class Jira:
             parent = None
             # Create epic
             epic = self.create_task(
-                summary=None,
+                summary=summary,
                 issue_type=self.EPIC,
                 description=description,
                 parent=parent,
-                reporter_id=reporter_jira_id,
+                reporter_jira_id=reporter_jira_id,
                 due_date=due_date,
             )
+
             # Create subtasks for this epic
             for subtask_name in ["UX", "Visual", "Dev"]:
                 self.create_task(
                     summary=f"{subtask_name}-{summary}",
                     issue_type=self.SUBTASK,
                     description=description,
-                    parent=epic["id"],
-                    reporter_id=reporter_jira_id,
+                    parent=epic["key"],
+                    reporter_jira_id=reporter_jira_id,
                     due_date=due_date,
                 )
             return epic
 
         elif request_type == self.COPY_UPDATE:
-            parent = {"key": self.copy_updates_epic}
+            parent = self.copy_updates_epic
 
         return self.create_task(
             summary=summary,
             issue_type=self.SUBTASK,
             description=description,
             parent=parent,
-            reporter_id=reporter_jira_id,
+            reporter_jira_id=reporter_jira_id,
             due_date=due_date,
         )
 

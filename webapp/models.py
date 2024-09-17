@@ -113,6 +113,14 @@ class Reviewer(db.Model, DateTimeMixin):
     user = relationship("User", back_populates="reviewers")
     webpages = relationship("Webpage", back_populates="reviewers")
 
+class JIRATaskStatus(enum.Enum):
+    TRIAGED = "TRIAGED"
+    UNTRIAGED = "UNTRIAGED"
+    BLOCKED = "BLOCKED"
+    IN_PROGRESS = "IN_PROGRESS"
+    TO_BE_DEPLOYED = "TO_BE_DEPLOYED"
+    DONE = "DONE"
+    REJECTED = "REJECTED"
 
 class JiraTask(db.Model, DateTimeMixin):
     __tablename__ = "jira_tasks"
@@ -121,7 +129,7 @@ class JiraTask(db.Model, DateTimeMixin):
     jira_id: int = Column(Integer)
     webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
     user_id: int = Column(Integer, ForeignKey("users.id"))
-    status: str = Column(String)  # Will be filled from Jira API
+    status: str = Column(Enum(JIRATaskStatus), default=JIRATaskStatus.TRIAGED)
     created_at: str = Column(String)
 
     webpages = relationship("Webpage", back_populates="jira_tasks")

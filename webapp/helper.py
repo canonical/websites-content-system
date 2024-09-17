@@ -35,8 +35,6 @@ def create_jira_task(app, task):
         description=task["description"],
     )
 
-    app.logger.info(issue)
-
     # Create jira task in the database
     get_or_create(
         db.session,
@@ -44,5 +42,4 @@ def create_jira_task(app, task):
         jira_id=issue["id"],
         webpage_id=task["webpage_id"],
         user_id=task["reporter_id"],
-        status=issue["status"],
     )
