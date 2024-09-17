@@ -29,9 +29,9 @@ def create_jira_task(app, task):
     jira = app.config["JIRA"]
     issue = jira.create_issue(
         due_date=task["due_date"],
-        reporter=task["reporter_id"],
+        reporter_id=task["reporter_id"],
         webpage_id=task["webpage_id"],
-        issue_type=task["type"],
+        request_type=task["type"],
         description=task["description"],
     )
 

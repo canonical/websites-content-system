@@ -8,7 +8,7 @@ import requests
 from pydantic import BaseModel
 from requests.auth import HTTPBasicAuth
 
-from webapp.models import User, Webpage
+from webapp.models import User, Webpage, db
 
 
 class Issue(BaseModel):
@@ -42,6 +42,9 @@ class Jira:
     }
     EPIC = "10000"
     SUBTASK = "10013"
+    COPY_UPDATE = 0
+    PAGE_REFRESH = 1
+    NEW_WEBPAGE = 2
 
     def __init__(
         self,
@@ -108,9 +111,9 @@ class Jira:
         if not jira_user:
             raise ValueError(f"User with email {user.email} not found in Jira")
         # Update the user in the database
-        # user.jira_account_id = jira_user["accountId"]
-        # db.session.commit()
-        return jira_user
+        user.jira_account_id = jira_user[0]["accountId"]
+        db.session.commit()
+        return jira_user[0]["accountId"]
 
     def find_user(self, query: str):
         """
@@ -134,7 +137,7 @@ class Jira:
         issue_type: int,
         description: str,
         parent: str,
-        reporter: str,
+        reporter_jira_id: str,
         due_date: datetime,
     ):
         """
@@ -146,7 +149,7 @@ class Jira:
             description (str): The description of the task.
             parent (str): The key of the parent issue. If None, the task will
                 be created without a parent.
-            reporter (str): The ID of the reporter of the task.
+            reporter_jira_id (str): The ID of the reporter of the task.
             due_date (datetime): The due date of the task.
 
         Returns:
@@ -176,11 +179,11 @@ class Jira:
                 "summary": summary,
                 "issuetype": {"id": issue_type},
                 "labels": self.labels,
-                "reporter": {"id": reporter},
-                "duedate": due_date.date.isoformat(),
+                "reporter": {"id": reporter_jira_id},
+                "duedate": due_date,
                 "parent": parent,
-                "project": {"id": "10000"},  # Hardcoded for now
-                "components": [{"id": "10000"}],  # Hardcoded for now
+                "project": {"id": "10492"},  # Web and Design-ENG
+                "components": [{"id": "12655"}],  # Sites tribe
             },
             "update": {},
         }
@@ -190,19 +193,19 @@ class Jira:
 
     def create_issue(
         self,
-        issue_type: int,
+        request_type: int,
         description: str,
-        reporter: str,
+        reporter_id: str,
         webpage_id: int,
         due_date: datetime,
     ):
         """Creates a new issue in Jira.
 
         Args:
-            issue_type (int): The type of the issue. 0 for Epic, 1 or 2 for
+            request_type (int): The type of the request. 0 for Epic, 1 or 2 for
                 Task.
             description (str): The description of the issue.
-            reporter (str): The ID of the reporter.
+            reporter_id (str): The ID of the reporter.
             webpage_id (int): The ID of the webpage.
             due_date (datetime): The due date of the issue.
 
@@ -218,50 +221,52 @@ class Jira:
             raise Exception(f"Webpage with ID {webpage_id} not found")
 
         # Get the reporter ID
-        reporter = self.get_reporter_jira_id(reporter)
+        reporter_jira_id = self.get_reporter_jira_id(reporter_id)
 
-        # Determine the correct issue type
-        if issue_type == 0:
-            parent = None
+        # Determine summary message
+        if request_type == self.COPY_UPDATE:
             summary = f"Copy update {webpage.name}"
+        elif request_type == self.PAGE_REFRESH:
+            summary = f"Page refresh for {webpage.name}"
+        elif request_type == self.NEW_WEBPAGE:
+            summary = f"New webpage for {webpage.name}"
+
+        # Create the issue depending on the request type
+        if (
+            request_type == self.NEW_WEBPAGE
+            or request_type == self.PAGE_REFRESH
+        ):
+            parent = None
             # Create epic
             epic = self.create_task(
                 summary=None,
                 issue_type=self.EPIC,
                 description=description,
                 parent=parent,
-                reporter=reporter,
+                reporter_id=reporter_jira_id,
                 due_date=due_date,
             )
             # Create subtasks for this epic
             for subtask_name in ["UX", "Visual", "Dev"]:
                 self.create_task(
                     summary=f"{subtask_name}-{summary}",
-                    issue_type=self.SUBTASK,  # Task
+                    issue_type=self.SUBTASK,
                     description=description,
                     parent=epic["id"],
-                    reporter=reporter,
+                    reporter_id=reporter_jira_id,
                     due_date=due_date,
                 )
             return epic
 
-        elif issue_type == 1 or issue_type == 2:
+        elif request_type == self.COPY_UPDATE:
             parent = {"key": self.copy_updates_epic}
-
-        # Determine summary message
-        if issue_type == 0:
-            summary = f"Copy update {webpage.name}"
-        elif issue_type == 1:
-            summary = f"Page refresh for {webpage.name}"
-        elif issue_type == 2:
-            summary = f"New webpage for {webpage.name}"
 
         return self.create_task(
             summary=summary,
             issue_type=self.SUBTASK,
             description=description,
             parent=parent,
-            reporter=reporter,
+            reporter_id=reporter_jira_id,
             due_date=due_date,
         )
 

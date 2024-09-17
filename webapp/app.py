@@ -5,7 +5,7 @@ from flask import jsonify, render_template, request
 from flask_pydantic import validate
 
 from webapp import create_app
-from webapp.helper import get_or_create_user_id
+from webapp.helper import create_jira_task, get_or_create_user_id
 from webapp.models import Reviewer, Webpage, db, get_or_create
 from webapp.schemas import (
     ChangesRequestModel,
@@ -129,10 +129,9 @@ def set_owner():
 
 
 @app.route("/request-changes", methods=["POST"])
-# @login_required
+@login_required
 @validate()
 def request_changes(body: ChangesRequestModel):
-    from webapp.helper import create_jira_task
 
     # Make a request to JIRA to create a task
     try:
