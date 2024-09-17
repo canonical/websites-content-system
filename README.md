@@ -121,3 +121,19 @@ $ docker inspect <postgres-container-id> | grep IPAddress
     "title": null
   }
 }
+```
+
+#### Making a webpage update request
+
+<details>
+ <summary><code>POST</code> <code><b>/request-changes</b></code>
+</details>
+
+```json
+{
+  "due_date": "2022-01-01",
+  "reporter_id": 1,
+  "webpage_id": 31,
+  "type": 1,
+  "description": "This is a description",
+}
