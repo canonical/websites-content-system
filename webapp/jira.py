@@ -2,37 +2,11 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import Literal, Optional
 
 import requests
-from pydantic import BaseModel
 from requests.auth import HTTPBasicAuth
 
 from webapp.models import User, Webpage, db
-
-
-class Issue(BaseModel):
-    project: str
-    summary: str
-    description: str
-    priority: str
-    issuetype: str
-
-
-class JIRATaskRequestModel(BaseModel):
-    project: Literal["Web & Design - ENG"]
-    due_date: datetime
-    reporter: str
-    components: str
-    labels: str
-    description: Optional[str] = None
-
-
-class JIRATaskResponseModel(BaseModel):
-    id: int
-    age: int
-    name: str
-    nickname: Optional[str] = None
 
 
 class Jira:
