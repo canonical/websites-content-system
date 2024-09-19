@@ -126,7 +126,7 @@ class JiraTask(db.Model, DateTimeMixin):
     __tablename__ = "jira_tasks"
 
     id: int = Column(Integer, primary_key=True)
-    jira_id: int = Column(Integer)
+    jira_id: str = Column(String)
     webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
     user_id: int = Column(Integer, ForeignKey("users.id"))
     status: str = Column(String, default=JIRATaskStatus.TRIAGED)
