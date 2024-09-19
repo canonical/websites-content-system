@@ -77,9 +77,11 @@ class Jira:
         """
         # Try to get the user from the database
         user = User.query.filter_by(id=user_id).first()
-        if user:
-            if user.jira_account_id:
-                return user.jira_account_id
+        if not user:
+            raise ValueError(f"User with ID {user_id} not found")
+        # If the user already has a Jira account ID, return it
+        if user.jira_account_id:
+            return user.jira_account_id
         # Otherwise get it from jira
         jira_user = self.find_user(user.email)
         if not jira_user:
@@ -190,11 +192,8 @@ class Jira:
             dict: The response from the Jira API.
         """
         # Get the webpage
-        try:
-            webpage = Webpage.query.filter_by(id=webpage_id).first()
-            if not webpage:
-                raise Exception
-        except Exception:
+        webpage = Webpage.query.filter_by(id=webpage_id).first()
+        if not webpage:
             raise Exception(f"Webpage with ID {webpage_id} not found")
 
         # Get the reporter ID

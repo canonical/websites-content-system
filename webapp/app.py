@@ -137,6 +137,6 @@ def request_changes(body: ChangesRequestModel):
     try:
         create_jira_task(app, body.model_dump())
     except Exception as e:
-        return jsonify(e), 500
+        return jsonify(str(e)), 500
 
     return jsonify("Task created successfully"), 201
