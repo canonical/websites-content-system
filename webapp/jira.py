@@ -161,7 +161,6 @@ class Jira:
                 "project": {"id": "10492"},  # Web and Design-ENG
                 "components": [
                     {"id": "12655"},  # Sites Tribe
-                    {"id": "12628"},  # Infrastructure
                 ],
             },
             "update": {},
