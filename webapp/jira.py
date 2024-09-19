@@ -227,7 +227,7 @@ class Jira:
             # Create subtasks for this epic
             for subtask_name in ["UX", "Visual", "Dev"]:
                 self.create_task(
-                    summary=f"{subtask_name}-{summary}",
+                    summary=f"{subtask_name} - {summary}",
                     issue_type=self.SUBTASK,
                     description=description,
                     parent=epic["key"],
