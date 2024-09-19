@@ -28,6 +28,25 @@ env:
       key: token
       name: directory-api
 
+  - name: JIRA_EMAIL
+    secretKeyRef:
+      key: jira-email
+      name: cms-jira
+
+  - name: JIRA_TOKEN
+    secretKeyRef:
+      key: jira-token
+      name: cms-jira
+
+  - name: JIRA_URL
+    value: "https://warthogs.atlassian.net"
+
+  - name: JIRA_LABELS
+    value: "sites_BAU"
+
+  - name: JIRA_COPY_UPDATES_EPIC
+    value: "WD-12643"
+
 # Overrides for production
 production:
   replicas: 1

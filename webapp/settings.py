@@ -10,3 +10,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SQLALCHEMY_DATABASE_URI = environ.get(
     "SQLALCHEMY_DATABASE_URI", "sqlite:///project.db"
 )
+JIRA_EMAIL = environ.get("JIRA_EMAIL")
+JIRA_TOKEN = environ.get("JIRA_TOKEN")
+JIRA_URL = environ.get("JIRA_URL")
+JIRA_LABELS = environ.get("JIRA_LABELS")
+JIRA_COPY_UPDATES_EPIC = environ.get("JIRA_COPY_UPDATES_EPIC")
