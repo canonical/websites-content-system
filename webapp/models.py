@@ -130,7 +130,6 @@ class JiraTask(db.Model, DateTimeMixin):
     webpage_id: int = Column(Integer, ForeignKey("webpages.id"))
     user_id: int = Column(Integer, ForeignKey("users.id"))
     status: str = Column(String, default=JIRATaskStatus.TRIAGED)
-    created_at: str = Column(String)
 
     webpages = relationship("Webpage", back_populates="jira_tasks")
     user = relationship("User", back_populates="jira_tasks")
