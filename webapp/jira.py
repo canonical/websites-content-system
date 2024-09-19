@@ -158,9 +158,9 @@ class Jira:
                 "parent": parent,
                 "project": {"id": "10492"},  # Web and Design-ENG
                 "components": [
-                    {"id": "12655"},
-                    {"id": "12628"},
-                ],  # Sites Tribe, Infrastructure
+                    {"id": "12655"},  # Sites Tribe
+                    {"id": "12628"},  # Infrastructure
+                ],
             },
             "update": {},
         }

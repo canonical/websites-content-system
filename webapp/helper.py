@@ -39,7 +39,7 @@ def create_jira_task(app, task):
     get_or_create(
         db.session,
         JiraTask,
-        jira_id=issue["id"],
+        jira_id=issue["key"],
         webpage_id=task["webpage_id"],
         user_id=task["reporter_id"],
     )
