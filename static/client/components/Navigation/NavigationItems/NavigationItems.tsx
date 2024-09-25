@@ -6,7 +6,10 @@ const NavigationItems = (): React.ReactNode => {
 
   return selectedProject ? (
     <ul aria-multiselectable="true" className="p-list-tree" key={selectedProject.name} role="tree">
-      <NavigationElement isRoot page={selectedProject.templates} project={selectedProject.name} />
+      {selectedProject.templates?.children?.length &&
+        selectedProject.templates.children.map((page) => (
+          <NavigationElement page={page} project={selectedProject.name} />
+        ))}
     </ul>
   ) : null;
 };

@@ -7,7 +7,7 @@ import { type INavigationElementProps } from "./NavigationElement.types";
 import type { IPage } from "@/services/api/types/pages";
 import { NavigationServices } from "@/services/navigation";
 
-const NavigationElement = ({ page, project, isRoot }: INavigationElementProps): JSX.Element => {
+const NavigationElement = ({ page, project }: INavigationElementProps): JSX.Element => {
   const [expanded, setExpanded] = useState(false);
   const [childrenHidden, setChildrenHidden] = useState(true);
   const [children, setChildren] = useState<IPage[]>([]);
@@ -70,7 +70,7 @@ const NavigationElement = ({ page, project, isRoot }: INavigationElementProps): 
               onClick={toggleElement}
               ref={expandButtonRef}
             >
-              {isRoot ? project : NavigationServices.formatPageName(page.name)}
+              {NavigationServices.formatPageName(page.name)}
             </button>
           </>
           <ul
