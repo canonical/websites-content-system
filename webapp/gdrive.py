@@ -39,13 +39,14 @@ class GoogleDriveClient:
         """
         Create a copydoc from a template. The document is created in the
         """
+        parents = [self.GOOGLE_DRIVE_FOLDER_ID]
         # Create a folder if it does not exist
         if not self.find_folder(webpage.project.name):
-            self.create_folder(webpage.project.name)
+            parents = [self.create_folder(webpage.project.name)]
         try:
             copy_metadata = {
                 "name": webpage.url,
-                "parents": [self.GOOGLE_DRIVE_FOLDER_ID],
+                "parents": parents,
             }
             copy = (
                 self.service.files()
