@@ -82,10 +82,13 @@ class GoogleDriveClient:
 
     def find_folder(service, folder_name):
         """
-        Check if a folder with the given name exists in Google Drive, to prevent
-        creating duplicate folders.
+        Check if a folder with the given name exists in Google Drive, to
+        prevent creating duplicate folders.
         """
-        query = f"name = '{folder_name}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+        query = (
+            f"name = '{folder_name}' and mimeType = "
+            "'application/vnd.google-apps.folder' and trashed = false"
+        )
         results = (
             service.files()
             .list(
