@@ -1,5 +1,6 @@
 import base64
 import os
+import tempfile
 
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
@@ -8,8 +9,10 @@ from googleapiclient.errors import HttpError
 
 class GoogleDriveClient:
     # If modifying these scopes, delete the file token.json.
-    SCOPES = ["https://www.googleapis.com/auth/drive.metadata.readonly"]
-    SERVICE_ACCOUNT_FILE = "webapp/local-creds.json"
+    SCOPES = [
+        "https://www.googleapis.com/auth/drive.metadata.readonly",
+        "https://www.googleapis.com/auth/drive.file",
+    ]
     GOOGLE_DRIVE_FOLDER_ID = (
         "0B4s80tIYQW4BMjNiMGFmNzQtNDkxZC00YmQ0LWJiZWUtNTk2YThlY2MzZmJh"
     )
@@ -20,22 +23,26 @@ class GoogleDriveClient:
         self.service = self._build_service()
 
     def _get_credentials(self):
-        """Load credentials from a base64 encoded environment variable."""
+        """
+        Load credentials from a base64 encoded environment variable.
+        """
         credentials_text = os.getenv("GOOGLE_SERVICE_ACCOUNT")
-        with open("service_account.json", "w") as f:
+        with tempfile.NamedTemporaryFile(delete_on_close=False) as f:
             f.write(base64.decode(credentials_text))
+            f.close()
 
-        return service_account.Credentials.from_service_account_file(
-            self.SERVICE_ACCOUNT_FILE,
-            scopes=self.SCOPES,
-        )
+            return service_account.Credentials.from_service_account_file(
+                f.name,
+                scopes=self.SCOPES,
+            )
 
     def _build_service(self):
         return build("drive", "v3", credentials=self.credentials)
 
     def create_copydoc_from_template(self, webpage):
         """
-        Create a copydoc from a template. The document is created in the
+        Create a copydoc from a template. The document is created in the folder
+        for the webpage project.
         """
         parents = [self.GOOGLE_DRIVE_FOLDER_ID]
         # Create a folder if it does not exist
