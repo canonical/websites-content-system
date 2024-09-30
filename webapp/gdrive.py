@@ -10,12 +10,10 @@ class GoogleDriveClient:
     # If modifying these scopes, delete the file token.json.
     SCOPES = ["https://www.googleapis.com/auth/drive.metadata.readonly"]
     SERVICE_ACCOUNT_FILE = "webapp/local-creds.json"
-    # GOOGLE_DRIVE_FOLDER_ID = (
-    #     "0B4s80tIYQW4BMjNiMGFmNzQtNDkxZC00YmQ0LWJiZWUtNTk2YThlY2MzZmJh"
-    # )
-    # COPYD0C_TEMPLATE_ID = "1EPA_Ea8ShIvyftAc9oVxZYUIMHfAPFF6S5x6FOvLkwM"
-    GOOGLE_DRIVE_FOLDER_ID = "1EIFOGJ8DIWpsYIfWk7Yos3YijZIkbJDk"
-    COPYD0C_TEMPLATE_ID = "125auRsLQukYH-tKN1oEKaksmpCXd_DTGiswvmbeS2iA"
+    GOOGLE_DRIVE_FOLDER_ID = (
+        "0B4s80tIYQW4BMjNiMGFmNzQtNDkxZC00YmQ0LWJiZWUtNTk2YThlY2MzZmJh"
+    )
+    COPYD0C_TEMPLATE_ID = "1EPA_Ea8ShIvyftAc9oVxZYUIMHfAPFF6S5x6FOvLkwM"
 
     def __init__(self):
         self.credentials = self._get_credentials()
