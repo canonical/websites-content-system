@@ -68,6 +68,11 @@ production:
   nginxConfigurationSnippet: |
     more_set_headers "X-Robots-Tag: noindex";
     more_set_headers "Link: <https://assets.ubuntu.com>; rel=preconnect; crossorigin, <https://assets.ubuntu.com>; rel=preconnect";
+  env:
+    - name: DATABASE_URL
+      secretKeyRef:
+        key: websites-content-system
+        name: database-urls
 
 # Overrides for staging
 staging:
@@ -75,3 +80,8 @@ staging:
   nginxConfigurationSnippet: |
     more_set_headers "X-Robots-Tag: noindex";
     more_set_headers "Link: <https://assets.ubuntu.com>; rel=preconnect; crossorigin, <https://assets.ubuntu.com>; rel=preconnect";
+  env:
+    - name: DATABASE_URL
+      secretKeyRef:
+        key: websites-content-system
+        name: database-urls
