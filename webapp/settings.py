@@ -7,9 +7,7 @@ REPO_ORG = environ.get("REPO_ORG", "https://github.com/canonical")
 GH_TOKEN = environ.get("GH_TOKEN", "")
 SECRET_KEY = environ.get("SECRET_KEY")
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SQLALCHEMY_DATABASE_URI = environ.get(
-    "SQLALCHEMY_DATABASE_URI", "sqlite:///project.db"
-)
+SQLALCHEMY_DATABASE_URI = environ.get("DATABASE_URL", "sqlite:///project.db")
 JIRA_EMAIL = environ.get("JIRA_EMAIL")
 JIRA_TOKEN = environ.get("JIRA_TOKEN")
 JIRA_URL = environ.get("JIRA_URL")
