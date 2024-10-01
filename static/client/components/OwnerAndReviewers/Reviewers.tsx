@@ -7,21 +7,22 @@ import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
 import { PagesServices } from "@/services/api/services/pages";
 import { type IUser } from "@/services/api/types/users";
 
-const Reviewers = ({ page }: IOwnerAndReviewersProps): JSX.Element => {
+const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): JSX.Element => {
   const [currentReviewers, setCurrentReviewers] = useState<IUser[]>([]);
   const { options, setOptions, handleChange } = useUsersRequest();
 
   useEffect(() => {
-    setCurrentReviewers(page.reviewers);
+    if (page) setCurrentReviewers(page.reviewers);
   }, [page]);
 
   const handleRemoveReviewer = useCallback(
     (option?: IUser) => () => {
       const newReviewers = currentReviewers.filter((r) => r.id !== option?.id);
       setCurrentReviewers(newReviewers);
-      PagesServices.setReviewers(newReviewers, page.id);
+      if (page) PagesServices.setReviewers(newReviewers, page.id);
+      if (onSelectReviewers) onSelectReviewers(newReviewers);
     },
-    [currentReviewers, page],
+    [currentReviewers, page, onSelectReviewers],
   );
 
   const selectReviewer = useCallback(
@@ -30,14 +31,17 @@ const Reviewers = ({ page }: IOwnerAndReviewersProps): JSX.Element => {
       // proceed with setting the reviewer only if not
       if (!currentReviewers.find((r) => r.email === option.email)) {
         const newReviewers = [...currentReviewers, option];
-        PagesServices.setReviewers(newReviewers, page.id);
+        if (page) {
+          PagesServices.setReviewers(newReviewers, page.id);
+          // mutate the tree structure element to reflect the recent change
+          page.reviewers = newReviewers;
+        }
         setOptions([]);
         setCurrentReviewers(newReviewers);
-        // mutate the tree structure element to reflect the recent change
-        page.reviewers = newReviewers;
+        if (onSelectReviewers) onSelectReviewers(newReviewers);
       }
     },
-    [page, currentReviewers, setOptions],
+    [page, currentReviewers, setOptions, onSelectReviewers],
   );
 
   return (

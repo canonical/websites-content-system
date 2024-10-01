@@ -41,6 +41,7 @@ def get_tree(uri: str, branch="main"):
 
 @app.route("/", defaults={"path": ""})
 @app.route("/webpage/<path:path>")
+@app.route("/new-webpage", defaults={"path": ""})
 @login_required
 def index(path):
     return render_template("index.html")

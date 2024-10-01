@@ -1,26 +1,20 @@
 import React, { type MouseEvent, useCallback, useEffect, useRef, useState } from "react";
 
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 import { type INavigationElementProps } from "./NavigationElement.types";
 
 import type { IPage } from "@/services/api/types/pages";
 import { NavigationServices } from "@/services/navigation";
 
-const NavigationElement = ({ page, project }: INavigationElementProps): JSX.Element => {
+const NavigationElement = ({ activePageName, page, project, onSelect }: INavigationElementProps): JSX.Element => {
   const [expanded, setExpanded] = useState(false);
   const [childrenHidden, setChildrenHidden] = useState(true);
   const [children, setChildren] = useState<IPage[]>([]);
-  const [isActive, setIsActive] = useState(false);
 
-  const navigate = useNavigate();
   const location = useLocation();
 
   const expandButtonRef = useRef<HTMLButtonElement>(null);
-
-  const selectPage = useCallback(() => {
-    navigate(`/webpage/${project}${page.name}`);
-  }, [page, project, navigate]);
 
   const toggleElement = useCallback(
     (e: MouseEvent<HTMLButtonElement>) => {
@@ -29,11 +23,15 @@ const NavigationElement = ({ page, project }: INavigationElementProps): JSX.Elem
         setExpanded((prevValue) => !prevValue);
         setChildrenHidden((prevValue) => !prevValue);
       } else {
-        selectPage();
+        onSelect(page.name);
       }
     },
-    [expandButtonRef, selectPage],
+    [expandButtonRef, page, onSelect],
   );
+
+  const handleSelect = useCallback(() => {
+    onSelect(page.name);
+  }, [page, onSelect]);
 
   useEffect(() => {
     if (page.name === "" || location.pathname.indexOf(`${project}${page.name}`) > 0) {
@@ -52,20 +50,19 @@ const NavigationElement = ({ page, project }: INavigationElementProps): JSX.Elem
     }
   }, [page?.children]);
 
-  // highlight the current page
-  useEffect(() => {
-    setIsActive(location.pathname === `/webpage/${project}${page.name}`);
-  }, [location, page, project]);
-
   return (
-    <li className={`p-list-tree__item ${children.length ? "p-list-tree__item--group" : ""}`}>
+    <li
+      aria-selected={page.name === activePageName}
+      className={`p-list-tree__item ${children.length ? "p-list-tree__item--group" : ""} ${page.name === activePageName ? "is-active" : ""}`}
+      role="treeitem"
+    >
       {children.length ? (
         <>
           <>
             <button
               aria-controls={page.name}
               aria-expanded={expanded}
-              className={`p-list-tree__toggle l-page-link ${isActive ? "is-active" : ""}`}
+              className={`p-list-tree__toggle ${page.name === activePageName ? "is-active" : ""}`}
               id={`${page.name}-btn`}
               onClick={toggleElement}
               ref={expandButtonRef}
@@ -82,13 +79,13 @@ const NavigationElement = ({ page, project }: INavigationElementProps): JSX.Elem
           >
             {children.map((page, index) => (
               <React.Fragment key={`${page.name}-${index}`}>
-                <NavigationElement page={page} project={project} />
+                <NavigationElement activePageName={activePageName} onSelect={onSelect} page={page} project={project} />
               </React.Fragment>
             ))}
           </ul>
         </>
       ) : (
-        <div className={`l-page-link ${isActive ? "is-active" : ""}`} onClick={selectPage}>
+        <div className={`p-list-tree__link ${page.name === activePageName ? "is-active" : ""}`} onClick={handleSelect}>
           {NavigationServices.formatPageName(page.name)}
         </div>
       )}

@@ -1,7 +1,8 @@
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 import { Button } from "@canonical/react-components";
 import classNames from "classnames";
+import { useNavigate } from "react-router-dom";
 
 import NavigationBanner from "./NavigationBanner";
 import NavigationItems from "./NavigationItems";
@@ -10,11 +11,16 @@ import NavigationCollapseToggle from "@/components/Navigation/NavigationCollapse
 import SiteSelector from "@/components/SiteSelector";
 
 const Navigation = (): JSX.Element => {
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const logout = useCallback(() => {
     window.open("/logout", "_self");
   }, []);
+
+  const handleNewPageClick = useCallback(() => {
+    navigate("/new-webpage");
+  }, [navigate]);
 
   return (
     <>
@@ -39,6 +45,11 @@ const Navigation = (): JSX.Element => {
                 <NavigationCollapseToggle isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
               </div>
               <SiteSelector />
+              <Button appearance="" hasIcon onClick={handleNewPageClick}>
+                <React.Fragment key=".0">
+                  <i className="p-icon--plus" /> <span>Request new page</span>
+                </React.Fragment>
+              </Button>
             </div>
             <div className="p-panel__content">
               <NavigationItems />
