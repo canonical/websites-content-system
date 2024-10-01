@@ -13,14 +13,12 @@ class GoogleDriveClient:
         "https://www.googleapis.com/auth/drive.metadata.readonly",
         "https://www.googleapis.com/auth/drive.file",
     ]
-    GOOGLE_DRIVE_FOLDER_ID = (
-        "0B4s80tIYQW4BMjNiMGFmNzQtNDkxZC00YmQ0LWJiZWUtNTk2YThlY2MzZmJh"
-    )
-    COPYD0C_TEMPLATE_ID = "1EPA_Ea8ShIvyftAc9oVxZYUIMHfAPFF6S5x6FOvLkwM"
 
     def __init__(self):
         self.credentials = self._get_credentials()
         self.service = self._build_service()
+        self.GOOGLE_DRIVE_FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
+        self.COPYD0C_TEMPLATE_ID = os.getenv("COPYD0C_TEMPLATE_ID")
 
     def _get_credentials(self):
         """

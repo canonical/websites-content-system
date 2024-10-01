@@ -46,6 +46,21 @@ env:
 
   - name: JIRA_COPY_UPDATES_EPIC
     value: "WD-12643"
+  
+  - name: GOOGLE_SERVICE_ACCOUNT
+    secretKeyRef:
+      key: google-service-account
+      name: cms-jira
+  
+  - name: GOOGLE_DRIVE_FOLDER_ID
+    secretKeyRef:
+      key: google-drive-folder-id
+      name: cms-jira
+  
+  - name: COPYDOC_TEMPLATE_ID
+    secretKeyRef:
+      key: copydoc-template-id
+      name: cms-jira
 
 # Overrides for production
 production:
