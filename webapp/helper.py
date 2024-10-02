@@ -48,5 +48,9 @@ def create_jira_task(app, task):
     # Create a new copydoc if the request is a new webpage
     if task["type"] == jira.NEW_WEBPAGE:
         webpage = Webpage.query.filter_by(id=task["webpage_id"]).first()
-        client = GoogleDriveClient()
+        client = GoogleDriveClient(
+            credentials=app.config["GOOGLE_SERVICE_ACCOUNT"],
+            drive_folder_id=app.config["GOOGLE_DRIVE_FOLDER_ID"],
+            copydoc_template_id=app.config["COPYD0C_TEMPLATE_ID"],
+        )
         client.create_copydoc_from_template(webpage)

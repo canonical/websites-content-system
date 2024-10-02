@@ -1,5 +1,4 @@
 import base64
-import os
 import tempfile
 
 from google.oauth2 import service_account
@@ -14,17 +13,18 @@ class GoogleDriveClient:
         "https://www.googleapis.com/auth/drive.file",
     ]
 
-    def __init__(self):
-        self.credentials = self._get_credentials()
+    def __init__(
+        self, credentials=None, drive_folder_id=None, copydoc_template_id=None
+    ):
+        self.credentials = self._get_credentials(credentials_text=credentials)
         self.service = self._build_service()
-        self.GOOGLE_DRIVE_FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
-        self.COPYD0C_TEMPLATE_ID = os.getenv("COPYD0C_TEMPLATE_ID")
+        self.GOOGLE_DRIVE_FOLDER_ID = drive_folder_id
+        self.COPYD0C_TEMPLATE_ID = copydoc_template_id
 
-    def _get_credentials(self):
+    def _get_credentials(self, credentials_text=None):
         """
         Load credentials from a base64 encoded environment variable.
         """
-        credentials_text = os.getenv("GOOGLE_SERVICE_ACCOUNT")
         with tempfile.NamedTemporaryFile(delete_on_close=False) as f:
             f.write(base64.decode(credentials_text))
             f.close()
