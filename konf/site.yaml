@@ -80,3 +80,60 @@ staging:
       secretKeyRef:
         key: websites-content-system
         name: database-urls
+
+# Overrides for demos
+demo:
+  env:
+    - name: VALKEY_HOST
+      secretKeyRef:
+        key: host
+        name: webteam-valkey
+
+    - name: VALKEY_PORT
+      secretKeyRef:
+        key: port
+        name: webteam-valkey
+
+    - name: GH_TOKEN
+      secretKeyRef:
+        key: github
+        name: webteam-valkey
+
+    - name: DIRECTORY_API_TOKEN
+      secretKeyRef:
+        key: token
+        name: directory-api
+
+    - name: JIRA_EMAIL
+      secretKeyRef:
+        key: jira-email
+        name: cms-jira
+
+    - name: JIRA_TOKEN
+      secretKeyRef:
+        key: jira-token
+        name: cms-jira
+
+    - name: JIRA_URL
+      value: "https://warthogs.atlassian.net"
+
+    - name: JIRA_LABELS
+      value: "sites_BAU"
+
+    - name: JIRA_COPY_UPDATES_EPIC
+      value: "WD-12643"
+
+    - name: GOOGLE_SERVICE_ACCOUNT
+      secretKeyRef:
+        key: google-service-account
+        name: cms-jira
+
+    - name: GOOGLE_DRIVE_FOLDER_ID
+      secretKeyRef:
+        key: google-drive-folder-id
+        name: cms-jira
+
+    - name: COPYDOC_TEMPLATE_ID
+      secretKeyRef:
+        key: copydoc-template-id
+        name: cms-jira
