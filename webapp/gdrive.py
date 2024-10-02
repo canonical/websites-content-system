@@ -103,19 +103,3 @@ class GoogleDriveClient:
 
         items = results.get("files", [])
         return items
-
-    def list_files(self, page_size=10):
-        try:
-            results = (
-                self.service.files()
-                .list(
-                    pageSize=page_size,
-                    fields="nextPageToken, files(id, name)",
-                )
-                .execute()
-            )
-            items = results.get("files", [])
-            return items
-        except HttpError as error:
-            print(f"An error occurred: {error}")
-            return None
