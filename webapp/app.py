@@ -6,7 +6,7 @@ from flask_pydantic import validate
 
 from webapp import create_app
 from webapp.helper import create_jira_task, get_or_create_user_id
-from webapp.models import Reviewer, Webpage, db, get_or_create
+from webapp.models import Reviewer, Webpage, JiraTask, db, get_or_create
 from webapp.schemas import (
     ChangesRequestModel,
 )
@@ -140,3 +140,28 @@ def request_changes(body: ChangesRequestModel):
         return jsonify(str(e)), 500
 
     return jsonify("Task created successfully"), 201
+
+
+@app.route("/get-jira-tasks/<webpage_id>", methods=["GET"])
+def get_jira_tasks(webpage_id: int):
+    jira_tasks = (
+        JiraTask.query.filter_by(webpage_id=webpage_id)
+                .order_by(JiraTask.created_at)
+                .all()
+    )
+    if jira_tasks:
+        tasks = []
+        for task in jira_tasks:
+            tasks.append(
+                {
+                    "id": task.id,
+                    "jira_id": task.jira_id,
+                    "status": task.status,
+                    "webpage_id": task.webpage_id,
+                    "user_id": task.user_id,
+                    "created_at": task.created_at,
+                }
+            )
+        return jsonify(tasks), 200
+    else:
+        return jsonify({"error": "Failed to fetch Jira tasks"}), 500

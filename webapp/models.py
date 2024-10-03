@@ -113,6 +113,7 @@ class Reviewer(db.Model, DateTimeMixin):
     user = relationship("User", back_populates="reviewers")
     webpages = relationship("Webpage", back_populates="reviewers")
 
+
 class JIRATaskStatus:
     TRIAGED = "TRIAGED"
     UNTRIAGED = "UNTRIAGED"
@@ -121,6 +122,7 @@ class JIRATaskStatus:
     TO_BE_DEPLOYED = "TO_BE_DEPLOYED"
     DONE = "DONE"
     REJECTED = "REJECTED"
+
 
 class JiraTask(db.Model, DateTimeMixin):
     __tablename__ = "jira_tasks"
