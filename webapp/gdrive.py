@@ -22,7 +22,7 @@ class GoogleDriveClient:
         Load credentials from a file."""
 
         return service_account.Credentials.from_service_account_file(
-            f"{BASE_DIR}/credentials.json",
+            f"{BASE_DIR}/credentials/credentials.json",
             scopes=self.SCOPES,
         )
 

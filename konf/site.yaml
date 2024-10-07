@@ -42,11 +42,6 @@ env:
   - name: JIRA_COPY_UPDATES_EPIC
     value: "WD-12643"
 
-  - name: GOOGLE_SERVICE_ACCOUNT
-    secretKeyRef:
-      key: google-service-account
-      name: cms-jira
-
   - name: GOOGLE_DRIVE_FOLDER_ID
     secretKeyRef:
       key: google-drive-folder-id
@@ -122,11 +117,6 @@ demo:
 
     - name: JIRA_COPY_UPDATES_EPIC
       value: "WD-12643"
-
-    - name: GOOGLE_SERVICE_ACCOUNT
-      secretKeyRef:
-        key: google-service-account
-        name: cms-jira
 
     - name: GOOGLE_DRIVE_FOLDER_ID
       secretKeyRef:
