@@ -8,6 +8,8 @@ Backend service for the CMS template parser
 
 Before starting, update the environment variables if needed. The default values will work for docker, save the `GH_TOKEN` which must be manually set. You can create a token [here](https://github.com/settings/tokens), by following [these](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) instructions. Make sure to select the `repo` scope for the token.
 
+You will also require a credentials file for google drive. Please store it as credentials.json in the parent directory.
+
 ```env
 PORT=8104
 FLASK_DEBUG=true
@@ -25,7 +27,6 @@ JIRA_TOKEN=jiratoken
 JIRA_URL=https://warthogs.atlassian.net
 JIRA_LABELS=sites_BAU
 JIRA_COPY_UPDATES_EPIC=WD-12643
-GOOGLE_SERVICE_ACCOUNT=base64encodedjsonfile
 GOOGLE_DRIVE_FOLDER_ID=1EIFOGJ8DIWpsYIfWk7Yos3YijZIkbJDk
 COPYD0C_TEMPLATE_ID=125auRsLQukYH-tKN1oEKaksmpCXd_DTGiswvmbeS2iA
 ```
