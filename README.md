@@ -16,6 +16,18 @@ DEVEL=True
 VALKEY_HOST=0.0.0.0
 VALKEY_PORT=6379
 GH_TOKEN=ghp_somepersonaltoken
+REPO_ORG=https://github.com/canonical
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/content
+TASK_DELAY=30
+DIRECTORY_API_TOKEN=token
+JIRA_EMAIL=example@canonical.com
+JIRA_TOKEN=jiratoken
+JIRA_URL=https://warthogs.atlassian.net
+JIRA_LABELS=sites_BAU
+JIRA_COPY_UPDATES_EPIC=WD-12643
+GOOGLE_SERVICE_ACCOUNT=base64encodedjsonfile
+GOOGLE_DRIVE_FOLDER_ID=1EIFOGJ8DIWpsYIfWk7Yos3YijZIkbJDk
+COPYD0C_TEMPLATE_ID=125auRsLQukYH-tKN1oEKaksmpCXd_DTGiswvmbeS2iA
 ```
 
 ### Using docker
