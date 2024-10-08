@@ -117,8 +117,8 @@ jobs:
           pip install -r requirements.txt
       - name: Run service
         env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
+          GOOGLE_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
           SECRET_KEY: secret_key
           VALKEY_HOST: localhost
@@ -164,8 +164,8 @@ jobs:
 
       - name: Run image
         env:
-          PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
+          GOOGLE_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
         run: |
           docker run \
           -p 8104:8104 \
@@ -182,8 +182,8 @@ jobs:
           -e JIRA_COPY_UPDATES_EPIC=WD-9999999 \
           -e GOOGLE_DRIVE_FOLDER_ID=folderid \
           -e COPYDOC_TEMPLATE_ID=templateid \
-          -e PRIVATE_KEY="$PRIVATE_KEY" \
-          -e PRIVATE_KEY_ID="$PRIVATE_KEY_ID" \
+          -e GOOGLE_PRIVATE_KEY="$PRIVATE_KEY" \
+          -e GOOGLE_PRIVATE_KEY_ID="$PRIVATE_KEY_ID" \
           --network host \
           websites-content-system & sleep 1
           curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost

@@ -19,8 +19,8 @@ COPYD0C_TEMPLATE_ID = environ.get("COPYD0C_TEMPLATE_ID")
 GOOGLE_CREDENTIALS = {
     "type": "service_account",
     "project_id": "web-engineering-436014",
-    "private_key_id": environ.get("PRIVATE_KEY_ID"),
-    "private_key": base64.b64decode(environ.get("PRIVATE_KEY")).replace(
+    "private_key_id": environ.get("GOOGLE_PRIVATE_KEY_ID"),
+    "private_key": base64.b64decode(environ.get("GOOGLE_PRIVATE_KEY")).replace(
         b"\\n", b"\n"
     ),
     "client_email": "websites-copy-docs-627@web-engineering-436014.iam.gserviceaccount.com",  # noqa: E501

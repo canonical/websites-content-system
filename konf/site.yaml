@@ -52,14 +52,14 @@ env:
       key: copydoc-template-id
       name: cs-canonical-com
 
-  - name: PRIVATE_KEY
+  - name: GOOGLE_PRIVATE_KEY
     secretKeyRef:
-      key: private-key
+      key: google-private-key
       name: cs-canonical-com
   
-  - name: PRIVATE_KEY_ID
+  - name: GOOGLE_PRIVATE_KEY_ID
     secretKeyRef:
-      key: private-key-id
+      key: google-private-key-id
       name: cs-canonical-com
 
 # Overrides for production
@@ -138,12 +138,12 @@ demo:
         key: copydoc-template-id
         name: cs-canonical-com
 
-    - name: PRIVATE_KEY
+    - name: GOOGLE_PRIVATE_KEY
       secretKeyRef:
-        key: private-key
+        key: google-private-key
         name: cs-canonical-com
     
-    - name: PRIVATE_KEY_ID
+    - name: GOOGLE_PRIVATE_KEY_ID
       secretKeyRef:
-        key: private-key-id
+        key: google-private-key-id
         name: cs-canonical-com
