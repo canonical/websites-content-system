@@ -48,4 +48,4 @@ def create_jira_task(app, task):
     if task["type"] == jira.NEW_WEBPAGE:
         webpage = Webpage.query.filter_by(id=task["webpage_id"]).first()
         client = app.config["gdrive"]
-        client.create_copydoc_from_template(webpage)
+        return client.create_copydoc_from_template(webpage)

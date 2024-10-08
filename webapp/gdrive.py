@@ -93,7 +93,7 @@ class GoogleDriveClient:
         """
         Create a folder hierarchy in Google Drive for a webpage.
         """
-        folders = [f for f in webpage.url.split("/")[:-1] if f != ""]
+        folders = [f"/{f}" for f in webpage.url.split("/")[:-1] if f != ""]
         # Check if the project folder exists, or create one
         if not (
             parent := self._item_exists(
@@ -147,10 +147,9 @@ class GoogleDriveClient:
         webpage_folder = self.build_webpage_folder(webpage)
 
         # Clone the template document to the new folder
-        doc_name = f'{webpage.url} - "{webpage.title}"'
-        self.copy_file(
+        return self.copy_file(
             fileID=self.COPYD0C_TEMPLATE_ID,
-            name=doc_name,
+            name=webpage.url,
             parents=webpage_folder,
         )
 
