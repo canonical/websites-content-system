@@ -93,7 +93,7 @@ class GoogleDriveClient:
         """
         Create a folder hierarchy in Google Drive for a webpage.
         """
-        folders = webpage.url.split("/")[:-1]
+        folders = [f for f in webpage.url.split("/")[:-1] if f != ""]
         # Check if the project folder exists, or create one
         if not (
             parent := self._item_exists(
@@ -106,9 +106,9 @@ class GoogleDriveClient:
 
         # Create subfolders
         for folder in folders:
-            if folder != "":
+            if not (folder_id := self._item_exists(folder, parent)):
                 folder_id = self.create_folder(folder, parent)
-                parent = folder_id
+            parent = folder_id
 
         # Return the last parent folder
         return parent
