@@ -1,3 +1,17 @@
+from webapp.tasks import LOCKS
+from webapp.sso import login_required
+from webapp.site_repository import SiteRepository
+from webapp.schemas import (
+    ChangesRequestModel,
+)
+from webapp.models import (
+  Reviewer,
+  Webpage,
+  JiraTask,
+  db,
+  get_or_create,
+  WebpageStatus
+)
 from os import environ
 
 import requests
@@ -5,20 +19,18 @@ from flask import jsonify, render_template, request
 from flask_pydantic import validate
 
 from webapp import create_app
-from webapp.helper import create_jira_task, get_or_create_user_id
-from webapp.models import Reviewer, Webpage, JiraTask, db, get_or_create
-from webapp.schemas import (
-    ChangesRequestModel,
+from webapp.helper import (
+    create_jira_task,
+    get_or_create_user_id,
+    get_project_id,
+    get_webpage_id,
 )
-from webapp.site_repository import SiteRepository
-from webapp.sso import login_required
-from webapp.tasks import LOCKS
 
 app = create_app()
 
 
-@app.route("/get-tree/<string:uri>", methods=["GET"])
-@app.route("/get-tree/<string:uri>/<string:branch>", methods=["GET"])
+@app.route("/api/get-tree/<string:uri>", methods=["GET"])
+@app.route("/api/get-tree/<string:uri>/<string:branch>", methods=["GET"])
 @login_required
 def get_tree(uri: str, branch="main"):
     site_repository = SiteRepository(uri, app, branch=branch, task_locks=LOCKS)
@@ -41,13 +53,13 @@ def get_tree(uri: str, branch="main"):
 
 @app.route("/", defaults={"path": ""})
 @app.route("/webpage/<path:path>")
-@app.route("/new-webpage", defaults={"path": ""})
+@app.route("/new-webpage")
 @login_required
 def index(path):
     return render_template("index.html")
 
 
-@app.route("/get-users/<username>", methods=["GET"])
+@app.route("/api/get-users/<username>", methods=["GET"])
 @login_required
 def get_users(username: str):
     query = """
@@ -84,7 +96,7 @@ def get_users(username: str):
         return jsonify({"error": "Failed to fetch users"}), 500
 
 
-@app.route("/set-reviewers", methods=["POST"])
+@app.route("/api/set-reviewers", methods=["POST"])
 @login_required
 def set_reviewers():
     data = request.get_json()
@@ -104,14 +116,13 @@ def set_reviewers():
 
     # Create new reviewer rows
     for user_id in user_ids:
-        get_or_create(
-            db.session, Reviewer, user_id=user_id, webpage_id=webpage_id
-        )
+        get_or_create(db.session, Reviewer, user_id=user_id,
+                      webpage_id=webpage_id)
 
     return jsonify({"message": "Successfully set reviewers"}), 200
 
 
-@app.route("/set-owner", methods=["POST"])
+@app.route("/api/set-owner", methods=["POST"])
 @login_required
 def set_owner():
     data = request.get_json()
@@ -129,7 +140,7 @@ def set_owner():
     return jsonify({"message": "Successfully set owner"}), 200
 
 
-@app.route("/request-changes", methods=["POST"])
+@app.route("/api/request-changes", methods=["POST"])
 @login_required
 @validate()
 def request_changes(body: ChangesRequestModel):
@@ -167,3 +178,46 @@ def get_jira_tasks(webpage_id: int):
         return jsonify(tasks), 200
     else:
         return jsonify({"error": "Failed to fetch Jira tasks"}), 500
+    return jsonify("Task created successfully"), 201
+
+
+@app.route("/api/create-page", methods=["POST"])
+@login_required
+def create_page():
+    data = request.get_json()
+
+    project = data.get("project")
+    name = data.get("name")
+    copy_doc = data.get("copy_doc")
+    owner = data.get("owner")
+    reviewers = data.get("reviewers")
+    parent = data.get("parent")
+
+    owner_id = get_or_create_user_id(owner)
+    reviewer_ids = []
+    for reviewer in reviewers:
+        reviewer_ids.append(get_or_create_user_id(reviewer))
+
+    # Create new webpage
+    project_id = get_project_id(project)
+    new_webpage = get_or_create(
+        db.session,
+        Webpage,
+        True,
+        project_id=project_id,
+        name=name,
+        url=name,
+        parent_id=get_webpage_id(parent, project_id),
+        owner_id=owner_id,
+        status=WebpageStatus.NEW,
+    )
+
+    # Create new reviewer rows
+    for reviewer_id in reviewer_ids:
+        get_or_create(
+            db.session, Reviewer, user_id=reviewer_id, webpage_id=new_webpage
+        )
+
+    return jsonify({
+        "copy_doc": copy_doc,
+    }), 201

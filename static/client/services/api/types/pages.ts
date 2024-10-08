@@ -1,10 +1,10 @@
 import type { IUser } from "./users";
 
 export interface IPage {
-  id: number;
+  id?: number;
   name: string;
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   link: string;
   owner: IUser;
   reviewers: IUser[];
@@ -16,4 +16,17 @@ export interface IPagesResponse {
     name: string;
     templates: IPage;
   };
+}
+
+export interface INewPage {
+  name: string;
+  link: string | undefined;
+  owner: IUser;
+  reviewers: IUser[];
+  project: string;
+  parent: string;
+}
+
+export interface INewPageResponse {
+  copy_doc: string;
 }

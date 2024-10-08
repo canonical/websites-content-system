@@ -1,4 +1,4 @@
-from webapp.models import JiraTask, User, Webpage, db, get_or_create
+from webapp.models import JiraTask, User, Project, Webpage, db, get_or_create
 
 
 def get_or_create_user_id(user):
@@ -49,3 +49,13 @@ def create_jira_task(app, task):
         webpage = Webpage.query.filter_by(id=task["webpage_id"]).first()
         client = app.config["gdrive"]
         return client.create_copydoc_from_template(webpage)
+
+
+def get_project_id(project_name):
+    project = Project.query.filter_by(name=project_name).first()
+    return project.id
+
+
+def get_webpage_id(name, project_id):
+    webpage = Webpage.query.filter_by(name=name, project_id=project_id).first()
+    return webpage.id
