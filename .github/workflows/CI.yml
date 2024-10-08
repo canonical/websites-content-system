@@ -119,10 +119,20 @@ jobs:
         env:
           PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
           PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres
+          SECRET_KEY: secret_key
+          VALKEY_HOST: localhost
+          VALKEY_PORT: 6379
+          GH_TOKEN: token
+          REPO_ORG: https://github.com/canonical
+          JIRA_EMAIL: example@canonical.com
+          JIRA_TOKEN: jiratoken
+          JIRA_URL: https://example.atlassian.net
+          JIRA_LABELS: somelabel
+          JIRA_COPY_UPDATES_EPIC: WD-9999999
+          GOOGLE_DRIVE_FOLDER_ID: folderid
+          COPYDOC_TEMPLATE_ID: templateid
         run: |
-          set -a
-          source .env
-          set +a
           talisker.gunicorn webapp.app:app --daemon --bind 0.0.0.0:8104
           curl --head --fail --retry-delay 1 --retry 30 --retry-connrefused http://localhost:8104
 
@@ -164,7 +174,7 @@ jobs:
           -e VALKEY_PORT=6379 \
           -e GH_TOKEN=token \
           -e REPO_ORG=https://github.com/canonical \
-          -e SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/postgres \
+          -e DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres \
           -e JIRA_EMAIL=example@canonical.com \
           -e JIRA_TOKEN=jiratoken \
           -e JIRA_URL=https://example.atlassian.net \
