@@ -4,25 +4,24 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 
-from webapp.settings import BASE_DIR
-
 
 class GoogleDriveClient:
     # If modifying these scopes, delete the file token.json.
     SCOPES = ["https://www.googleapis.com/auth/drive"]
 
-    def __init__(self, drive_folder_id=None, copydoc_template_id=None):
-        self.credentials = self._get_credentials()
+    def __init__(
+        self, credentials, drive_folder_id=None, copydoc_template_id=None
+    ):
+        self.credentials = self._get_credentials(credentials)
         self.service = self._build_service()
         self.GOOGLE_DRIVE_FOLDER_ID = drive_folder_id
         self.COPYD0C_TEMPLATE_ID = copydoc_template_id
 
-    def _get_credentials(self):
-        """
-        Load credentials from a file."""
+    def _get_credentials(self, credentials):
+        """Load credentials from an object."""
 
-        return service_account.Credentials.from_service_account_file(
-            f"{BASE_DIR}/credentials/credentials.json",
+        return service_account.Credentials.from_service_account_info(
+            credentials,
             scopes=self.SCOPES,
         )
 
@@ -158,6 +157,7 @@ class GoogleDriveClient:
 
 def init_gdrive(app):
     app.config["gdrive"] = GoogleDriveClient(
+        credentials=app.config["GOOGLE_CREDENTIALS"],
         drive_folder_id=app.config["GOOGLE_DRIVE_FOLDER_ID"],
         copydoc_template_id=app.config["COPYD0C_TEMPLATE_ID"],
     )

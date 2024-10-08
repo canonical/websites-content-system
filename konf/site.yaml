@@ -26,12 +26,12 @@ env:
   - name: JIRA_EMAIL
     secretKeyRef:
       key: jira-email
-      name: cms-jira
+      name: cs-canonical-com
 
   - name: JIRA_TOKEN
     secretKeyRef:
       key: jira-token
-      name: cms-jira
+      name: cs-canonical-com
 
   - name: JIRA_URL
     value: "https://warthogs.atlassian.net"
@@ -45,12 +45,22 @@ env:
   - name: GOOGLE_DRIVE_FOLDER_ID
     secretKeyRef:
       key: google-drive-folder-id
-      name: cms-jira
+      name: cs-canonical-com
 
   - name: COPYDOC_TEMPLATE_ID
     secretKeyRef:
       key: copydoc-template-id
-      name: cms-jira
+      name: cs-canonical-com
+
+  - name: PRIVATE_KEY
+    secretKeyRef:
+      key: private-key
+      name: cs-canonical-com
+  
+  - name: PRIVATE_KEY_ID
+    secretKeyRef:
+      key: private-key-id
+      name: cs-canonical-com
 
 # Overrides for production
 production:
@@ -102,12 +112,12 @@ demo:
     - name: JIRA_EMAIL
       secretKeyRef:
         key: jira-email
-        name: cms-jira
+        name: cs-canonical-com
 
     - name: JIRA_TOKEN
       secretKeyRef:
         key: jira-token
-        name: cms-jira
+        name: cs-canonical-com
 
     - name: JIRA_URL
       value: "https://warthogs.atlassian.net"
@@ -121,9 +131,9 @@ demo:
     - name: GOOGLE_DRIVE_FOLDER_ID
       secretKeyRef:
         key: google-drive-folder-id
-        name: cms-jira
+        name: cs-canonical-com
 
     - name: COPYDOC_TEMPLATE_ID
       secretKeyRef:
         key: copydoc-template-id
-        name: cms-jira
+        name: cs-canonical-com
