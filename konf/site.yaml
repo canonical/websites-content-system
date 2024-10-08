@@ -18,11 +18,6 @@ env:
       key: github
       name: webteam-valkey
 
-  - name: SECRET_KEY
-    secretKeyRef:
-      key: websites-content-system
-      name: secret-keys
-
   - name: DIRECTORY_API_TOKEN
     secretKeyRef:
       key: token
@@ -31,12 +26,12 @@ env:
   - name: JIRA_EMAIL
     secretKeyRef:
       key: jira-email
-      name: cms-jira
+      name: cs-canonical-com
 
   - name: JIRA_TOKEN
     secretKeyRef:
       key: jira-token
-      name: cms-jira
+      name: cs-canonical-com
 
   - name: JIRA_URL
     value: "https://warthogs.atlassian.net"
@@ -47,12 +42,37 @@ env:
   - name: JIRA_COPY_UPDATES_EPIC
     value: "WD-12643"
 
+  - name: GOOGLE_DRIVE_FOLDER_ID
+    secretKeyRef:
+      key: google-drive-folder-id
+      name: cs-canonical-com
+
+  - name: COPYDOC_TEMPLATE_ID
+    secretKeyRef:
+      key: copydoc-template-id
+      name: cs-canonical-com
+
+  - name: GOOGLE_PRIVATE_KEY
+    secretKeyRef:
+      key: google-private-key
+      name: cs-canonical-com
+  
+  - name: GOOGLE_PRIVATE_KEY_ID
+    secretKeyRef:
+      key: google-private-key-id
+      name: cs-canonical-com
+
 # Overrides for production
 production:
   replicas: 1
   nginxConfigurationSnippet: |
     more_set_headers "X-Robots-Tag: noindex";
     more_set_headers "Link: <https://assets.ubuntu.com>; rel=preconnect; crossorigin, <https://assets.ubuntu.com>; rel=preconnect";
+  env:
+    - name: DATABASE_URL
+      secretKeyRef:
+        key: websites-content-system
+        name: database-urls
 
 # Overrides for staging
 staging:
@@ -60,3 +80,70 @@ staging:
   nginxConfigurationSnippet: |
     more_set_headers "X-Robots-Tag: noindex";
     more_set_headers "Link: <https://assets.ubuntu.com>; rel=preconnect; crossorigin, <https://assets.ubuntu.com>; rel=preconnect";
+  env:
+    - name: DATABASE_URL
+      secretKeyRef:
+        key: websites-content-system
+        name: database-urls
+
+# Overrides for demos
+demo:
+  env:
+    - name: VALKEY_HOST
+      secretKeyRef:
+        key: host
+        name: webteam-valkey
+
+    - name: VALKEY_PORT
+      secretKeyRef:
+        key: port
+        name: webteam-valkey
+
+    - name: GH_TOKEN
+      secretKeyRef:
+        key: github
+        name: webteam-valkey
+
+    - name: DIRECTORY_API_TOKEN
+      secretKeyRef:
+        key: token
+        name: directory-api
+
+    - name: JIRA_EMAIL
+      secretKeyRef:
+        key: jira-email
+        name: cs-canonical-com
+
+    - name: JIRA_TOKEN
+      secretKeyRef:
+        key: jira-token
+        name: cs-canonical-com
+
+    - name: JIRA_URL
+      value: "https://warthogs.atlassian.net"
+
+    - name: JIRA_LABELS
+      value: "sites_BAU"
+
+    - name: JIRA_COPY_UPDATES_EPIC
+      value: "WD-12643"
+
+    - name: GOOGLE_DRIVE_FOLDER_ID
+      secretKeyRef:
+        key: google-drive-folder-id
+        name: cs-canonical-com
+
+    - name: COPYDOC_TEMPLATE_ID
+      secretKeyRef:
+        key: copydoc-template-id
+        name: cs-canonical-com
+
+    - name: GOOGLE_PRIVATE_KEY
+      secretKeyRef:
+        key: google-private-key
+        name: cs-canonical-com
+    
+    - name: GOOGLE_PRIVATE_KEY_ID
+      secretKeyRef:
+        key: google-private-key-id
+        name: cs-canonical-com

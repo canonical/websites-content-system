@@ -2,6 +2,7 @@ from flask import Flask
 
 from webapp.cache import init_cache
 from webapp.context import base_context
+from webapp.gdrive import init_gdrive
 from webapp.jira import init_jira
 from webapp.models import init_db
 from webapp.sso import init_sso
@@ -29,5 +30,8 @@ def create_app():
 
     # Initialize JIRA
     init_jira(app)
+
+    # Initialize gdrive
+    init_gdrive(app)
 
     return app

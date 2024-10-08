@@ -135,11 +135,12 @@ def request_changes(body: ChangesRequestModel):
 
     # Make a request to JIRA to create a task
     try:
-        create_jira_task(app, body.model_dump())
+        task = create_jira_task(app, body.model_dump())
+        task_url = f"https://docs.google.com/document/d/{task['id']}"
     except Exception as e:
         return jsonify(str(e)), 500
 
-    return jsonify("Task created successfully"), 201
+    return jsonify({"message": f"Task created successfully\n{task_url}"}), 201
 
 
 @app.route("/get-jira-tasks/<webpage_id>", methods=["GET"])

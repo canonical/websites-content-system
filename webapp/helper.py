@@ -1,4 +1,4 @@
-from webapp.models import JiraTask, User, db, get_or_create
+from webapp.models import JiraTask, User, Webpage, db, get_or_create
 
 
 def get_or_create_user_id(user):
@@ -43,3 +43,9 @@ def create_jira_task(app, task):
         webpage_id=task["webpage_id"],
         user_id=task["reporter_id"],
     )
+
+    # Create a new copydoc if the request is a new webpage
+    if task["type"] == jira.NEW_WEBPAGE:
+        webpage = Webpage.query.filter_by(id=task["webpage_id"]).first()
+        client = app.config["gdrive"]
+        return client.create_copydoc_from_template(webpage)

@@ -8,6 +8,8 @@ Backend service for the CMS template parser
 
 Before starting, update the environment variables if needed. The default values will work for docker, save the `GH_TOKEN` which must be manually set. You can create a token [here](https://github.com/settings/tokens), by following [these](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) instructions. Make sure to select the `repo` scope for the token.
 
+You will also require a credentials file for google drive. Please store it as credentials.json in the `credentials` directory.
+
 ```env
 PORT=8104
 FLASK_DEBUG=true
@@ -16,6 +18,19 @@ DEVEL=True
 VALKEY_HOST=0.0.0.0
 VALKEY_PORT=6379
 GH_TOKEN=ghp_somepersonaltoken
+REPO_ORG=https://github.com/canonical
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/content
+TASK_DELAY=30
+DIRECTORY_API_TOKEN=token
+JIRA_EMAIL=example@canonical.com
+JIRA_TOKEN=jiratoken
+JIRA_URL=https://warthogs.atlassian.net
+JIRA_LABELS=sites_BAU
+JIRA_COPY_UPDATES_EPIC=WD-12643
+GOOGLE_DRIVE_FOLDER_ID=1EIFOGJ8DIWpsYIfWk7Yos3YijZIkbJDk
+COPYD0C_TEMPLATE_ID=125auRsLQukYH-tKN1oEKaksmpCXd_DTGiswvmbeS2iA
+GOOGLE_PRIVATE_KEY=base64encodedprivatekey
+GOOGLE_PRIVATE_KEY_ID=privatekeyid
 ```
 
 ### Using docker

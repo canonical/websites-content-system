@@ -62,6 +62,7 @@ class Jira:
 
         raise Exception(
             "Failed to make a request to Jira. Status code:"
+            f" {url} {method} {data} {params}"
             f" {response.status_code}. Response: {response.text}"
         )
 
@@ -76,7 +77,7 @@ class Jira:
             str: The Jira ID of the user who reported the issue.
         """
         # Try to get the user from the database
-        user = User.query.filter_by(id=user_id).first()
+        user = db.session.query(User).filter_by(id=user_id).first()
         if not user:
             raise ValueError(f"User with ID {user_id} not found")
         # If the user already has a Jira account ID, return it
@@ -211,16 +212,18 @@ class Jira:
             request_type == self.NEW_WEBPAGE
             or request_type == self.PAGE_REFRESH
         ):
-            parent = None
             # Create epic
             epic = self.create_task(
                 summary=summary,
                 issue_type=self.EPIC,
                 description=description,
-                parent=parent,
+                parent=None,
                 reporter_jira_id=reporter_jira_id,
                 due_date=due_date,
             )
+
+            if not epic:
+                raise Exception("Failed to create epic")
 
             # Create subtasks for this epic
             for subtask_name in ["UX", "Visual", "Dev"]:
@@ -234,14 +237,11 @@ class Jira:
                 )
             return epic
 
-        elif request_type == self.COPY_UPDATE:
-            parent = self.copy_updates_epic
-
         return self.create_task(
             summary=summary,
             issue_type=self.SUBTASK,
             description=description,
-            parent=parent,
+            parent=self.copy_updates_epic,
             reporter_jira_id=reporter_jira_id,
             due_date=due_date,
         )
