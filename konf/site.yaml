@@ -115,7 +115,7 @@ staging:
     - paths: [/_pgadmin]
       name: cs-canonical-com-pgadmin
       app_name: cs.canonical.com-pgadmin
-      image: prod-comms.ps5.docker-registry.canonical.com/pgadmin4:latest
+      image: prod-comms.ps5.docker-registry.canonical.com/pgadmin4
       replicas: 1
       memoryLimit: 512Mi
       env:
