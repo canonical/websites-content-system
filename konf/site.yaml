@@ -73,6 +73,32 @@ production:
       secretKeyRef:
         key: websites-content-system
         name: database-urls
+  routes:
+    - paths: [/_pgadmin]
+      name: cs-canonical-com-pgadmin
+      app_name: cs.canonical.com-pgadmin
+      image: prod-comms.ps5.docker-registry.canonical.com/pgadmin4:latest
+      replicas: 1
+      memoryLimit: 512Mi
+      env:
+        - name: PGADMIN_DEFAULT_EMAIL
+          valueFrom:
+            secretKeyRef:
+              key: pg-admin-email
+              name: pgadmin-defaults
+        - name: PGADMIN_DEFAULT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              key: pg-admin-password
+              name: pgadmin-defaults
+        - name: SCRIPT_NAME
+          value: /_pgadmin
+        - name: PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION
+          value: "False"
+        - name: PGADMIN_CONFIG_WTF_CSRF_CHECK_DEFAULT
+          value: "False"
+        - name: PGADMIN_CONFIG_WTF_CSRF_ENABLED
+          value: "False"
 
 # Overrides for staging
 staging:
@@ -85,6 +111,30 @@ staging:
       secretKeyRef:
         key: websites-content-system
         name: database-urls
+  routes:
+    - paths: [/_pgadmin]
+      name: cs-canonical-com-pgadmin
+      app_name: cs.canonical.com-pgadmin
+      image: prod-comms.ps5.docker-registry.canonical.com/pgadmin4:latest
+      replicas: 1
+      memoryLimit: 512Mi
+      env:
+        - name: PGADMIN_DEFAULT_EMAIL
+          secretKeyRef:
+            key: pg-admin-email
+            name: pgadmin-defaults
+        - name: PGADMIN_DEFAULT_PASSWORD
+          secretKeyRef:
+            key: pg-admin-password
+            name: pgadmin-defaults
+        - name: SCRIPT_NAME
+          value: /_pgadmin
+        - name: PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION
+          value: "False"
+        - name: PGADMIN_CONFIG_WTF_CSRF_CHECK_DEFAULT
+          value: "False"
+        - name: PGADMIN_CONFIG_WTF_CSRF_ENABLED
+          value: "False"
 
 # Overrides for demos
 demo:
