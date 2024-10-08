@@ -137,3 +137,13 @@ demo:
       secretKeyRef:
         key: copydoc-template-id
         name: cs-canonical-com
+
+    - name: PRIVATE_KEY
+      secretKeyRef:
+        key: private-key
+        name: cs-canonical-com
+    
+    - name: PRIVATE_KEY_ID
+      secretKeyRef:
+        key: private-key-id
+        name: cs-canonical-com
