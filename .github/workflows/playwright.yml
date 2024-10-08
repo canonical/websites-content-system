@@ -31,7 +31,16 @@ jobs:
       VALKEY_PORT: 6379 
       GH_TOKEN: token 
       REPO_ORG: https://github.com/canonical 
-      SQLALCHEMY_DATABASE_URI: postgresql://postgres:postgres@localhost:5432/postgres 
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/postgres 
+      GOOGLE_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+      GOOGLE_PRIVATE_KEY_ID: ${{ secrets.PRIVATE_KEY_ID }}
+      JIRA_EMAIL: example@canonical.com
+      JIRA_TOKEN: jiratoken
+      JIRA_URL: https://example.atlassian.net
+      JIRA_LABELS: somelabel
+      JIRA_COPY_UPDATES_EPIC: WD-9999999
+      GOOGLE_DRIVE_FOLDER_ID: folderid
+      COPYDOC_TEMPLATE_ID: templateid
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.12
