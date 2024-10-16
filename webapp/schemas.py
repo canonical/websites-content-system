@@ -24,3 +24,10 @@ class ChangesRequestModel(BaseModel):
     webpage_id: int
     type: int
     description: str
+
+
+class RemoveWebpageModel(BaseModel):
+    webpage_id: int
+    due_date: str = ""
+    reporter_id: int = None
+    description: str = ""
