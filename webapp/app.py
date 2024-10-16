@@ -197,11 +197,9 @@ def remove_webpage(body: RemoveWebpageModel):
             - If the webpage is successfully deleted or a task is created, returns a 201 status with a success message.
             - If there is an error during deletion, returns a 500 error with a message.
     """
-    print(body.dict())
     webpage_id = body.webpage_id
 
     webpage = Webpage.query.filter(Webpage.id == webpage_id).one_or_none()
-    print("webpage fetched ", webpage)
     if webpage is None:
         return jsonify({"error": "webpage not found"}), 404
     if webpage.status == WebpageStatus.NEW:

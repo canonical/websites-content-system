@@ -157,7 +157,7 @@ class Jira:
                 "summary": summary,
                 "issuetype": {"id": issue_type},
                 "labels": self.labels,
-                # need to add reporter back ################################################
+                "reporter": {"id": reporter_jira_id},
                 "parent": parent,
                 "duedate": due_date,  # need to add back parent ################################################
                 "project": {"id": "10492"},  # Web and Design-ENG
