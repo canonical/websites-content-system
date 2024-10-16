@@ -182,6 +182,7 @@ def get_jira_tasks(webpage_id: int):
 
 @app.route("/api/remove_webpage", methods=["POST"])
 @validate()
+@login_required
 def remove_webpage(body: RemoveWebpageModel):
     """
     Remove a webpage based on its status.
