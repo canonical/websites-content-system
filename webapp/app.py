@@ -180,7 +180,7 @@ def get_jira_tasks(webpage_id: int):
         return jsonify({"error": "Failed to fetch Jira tasks"}), 500
 
 
-@app.route("/api/webpage", methods=["POST"])
+@app.route("/api/remove_webpage", methods=["POST"])
 @validate()
 def remove_webpage(body: RemoveWebpageModel):
     """
