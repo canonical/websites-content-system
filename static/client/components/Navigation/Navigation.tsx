@@ -45,7 +45,7 @@ const Navigation = (): JSX.Element => {
                 <NavigationCollapseToggle isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
               </div>
               <SiteSelector />
-              <Button appearance="" hasIcon onClick={handleNewPageClick}>
+              <Button appearance="" className="l-new-webpage-button" hasIcon onClick={handleNewPageClick}>
                 <React.Fragment key=".0">
                   <i className="p-icon--plus" /> <span>Request new page</span>
                 </React.Fragment>

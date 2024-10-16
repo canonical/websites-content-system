@@ -5,12 +5,12 @@ from webapp.schemas import (
     ChangesRequestModel,
 )
 from webapp.models import (
-  Reviewer,
-  Webpage,
-  JiraTask,
-  db,
-  get_or_create,
-  WebpageStatus
+    Reviewer,
+    Webpage,
+    JiraTask,
+    db,
+    get_or_create,
+    WebpageStatus
 )
 from os import environ
 
@@ -24,18 +24,27 @@ from webapp.helper import (
     get_or_create_user_id,
     get_project_id,
     get_webpage_id,
+    create_copy_doc
 )
 
 app = create_app()
 
 
-@app.route("/api/get-tree/<string:uri>", methods=["GET"])
 @app.route("/api/get-tree/<string:uri>/<string:branch>", methods=["GET"])
+@app.route(
+    "/api/get-tree/<string:uri>/<string:branch>/<string:no_cache>",
+    methods=["GET"]
+)
 @login_required
-def get_tree(uri: str, branch="main"):
-    site_repository = SiteRepository(uri, app, branch=branch, task_locks=LOCKS)
+def get_tree(uri: str, branch: str = "main", no_cache: bool = False):
+    site_repository = SiteRepository(
+        uri,
+        app,
+        branch=branch,
+        task_locks=LOCKS
+    )
     # Getting the site tree here ensures that both the cache and db are updated
-    tree = site_repository.get_tree_async()
+    tree = site_repository.get_tree_sync(no_cache)
 
     response = jsonify(
         {
@@ -49,14 +58,6 @@ def get_tree(uri: str, branch="main"):
         response.headers.add("Access-Control-Allow-Origin", "*")
 
     return response
-
-
-@app.route("/", defaults={"path": ""})
-@app.route("/webpage/<path:path>")
-@app.route("/new-webpage")
-@login_required
-def index(path):
-    return render_template("index.html")
 
 
 @app.route("/api/get-users/<username>", methods=["GET"])
@@ -147,15 +148,14 @@ def request_changes(body: ChangesRequestModel):
 
     # Make a request to JIRA to create a task
     try:
-        task = create_jira_task(app, body.model_dump())
-        task_url = f"https://docs.google.com/document/d/{task['id']}"
+        create_jira_task(app, body.model_dump())
     except Exception as e:
         return jsonify(str(e)), 500
 
-    return jsonify({"message": f"Task created successfully\n{task_url}"}), 201
+    return jsonify({"message": "Task created successfully"}), 201
 
 
-@app.route("/get-jira-tasks/<webpage_id>", methods=["GET"])
+@app.route("/api/get-jira-tasks/<webpage_id>", methods=["GET"])
 def get_jira_tasks(webpage_id: int):
     jira_tasks = (
         JiraTask.query.filter_by(webpage_id=webpage_id)
@@ -178,7 +178,6 @@ def get_jira_tasks(webpage_id: int):
         return jsonify(tasks), 200
     else:
         return jsonify({"error": "Failed to fetch Jira tasks"}), 500
-    return jsonify("Task created successfully"), 201
 
 
 @app.route("/api/create-page", methods=["POST"])
@@ -194,9 +193,6 @@ def create_page():
     parent = data.get("parent")
 
     owner_id = get_or_create_user_id(owner)
-    reviewer_ids = []
-    for reviewer in reviewers:
-        reviewer_ids.append(get_or_create_user_id(reviewer))
 
     # Create new webpage
     project_id = get_project_id(project)
@@ -213,11 +209,32 @@ def create_page():
     )
 
     # Create new reviewer rows
-    for reviewer_id in reviewer_ids:
+    for reviewer in reviewers:
+        reviewer_id = get_or_create_user_id(reviewer)
         get_or_create(
-            db.session, Reviewer, user_id=reviewer_id, webpage_id=new_webpage
+            db.session,
+            Reviewer,
+            user_id=reviewer_id,
+            webpage_id=new_webpage[0].id
         )
 
-    return jsonify({
-        "copy_doc": copy_doc,
-    }), 201
+    if not copy_doc:
+        copy_doc = create_copy_doc(app, new_webpage[0])
+        new_webpage[0].copy_doc_link = copy_doc
+        db.session.commit()
+
+    return jsonify({"copy_doc": copy_doc}), 201
+
+
+# Client-side routes
+@app.route("/")
+@app.route("/new-webpage")
+@login_required
+def index():
+    return render_template("index.html")
+
+
+@app.route("/webpage/<path:path>")
+@login_required
+def webpage(path):
+    return render_template("index.html")

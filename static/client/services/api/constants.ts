@@ -1,5 +1,6 @@
 export const ENDPOINTS = {
-  getPagesTree: (domain: string) => `/api/get-tree/${domain}`,
+  getPagesTree: (domain: string, noCache?: boolean, branch: string = "main") =>
+    `/api/get-tree/${domain}/${branch}${noCache ? "/True" : ""}`,
   getUsers: (inputStr: string) => `/api/get-users/${inputStr}`,
   setOwner: "/api/set-owner",
   setReviewers: "/api/set-reviewers",

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { Button, Input, Spinner } from "@canonical/react-components";
-import { useNavigate } from "react-router-dom";
 
 import NavigationItems from "@/components/Navigation/NavigationItems";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
@@ -13,6 +12,12 @@ import { useStore } from "@/store";
 
 const errorMessage = "Please specify the URL title";
 
+const LoadingState = {
+  INITIAL: 0,
+  LOADING: 1,
+  DONE: 2,
+};
+
 const NewWebpage = (): JSX.Element => {
   const [titleValue, setTitleValue] = useState<string>();
   const [copyDoc, setCopyDoc] = useState<string>();
@@ -20,17 +25,16 @@ const NewWebpage = (): JSX.Element => {
   const [reviewers, setReviewers] = useState<IUser[]>([]);
   const [location, setLocation] = useState<string>();
   const [buttonDisabled, setButtonDisabled] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [reloading, setReloading] = useState<(typeof LoadingState)[keyof typeof LoadingState]>(LoadingState.INITIAL);
 
-  const project = useStore((state) => state.selectedProject);
-  const { data } = usePages();
-  const navigate = useNavigate();
+  const [selectedProject, setSelectedProject] = useStore((state) => [state.selectedProject, state.setSelectedProject]);
+  const { data, isFetching, refetch } = usePages(true);
 
   useEffect(() => {
     if (titleValue && location && owner) {
       setButtonDisabled(false);
     }
-  }, [titleValue, location, copyDoc, owner, reviewers, project]);
+  }, [titleValue, location, owner]);
 
   const handleTitleChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setTitleValue(event.target.value || "");
@@ -53,29 +57,40 @@ const NewWebpage = (): JSX.Element => {
   }, []);
 
   const handleSubmit = useCallback(() => {
-    if (titleValue && owner && project && location) {
-      setLoading(true);
+    if (titleValue && owner && selectedProject && location) {
+      setReloading(LoadingState.LOADING);
       const newPage = {
         name: `${location}/${titleValue}`,
-        link: copyDoc,
+        copy_doc_link: copyDoc,
         owner,
         reviewers,
-        project: project.name,
+        project: selectedProject.name,
         parent: location,
       };
-      PagesServices.createPage(newPage).then((response) => {
-        const currentProjectTree = data?.find((p) => p.data.name === project.name)?.data;
-        if (currentProjectTree) {
-          TreeServices.addNewPage(currentProjectTree.templates, {
-            ...newPage,
-            link: response.copy_doc,
+      PagesServices.createPage(newPage).then(() => {
+        // refetch the tree from the backend after a new webpage is added to the database
+        refetch &&
+          refetch().then(() => {
+            setReloading(LoadingState.DONE);
           });
-        }
-        setLoading(false);
-        navigate(`/webpage/${project}${location}/${titleValue}`);
       });
     }
-  }, [titleValue, location, copyDoc, owner, reviewers, project, data, navigate]);
+  }, [titleValue, location, copyDoc, owner, reviewers, selectedProject, refetch]);
+
+  // update navigation after new page is added to the tree on the backend
+  useEffect(() => {
+    if (!isFetching && reloading === LoadingState.DONE && data?.length && selectedProject) {
+      const project = data.find((p) => p.data.name === selectedProject.name)?.data;
+      if (project) {
+        const isNewPageExist = TreeServices.findPage(project.templates, `${location}/${titleValue}`);
+        if (isNewPageExist) {
+          // TODO: there is a max depth React error on this line, needs more investigation
+          setSelectedProject(project);
+          window.location.href = `/webpage/${project.name}${location}/${titleValue}`;
+        }
+      }
+    }
+  }, [data, isFetching, reloading, selectedProject, setSelectedProject, location, titleValue]);
 
   return (
     <div className="l-new-webpage">
@@ -110,7 +125,7 @@ const NewWebpage = (): JSX.Element => {
       </div>
       <OwnerAndReviewers onSelectOwner={handleSelectOwner} onSelectReviewers={handleSelectReviewers} />
       <Button appearance="positive" className="l-new-webpage--submit" disabled={buttonDisabled} onClick={handleSubmit}>
-        {loading ? <Spinner /> : `Save${copyDoc ? "" : " and generate copy doc"}`}
+        {reloading === LoadingState.LOADING ? <Spinner /> : `Save${copyDoc ? "" : " and generate copy doc"}`}
       </Button>
     </div>
   );

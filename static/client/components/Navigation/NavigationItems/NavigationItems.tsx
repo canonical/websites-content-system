@@ -1,6 +1,6 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import type { INavigationItemsProps } from "./NavigationItems.types";
 
@@ -12,6 +12,7 @@ const NavigationItems = ({ onSelectPage }: INavigationItemsProps): React.ReactNo
   const [activePageName, setActivePageName] = useState<string | null>(null);
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSelectPage = useCallback(
     (path: string) => {
@@ -24,6 +25,17 @@ const NavigationItems = ({ onSelectPage }: INavigationItemsProps): React.ReactNo
     },
     [selectedProject, onSelectPage, navigate],
   );
+
+  // set active page whenever the location changes
+  useEffect(() => {
+    const parts = location.pathname.split("/");
+    if (parts.length > 3 && parts[1] === "webpage") {
+      const path = `/${parts.slice(3).join("/")}`;
+      setActivePageName(path);
+    } else {
+      setActivePageName(null);
+    }
+  }, [location]);
 
   return selectedProject ? (
     <ul aria-multiselectable="true" className="p-list-tree" key={selectedProject.name} role="tree">

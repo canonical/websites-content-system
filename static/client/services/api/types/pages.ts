@@ -1,13 +1,20 @@
 import type { IUser } from "./users";
 
+export const PageStatus = {
+  NEW: "NEW",
+  AVAILABLE: "AVAILABLE",
+  TO_DELETE: "TO_DELETE",
+};
+
 export interface IPage {
   id?: number;
   name: string;
   title?: string;
   description?: string;
-  link: string;
+  copy_doc_link: string;
   owner: IUser;
   reviewers: IUser[];
+  status: (typeof PageStatus)[keyof typeof PageStatus];
   children: IPage[];
 }
 
@@ -20,7 +27,7 @@ export interface IPagesResponse {
 
 export interface INewPage {
   name: string;
-  link: string | undefined;
+  copy_doc_link: string | undefined;
   owner: IUser;
   reviewers: IUser[];
   project: string;

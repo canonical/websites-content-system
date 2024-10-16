@@ -59,7 +59,7 @@ const CustomSearchAndFilter = ({
         data-active="true"
         data-empty="true"
       >
-        {selectedOptions.map(
+        {selectedOptions?.map(
           (option) =>
             option && (
               <span className="p-chip">

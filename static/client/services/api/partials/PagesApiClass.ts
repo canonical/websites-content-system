@@ -5,8 +5,8 @@ import type { INewPage, INewPageResponse, IPagesResponse } from "@/services/api/
 import { type IUser } from "@/services/api/types/users";
 
 export class PagesApiClass extends BasicApiClass {
-  public getPages(domain: string): Promise<IPagesResponse> {
-    return this.callApi<IPagesResponse>(ENDPOINTS.getPagesTree(domain), REST_TYPES.GET);
+  public getPages(domain: string, noCache?: boolean): Promise<IPagesResponse> {
+    return this.callApi<IPagesResponse>(ENDPOINTS.getPagesTree(domain, noCache), REST_TYPES.GET);
   }
 
   public setOwner(user: IUser | {}, webpageId: number): Promise<void> {

@@ -6,9 +6,9 @@ from multiprocessing import Lock, Process, Queue
 import yaml
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import delete, select
+# from sqlalchemy import delete, select
 
-from webapp.models import Webpage, WebpageStatus, db
+from webapp.models import db
 from webapp.site_repository import SiteRepository
 
 # Crate the task queue
@@ -41,17 +41,6 @@ def init_tasks(app: Flask):
         # Load site trees
         Process(
             target=load_site_trees,
-            args=(app, db, TASK_QUEUE, LOCKS),
-        ).start()
-
-        # Update webpages
-        Process(
-            target=update_deleted_webpages,
-            args=(app, db, TASK_QUEUE, LOCKS),
-        ).start()
-
-        Process(
-            target=update_new_webpages,
             args=(app, db, TASK_QUEUE, LOCKS),
         ).start()
 
@@ -109,57 +98,5 @@ def load_site_trees(
             site_repository = SiteRepository(
                 site, app, db=database, task_locks=task_locks
             )
-            queue.put(site_repository.get_tree())
-
-
-@scheduled_task(delay=TASK_DELAY)
-def update_deleted_webpages(
-    app: Flask, database: SQLAlchemy, queue: Queue, task_locks: dict
-):
-    """
-    Webpages that have TO_DELETE status and do not exist in the parsed tree
-    structure will be deleted.
-    """
-    app.logger.info("Running scheduled task: update_deleted_webpages")
-    webpages_to_delete = database.session.execute(
-        select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE)
-    )
-
-    for row in webpages_to_delete:
-        webpage = row[0]
-        site_repository = SiteRepository(
-            webpage.project.name, app, task_locks=task_locks
-        )
-        site_webpages = site_repository.get_webpages()
-        # Delete if the webpage doesn't exist in the current tree structure
-        if webpage.name not in site_webpages:
-            queue.put(
-                database.session.execute(
-                    delete(Webpage).where(Webpage.id == webpage.id)
-                )
-            )
-
-
-@scheduled_task(delay=TASK_DELAY)
-def update_new_webpages(
-    app: Flask, database: SQLAlchemy, queue: Queue, task_locks: dict
-):
-    """
-    Webpages that have NEW status and exist in the parsed tree structure
-    will have their status updated to AVAILABLE.
-    """
-    app.logger.info("Running scheduled task: update_new_webpages")
-    new_webpages = database.session.execute(
-        select(Webpage).where(Webpage.status == WebpageStatus.NEW)
-    )
-
-    for row in new_webpages:
-        webpage = row[0]
-        site_repository = SiteRepository(
-            webpage.project.name, app, task_locks=task_locks
-        )
-        # Update the status if the webpage exists in the current tree structure
-        if webpage.url in site_repository.get_webpages():
-            webpage.status = WebpageStatus.AVAILABLE
-            database.session.add(webpage)
-            queue.put(database.session.commit())
+            # build the tree from GH source without using cache
+            queue.put(site_repository.get_tree(True))

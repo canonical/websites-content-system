@@ -1,16 +1,21 @@
 import os
 import re
 import subprocess
-import time
-from multiprocessing import Lock, Process
+from multiprocessing import Lock
 from pathlib import Path
 from typing import Callable, TypedDict
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import select, delete
 
-from webapp.models import Project, User, Webpage, db, get_or_create
+from webapp.models import (
+  Project, User, Webpage, db, get_or_create, WebpageStatus
+)
 from webapp.parse_tree import scan_directory
+from webapp.helper import (
+  get_project_id, get_tree_struct, convert_webpage_to_dict
+)
 
 
 class SiteRepositoryError(Exception):
@@ -40,7 +45,7 @@ class SiteRepository:
         app: Flask,
         branch="main",
         task_locks: dict = None,
-        db: SQLAlchemy = None,
+        db: SQLAlchemy = None
     ):
         base_dir = app.config["BASE_DIR"]
         self.REPOSITORY_DIRECTORY = f"{base_dir}/repositories"
@@ -59,9 +64,6 @@ class SiteRepository:
         # If a locks dictionary is provided, use it
         if task_locks:
             self.LOCKS = task_locks
-
-        # Start the task to load the tree
-        self.start_tree_task()
 
     def __str__(self) -> str:
         return f"SiteRepository({self.repository_uri}, {self.branch})"
@@ -268,6 +270,9 @@ class SiteRepository:
         if self.cache:
             return self.cache.set(self.cache_key, tree)
 
+    def invalidate_cache(self):
+        self.cache.set(self.cache_key, None)
+
     def get_tree_from_disk(self):
         """
         Get a tree from a freshly cloned repository.
@@ -308,42 +313,35 @@ class SiteRepository:
         # that has all fields
         tree = self.create_webpages_for_tree(self.db, base_tree)
 
-        # Update the cache
-        self.set_tree_in_cache(tree)
         self.logger.info(f"Tree loaded for {self.repository_uri}")
         return tree
 
-    def get_tree(self):
+    def get_tree_from_db(self):
+        webpages = self.db.session.execute(
+            select(Webpage).where(
+                Webpage.project_id == get_project_id(self.repository_uri)
+            )
+        ).scalars()
+        # build tree from repository in case DB table is empty
+        if not webpages:
+            self.get_new_tree()
+
+        tree = get_tree_struct(db.session, webpages)
+
+        self.logger.info(f"Tree fetched for {self.repository_uri}")
+
+        return tree
+
+    def get_tree(self, no_cache: bool = False):
         """
         Get the tree from the cache or load a new tree to cache and db.
         """
         # Return from cache if available
-        if tree := self.get_tree_from_cache():
-            return tree
+        if not no_cache:
+            if tree := self.get_tree_from_cache():
+                return tree
 
         return self.get_new_tree()
-
-    def start_tree_task(self):
-        """
-        Start a new task to setup the repository and load the tree.
-        """
-
-        def load_tree(lock, logger):
-            if lock.acquire(block=False):
-                logger.info(f"Loading {self.repository_uri}")
-                # Load the tree
-                try:
-                    self.get_new_tree()
-                except Exception as e:
-                    logger.error(f"Error loading tree: {e}")
-                finally:
-                    lock.release()
-
-        lock = self.get_task_lock()
-        Process(
-            target=load_tree,
-            args=(lock, self.logger),
-        ).start()
 
     def __create_webpage_for_node__(
         self,
@@ -376,71 +374,13 @@ class SiteRepository:
         webpage.description = node["description"]
         webpage.copy_doc_link = node["link"]
         webpage.parent_id = parent_id
-        # Preload relationships
-        webpage.reviewers
-        webpage.jira_tasks
-        webpage.owner
-        webpage.project
+        if webpage.status == WebpageStatus.NEW:
+            webpage.status = WebpageStatus.AVAILABLE
 
         db.session.add(webpage)
         db.session.flush()
 
-        # Remove unnecessary fields
-        webpage_dict = webpage.__dict__.copy()
-        webpage_dict.pop("_sa_instance_state", None)
-        webpage_dict.pop("copy_doc_link", None)
-        webpage_dict.pop("owner_id", None)
-        webpage_dict.pop("project_id", None)
-        owner = webpage_dict.pop("owner", None)
-        project = webpage_dict.pop("project", None)
-        reviewers = webpage_dict.pop("reviewers", None)
-
-        # Serialize owner fields
-        if owner:
-            owner_dict = owner.__dict__.copy()
-            owner_dict["created_at"] = owner.created_at.isoformat()
-            owner_dict["updated_at"] = owner.updated_at.isoformat()
-            if owner_dict["_sa_instance_state"]:
-                owner_dict.pop("_sa_instance_state", None)
-        else:
-            owner_dict = {}
-
-        # Serialize project fields
-        if project:
-            project_dict = project.__dict__.copy()
-            project_dict["created_at"] = project.created_at.isoformat()
-            project_dict["updated_at"] = project.updated_at.isoformat()
-            if project_dict["_sa_instance_state"]:
-                project_dict.pop("_sa_instance_state", None)
-        else:
-            project_dict = {}
-
-        # Serialize reviewers fields
-        if reviewers:
-            reviewers_list = []
-            for reviewer in reviewers:
-                reviewer_dict = reviewer.__dict__.copy()
-                reviewer_dict.pop("_sa_instance_state", None)
-                reviewer_dict["created_at"] = reviewer.created_at.isoformat()
-                reviewer_dict["updated_at"] = reviewer.updated_at.isoformat()
-                # Expand the user object
-                reviewer_user_dict = reviewer.user.__dict__.copy()
-                reviewer_user_dict.pop("created_at")
-                reviewer_user_dict.pop("updated_at")
-                if reviewer_user_dict["_sa_instance_state"]:
-                    reviewer_user_dict.pop("_sa_instance_state", None)
-                reviewer_dict = {**reviewer_dict, **reviewer_user_dict}
-                reviewers_list.append(reviewer_dict)
-        else:
-            reviewers_list = []
-
-        # Serialize object fields
-        webpage_dict["status"] = webpage.status.value
-        webpage_dict["created_at"] = webpage.created_at.isoformat()
-        webpage_dict["updated_at"] = webpage.updated_at.isoformat()
-        webpage_dict["owner"] = owner_dict
-        webpage_dict["project"] = project_dict
-        webpage_dict["reviewers"] = reviewers_list
+        webpage_dict = convert_webpage_to_dict(webpage, owner, project)
 
         # Return a dict with the webpage fields
         return {**node, **webpage_dict}
@@ -464,6 +404,22 @@ class SiteRepository:
                     db, child["children"], project, owner, webpage_dict["id"]
                 )
 
+    def __remove_webpages_to_delete__(self, db, tree):
+        # convert tree of pages from repository to list
+        webpages = []
+        self.add_pages_to_list(tree, webpages)
+
+        webpages_to_delete = db.session.execute(
+            select(Webpage).where(Webpage.status == WebpageStatus.TO_DELETE)
+        )
+
+        for row in webpages_to_delete:
+            page_to_delete = row[0]
+            if page_to_delete.name not in webpages:
+                db.session.execute(
+                    delete(Webpage).where(Webpage.id == page_to_delete.id)
+                )
+
     def create_webpages_for_tree(self, db: SQLAlchemy, tree: Tree):
         """
         Create webpages for each node in the tree.
@@ -483,40 +439,40 @@ class SiteRepository:
         self.__create_webpages_for_children__(
             db, webpage_dict["children"], project, owner, webpage_dict["id"]
         )
+
+        # Remove pages that don't exist in the repository anymore
+        self.__remove_webpages_to_delete__(db, tree)
+
         db.session.commit()
         return webpage_dict
 
-    def __wait_for_tree__(self, timeout=5):
-        """
-        Wait for the tree to finish generating.
-        """
-        end = time.time() + timeout
-        while time.time() < end:
-            if tree := self.get_tree_from_cache():
-                return tree
-            time.sleep(0.1)
-
-    def get_tree_async(self):
+    def get_tree_sync(self, no_cache: bool = False):
         """
         Try to get the tree from the cache, or create a new task to load it.
         """
         # First try to get the tree from the cache
-        if tree := self.get_tree_from_cache():
-            return tree
+        if not no_cache:
+            if tree := self.get_tree_from_cache():
+                return tree
+        else:
+            self.invalidate_cache()
 
-        # Otherwise, create a new task to load the tree
-        self.start_tree_task()
-
-        # Wait for the tree to be ready in 3s
-        if tree := self.__wait_for_tree__(timeout=3):
+        self.logger.info(f"Loading {self.repository_uri} from database")
+        # Load the tree from database
+        try:
+            tree = self.get_tree_from_db()
+            # Update the cache
+            self.set_tree_in_cache(tree)
             return tree
+        except Exception as e:
+            self.logger.error(f"Error loading tree: {e}")
 
         # Or just return an empty tree
         return {
             "name": "",
             "title": "",
             "description": "",
-            "link": "",
+            "copy_doc_link": "",
             "children": [],
         }
 
@@ -530,21 +486,20 @@ class SiteRepository:
         self.LOCKS[self.repository_uri] = Lock()
         return self.LOCKS[self.repository_uri]
 
+    def add_pages_to_list(self, tree, page_list: list):
+        # Append root node name
+        page_list.append(tree["name"])
+        for child in tree["children"]:
+            page_list.append(child["name"])
+            # If child nodes exist, add their names to the list
+            if child.get("children"):
+                self.add_pages_to_list(child, page_list)
+
     def get_webpages(self):
         """
         Return a list of webpages from the associated parsed tree.
         """
         tree = self.get_tree()
         webpages = []
-
-        def add_pages_to_list(tree, page_list: list):
-            # Append root node name
-            page_list.append(tree["name"])
-            for child in tree["children"]:
-                page_list.append(child["name"])
-                # If child nodes exist, add their names to the list
-                if child.get("children"):
-                    add_pages_to_list(child, page_list)
-
-        add_pages_to_list(tree, webpages)
+        self.add_pages_to_list(tree, webpages)
         return webpages

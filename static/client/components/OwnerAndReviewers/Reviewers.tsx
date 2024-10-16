@@ -19,7 +19,7 @@ const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): JSX.El
     (option?: IUser) => () => {
       const newReviewers = currentReviewers.filter((r) => r.id !== option?.id);
       setCurrentReviewers(newReviewers);
-      if (page) PagesServices.setReviewers(newReviewers, page.id);
+      if (page?.id) PagesServices.setReviewers(newReviewers, page.id);
       if (onSelectReviewers) onSelectReviewers(newReviewers);
     },
     [currentReviewers, page, onSelectReviewers],
@@ -31,7 +31,7 @@ const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): JSX.El
       // proceed with setting the reviewer only if not
       if (!currentReviewers.find((r) => r.email === option.email)) {
         const newReviewers = [...currentReviewers, option];
-        if (page) {
+        if (page?.id) {
           PagesServices.setReviewers(newReviewers, page.id);
           // mutate the tree structure element to reflect the recent change
           page.reviewers = newReviewers;
