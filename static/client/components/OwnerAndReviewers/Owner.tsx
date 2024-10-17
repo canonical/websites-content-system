@@ -18,7 +18,7 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
   const handleRemoveOwner = useCallback(
     () => () => {
       setCurrentOwner(null);
-      if (page) PagesServices.setOwner({}, page.id);
+      if (page?.id) PagesServices.setOwner({}, page.id);
       if (onSelectOwner) onSelectOwner(null);
     },
     [page, onSelectOwner],
@@ -26,7 +26,7 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
 
   const selectOwner = useCallback(
     (option: IUser) => {
-      if (page) {
+      if (page?.id) {
         PagesServices.setOwner(option, page.id);
         // mutate the tree structure element to reflect the recent change
         page.owner = option;
