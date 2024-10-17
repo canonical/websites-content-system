@@ -4,7 +4,9 @@ import type { IPage } from "@/services/api/types/pages";
 import type { IUser } from "@/services/api/types/users";
 
 export interface IOwnerAndReviewersProps {
-  page: IPage;
+  page?: IPage;
+  onSelectOwner?: (owner: IUser | null) => void;
+  onSelectReviewers?: (reviewers: IUser[]) => void;
 }
 
 export interface ICustomSearchAndFilterProps {

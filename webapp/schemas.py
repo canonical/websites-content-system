@@ -1,5 +1,6 @@
 from functools import wraps
 
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -24,3 +25,21 @@ class ChangesRequestModel(BaseModel):
     webpage_id: int
     type: int
     description: str
+
+
+class UserModel(BaseModel):
+    id: int
+    name: str
+    email: str
+    team: Optional[str]
+    department: Optional[str]
+    jobTitle: Optional[str]
+
+
+class CreatePageModel(BaseModel):
+    project: str
+    name: str
+    copy_doc: Optional[str] = None
+    owner: UserModel
+    reviewers: Optional[List[UserModel]]
+    parent: str

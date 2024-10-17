@@ -27,7 +27,8 @@
       padding-left: 0;
 
       .l-site-selector,
-      .l-site-selector__label {
+      .l-site-selector__label,
+      .l-new-webpage-button {
         @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
           visibility: hidden;
         }
@@ -78,7 +79,7 @@
     }
 
     .p-panel__content {
-      height: calc(100vh - 280px);
+      height: calc(100vh - 340px);
       overflow: auto;
 
       @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
@@ -106,7 +107,8 @@
     @media (min-width: $breakpoint-small) and (max-width: $breakpoint-large) {
       .p-panel__content,
       .p-panel__header .l-site-selector,
-      .p-panel__header .l-site-selector__label {
+      .p-panel__header .l-site-selector__label,
+      .p-panel__header .l-new-webpage-button {
         visibility: visible;
       }
     }
