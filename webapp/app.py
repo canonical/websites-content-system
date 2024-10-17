@@ -3,6 +3,7 @@ from webapp.sso import login_required
 from webapp.site_repository import SiteRepository
 from webapp.schemas import (
     ChangesRequestModel,
+    CreatePageModel
 )
 from webapp.models import (
     Reviewer,
@@ -182,34 +183,28 @@ def get_jira_tasks(webpage_id: int):
 
 @app.route("/api/create-page", methods=["POST"])
 @login_required
-def create_page():
-    data = request.get_json()
+@validate()
+def create_page(body: CreatePageModel):
+    data = body.model_dump()
 
-    project = data.get("project")
-    name = data.get("name")
-    copy_doc = data.get("copy_doc")
-    owner = data.get("owner")
-    reviewers = data.get("reviewers")
-    parent = data.get("parent")
-
-    owner_id = get_or_create_user_id(owner)
+    owner_id = get_or_create_user_id(data["owner"])
 
     # Create new webpage
-    project_id = get_project_id(project)
+    project_id = get_project_id(data["project"])
     new_webpage = get_or_create(
         db.session,
         Webpage,
         True,
         project_id=project_id,
-        name=name,
-        url=name,
-        parent_id=get_webpage_id(parent, project_id),
+        name=data["name"],
+        url=data["name"],
+        parent_id=get_webpage_id(data["parent"], project_id),
         owner_id=owner_id,
         status=WebpageStatus.NEW,
     )
 
     # Create new reviewer rows
-    for reviewer in reviewers:
+    for reviewer in data["reviewers"]:
         reviewer_id = get_or_create_user_id(reviewer)
         get_or_create(
             db.session,
@@ -218,6 +213,7 @@ def create_page():
             webpage_id=new_webpage[0].id
         )
 
+    copy_doc = data["copy_doc"]
     if not copy_doc:
         copy_doc = create_copy_doc(app, new_webpage[0])
         new_webpage[0].copy_doc_link = copy_doc

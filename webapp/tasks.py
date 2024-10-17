@@ -6,7 +6,6 @@ from multiprocessing import Lock, Process, Queue
 import yaml
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-# from sqlalchemy import delete, select
 
 from webapp.models import db
 from webapp.site_repository import SiteRepository
