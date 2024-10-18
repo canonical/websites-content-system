@@ -1,6 +1,7 @@
 from functools import wraps
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
+from datetime import datetime
 
 
 def validate_input(model):
@@ -31,3 +32,12 @@ class RemoveWebpageModel(BaseModel):
     due_date: str = ""
     reporter_id: int = None
     description: str = ""
+
+    @validator("due_date")
+    def date_validation(cls, value: str) -> str:
+        try:
+            if datetime.strptime(value, "%Y-%m-%d") <= datetime.now():
+                raise ValueError("due date must be in the future")
+            return value
+        except ValueError:
+            raise ValueError("invalid date format provided")

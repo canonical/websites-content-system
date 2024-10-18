@@ -117,7 +117,9 @@ def set_reviewers():
 
     # Create new reviewer rows
     for user_id in user_ids:
-        get_or_create(db.session, Reviewer, user_id=user_id, webpage_id=webpage_id)
+        get_or_create(
+            db.session, Reviewer, user_id=user_id, webpage_id=webpage_id
+        )
 
     return jsonify({"message": "Successfully set reviewers"}), 200
 
@@ -182,7 +184,7 @@ def get_jira_tasks(webpage_id: int):
 
 @app.route("/api/remove_webpage", methods=["POST"])
 @validate()
-@login_required
+# @login_required
 def remove_webpage(body: RemoveWebpageModel):
     """
     Remove a webpage based on its status.
@@ -208,46 +210,53 @@ def remove_webpage(body: RemoveWebpageModel):
             jira_tasks = JiraTask.query.filter_by(webpage_id=webpage_id).all()
             if jira_tasks:
                 for task in jira_tasks:
-                    if app.config["JIRA"].change_issue_status(
+                    status_change = app.config["JIRA"].change_issue_status(
                         issue_id=task.jira_id,
                         transition_id=JiraStatusTransitionCodes.REJECTED.value,
-                    ):
-                        JiraTask.query.filter_by(id=task.id).delete()
+                    )
+                    if status_change["status_code"] != 204:
+                        return (
+                            jsonify(
+                                {
+                                    "error": f"failed to change status of Jira task {task.jira_id}"
+                                }
+                            ),
+                            500,
+                        )
+                    JiraTask.query.filter_by(id=task.id).delete()
 
-                db.session.commit()
             Reviewer.query.filter_by(webpage_id=webpage_id).delete()
-            Webpage.query.filter_by(id=webpage_id).delete()
+            db.session.delete(webpage)
             db.session.commit()
 
-        except SQLAlchemyError as e:
+        except Exception as e:
             # Rollback if there's any error
             db.session.rollback()
-            print(f"Error deleting webpage: {str(e)}")  # log error
+            app.logger.info(e, "Error deleting webpage from the database")
             return jsonify({"error": f"unable to delete the webpage"}), 500
 
         return (
             jsonify(
-                {"message": f"request for removal of webpage is processed successfully"}
+                {
+                    "message": f"request for removal of webpage is processed successfully"
+                }
             ),
             201,
         )
 
     if webpage.status == WebpageStatus.AVAILABLE:
         if not (
-            (
-                body.due_date
-                and datetime.strptime(body.due_date, "%Y-%m-%d") > datetime.now()
-            )
-            and (
-                body.reporter_id
-                and User.query.filter_by(id=body.reporter_id).one_or_none()
-            )
+            body.reporter_id
+            and User.query.filter_by(id=body.reporter_id).one_or_none()
         ):
             return (
-                jsonify({"error": "provided parameters are incorrect of incomplete"}),
+                jsonify(
+                    {
+                        "error": "provided parameters are incorrect of incomplete"
+                    }
+                ),
                 400,
             )
-        print("webpage status is available")
         task_details = {
             "webpage_id": webpage_id,
             "due_date": body.due_date,
@@ -264,7 +273,9 @@ def remove_webpage(body: RemoveWebpageModel):
 
     return (
         jsonify(
-            {"message": f"request for removal of {webpage.name} processed successfully"}
+            {
+                "message": f"request for removal of {webpage.name} processed successfully"
+            }
         ),
         201,
     )

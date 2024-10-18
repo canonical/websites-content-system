@@ -43,7 +43,9 @@ class Jira:
         self.labels = labels
         self.copy_updates_epic = copy_updates_epic
 
-    def __request__(self, method: str, url: str, data: dict = {}, params: dict = {}):
+    def __request__(
+        self, method: str, url: str, data: dict = {}, params: dict = {}
+    ):
         if data:
             data = json.dumps(data)
         response = requests.request(
@@ -59,7 +61,10 @@ class Jira:
             try:
                 return response.json()
             except json.JSONDecodeError:
-                return response.status_code
+                return {
+                    "status_code": response.status_code,
+                    "response": response.text or "No response",
+                }
 
         raise Exception(
             "Failed to make a request to Jira. Status code:"
@@ -159,7 +164,7 @@ class Jira:
                 "labels": self.labels,
                 "reporter": {"id": reporter_jira_id},
                 "parent": parent,
-                "duedate": due_date,  # need to add back parent ################################################
+                "duedate": due_date,
                 "project": {"id": "10492"},  # Web and Design-ENG
                 "components": [
                     {"id": "12655"},  # Sites Tribe
@@ -210,7 +215,10 @@ class Jira:
             summary = f"New webpage for {webpage.name}"
 
         # Create the issue depending on the request type
-        if request_type == self.NEW_WEBPAGE or request_type == self.PAGE_REFRESH:
+        if (
+            request_type == self.NEW_WEBPAGE
+            or request_type == self.PAGE_REFRESH
+        ):
             # Create epic
             epic = self.create_task(
                 summary=summary,
@@ -258,17 +266,11 @@ class Jira:
         payload = {
             "transition": {"id": transition_id},
         }
-        if (
-            self.__request__(
-                method="POST",
-                url=f"{self.url}/rest/api/3/issue/{issue_id}/transitions",
-                data=payload,
-            )
-            == 204
-        ):
-            return True
-        else:
-            return False
+        return self.__request__(
+            method="POST",
+            url=f"{self.url}/rest/api/3/issue/{issue_id}/transitions",
+            data=payload,
+        )
 
 
 def init_jira(app):

@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class JiraStatusTransitionCodes(Enum):
     TRIAGED = 11
     PROGRESS = 21
@@ -9,4 +10,3 @@ class JiraStatusTransitionCodes(Enum):
     DONE = 61
     REJECTED = 71
     UNTRIAGED = 81
-
