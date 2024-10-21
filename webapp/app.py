@@ -1,13 +1,13 @@
-from os import environ
-
 import requests
+from os import environ
 from datetime import datetime
 from flask import jsonify, render_template, request
 from flask_pydantic import validate
 from sqlalchemy.exc import SQLAlchemyError
-
-from webapp import create_app
-from webapp.helper import create_jira_task, get_or_create_user_id
+from webapp.tasks import LOCKS
+from webapp.sso import login_required
+from webapp.site_repository import SiteRepository
+from webapp.schemas import ChangesRequestModel, CreatePageModel
 from webapp.models import (
     Reviewer,
     Webpage,
@@ -15,29 +15,29 @@ from webapp.models import (
     db,
     get_or_create,
     WebpageStatus,
-    User,
 )
-from webapp.schemas import (
-    ChangesRequestModel,
-    RemoveWebpageModel,
+from webapp import create_app
+from webapp.helper import (
+    create_jira_task,
+    get_or_create_user_id,
+    get_project_id,
+    get_webpage_id,
+    create_copy_doc,
 )
-from webapp.site_repository import SiteRepository
-from webapp.sso import login_required
-from webapp.tasks import LOCKS
-from webapp.jira import Jira
-from webapp.enums import JiraStatusTransitionCodes
-
 
 app = create_app()
 
 
-@app.route("/get-tree/<string:uri>", methods=["GET"])
-@app.route("/get-tree/<string:uri>/<string:branch>", methods=["GET"])
+@app.route("/api/get-tree/<string:uri>/<string:branch>", methods=["GET"])
+@app.route(
+    "/api/get-tree/<string:uri>/<string:branch>/<string:no_cache>",
+    methods=["GET"],
+)
 @login_required
-def get_tree(uri: str, branch="main"):
+def get_tree(uri: str, branch: str = "main", no_cache: bool = False):
     site_repository = SiteRepository(uri, app, branch=branch, task_locks=LOCKS)
     # Getting the site tree here ensures that both the cache and db are updated
-    tree = site_repository.get_tree_async()
+    tree = site_repository.get_tree_sync(no_cache)
 
     response = jsonify(
         {
@@ -53,14 +53,7 @@ def get_tree(uri: str, branch="main"):
     return response
 
 
-@app.route("/", defaults={"path": ""})
-@app.route("/webpage/<path:path>")
-@login_required
-def index(path):
-    return render_template("index.html")
-
-
-@app.route("/get-users/<username>", methods=["GET"])
+@app.route("/api/get-users/<username>", methods=["GET"])
 @login_required
 def get_users(username: str):
     query = """
@@ -97,7 +90,7 @@ def get_users(username: str):
         return jsonify({"error": "Failed to fetch users"}), 500
 
 
-@app.route("/set-reviewers", methods=["POST"])
+@app.route("/api/set-reviewers", methods=["POST"])
 @login_required
 def set_reviewers():
     data = request.get_json()
@@ -124,7 +117,7 @@ def set_reviewers():
     return jsonify({"message": "Successfully set reviewers"}), 200
 
 
-@app.route("/set-owner", methods=["POST"])
+@app.route("/api/set-owner", methods=["POST"])
 @login_required
 def set_owner():
     data = request.get_json()
@@ -142,22 +135,21 @@ def set_owner():
     return jsonify({"message": "Successfully set owner"}), 200
 
 
-@app.route("/request-changes", methods=["POST"])
+@app.route("/api/request-changes", methods=["POST"])
 @login_required
 @validate()
 def request_changes(body: ChangesRequestModel):
 
     # Make a request to JIRA to create a task
     try:
-        task = create_jira_task(app, body.model_dump())
-        task_url = f"https://docs.google.com/document/d/{task['id']}"
+        create_jira_task(app, body.model_dump())
     except Exception as e:
         return jsonify(str(e)), 500
 
-    return jsonify({"message": f"Task created successfully\n{task_url}"}), 201
+    return jsonify({"message": "Task created successfully"}), 201
 
 
-@app.route("/get-jira-tasks/<webpage_id>", methods=["GET"])
+@app.route("/api/get-jira-tasks/<webpage_id>", methods=["GET"])
 def get_jira_tasks(webpage_id: int):
     jira_tasks = (
         JiraTask.query.filter_by(webpage_id=webpage_id)
@@ -279,3 +271,58 @@ def remove_webpage(body: RemoveWebpageModel):
         ),
         201,
     )
+
+
+@app.route("/api/create-page", methods=["POST"])
+@login_required
+@validate()
+def create_page(body: CreatePageModel):
+    data = body.model_dump()
+
+    owner_id = get_or_create_user_id(data["owner"])
+
+    # Create new webpage
+    project_id = get_project_id(data["project"])
+    new_webpage = get_or_create(
+        db.session,
+        Webpage,
+        True,
+        project_id=project_id,
+        name=data["name"],
+        url=data["name"],
+        parent_id=get_webpage_id(data["parent"], project_id),
+        owner_id=owner_id,
+        status=WebpageStatus.NEW,
+    )
+
+    # Create new reviewer rows
+    for reviewer in data["reviewers"]:
+        reviewer_id = get_or_create_user_id(reviewer)
+        get_or_create(
+            db.session,
+            Reviewer,
+            user_id=reviewer_id,
+            webpage_id=new_webpage[0].id,
+        )
+
+    copy_doc = data["copy_doc"]
+    if not copy_doc:
+        copy_doc = create_copy_doc(app, new_webpage[0])
+        new_webpage[0].copy_doc_link = copy_doc
+        db.session.commit()
+
+    return jsonify({"copy_doc": copy_doc}), 201
+
+
+# Client-side routes
+@app.route("/")
+@app.route("/new-webpage")
+@login_required
+def index():
+    return render_template("index.html")
+
+
+@app.route("/webpage/<path:path>")
+@login_required
+def webpage(path):
+    return render_template("index.html")

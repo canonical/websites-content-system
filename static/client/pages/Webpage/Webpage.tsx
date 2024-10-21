@@ -6,10 +6,11 @@ import { type IWebpageProps } from "./Webpage.types";
 
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
 import config from "@/config";
+import { PageStatus } from "@/services/api/types/pages";
 
 const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
   const openCopyDoc = useCallback(() => {
-    window.open(page.link);
+    window.open(page.copy_doc_link);
   }, [page]);
 
   const openGitHub = useCallback(() => {
@@ -37,18 +38,20 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
         </a>
       </div>
       <div className="l-webpage--buttons">
-        {page.link && (
-          <>
+        <>
+          {page.copy_doc_link && (
             <Button appearance="neutral" onClick={openCopyDoc}>
               Edit copy doc&nbsp;
               <i className="p-icon--external-link" />
             </Button>
+          )}
+          {page.status !== PageStatus.NEW && (
             <Button appearance="neutral" onClick={openGitHub}>
               Inspect code on GitHub&nbsp;
               <i className="p-icon--external-link" />
             </Button>
-          </>
-        )}
+          )}
+        </>
       </div>
       <div className="row">
         <div className="col-7">
