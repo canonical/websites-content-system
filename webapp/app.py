@@ -1,13 +1,15 @@
 import requests
 from os import environ
-from datetime import datetime
 from flask import jsonify, render_template, request
 from flask_pydantic import validate
-from sqlalchemy.exc import SQLAlchemyError
 from webapp.tasks import LOCKS
 from webapp.sso import login_required
 from webapp.site_repository import SiteRepository
-from webapp.schemas import ChangesRequestModel, CreatePageModel
+from webapp.schemas import (
+    ChangesRequestModel,
+    CreatePageModel,
+    RemoveWebpageModel,
+)
 from webapp.models import (
     Reviewer,
     Webpage,
@@ -15,8 +17,10 @@ from webapp.models import (
     db,
     get_or_create,
     WebpageStatus,
+    User,
 )
 from webapp import create_app
+from webapp.enums import JiraStatusTransitionCodes
 from webapp.helper import (
     create_jira_task,
     get_or_create_user_id,
@@ -180,17 +184,26 @@ def get_jira_tasks(webpage_id: int):
 def remove_webpage(body: RemoveWebpageModel):
     """
     Remove a webpage based on its status.
-    This function handles the removal of a webpage from the system.
-    If the webpage is new and not in the codebase, it deletes the webpage and associated
-    reviewer records from the database. If the webpage pre-exists, it creates a Jira task to remove
-    the webpage from the code repository and updates the webpage status to "TO_DELETE".
+    This function handles removal of a webpage from the system.
+    If the webpage is new and not in the codebase,
+    it deletes the webpage and associated
+    reviewer records from the database.
+    If the webpage pre-exists, it creates Jira task to remove
+    the webpage from code repository and updates the webpage
+    status to "TO_DELETE".
     Args:
-        body (RemoveWebpageModel): The model containing the details of the webpage to be removed.
+        body (RemoveWebpageModel): The model containing
+            the details of the webpage to be removed.
     Returns:
-        Response: A JSON response indicating the result of the operation.
-            - If the webpage is not found, returns a 404 error with a message.
-            - If the webpage is successfully deleted or a task is created, returns a 201 status with a success message.
-            - If there is an error during deletion, returns a 500 error with a message.
+        Response: A JSON response indicating the result
+                of the operation.
+        - If the webpage is not found, returns a 404 error
+            with a message.
+        - If the webpage is successfully deleted or a task
+            is created,returns a 201 status with
+            a success message.
+        - If there is an error during deletion,
+            returns a 500 error with a message.
     """
     webpage_id = body.webpage_id
 
@@ -225,12 +238,12 @@ def remove_webpage(body: RemoveWebpageModel):
             # Rollback if there's any error
             db.session.rollback()
             app.logger.info(e, "Error deleting webpage from the database")
-            return jsonify({"error": f"unable to delete the webpage"}), 500
+            return jsonify({"error": "unable to delete the webpage"}), 500
 
         return (
             jsonify(
                 {
-                    "message": f"request for removal of webpage is processed successfully"
+                    "message": "request for removal of webpage is processed successfully"
                 }
             ),
             201,

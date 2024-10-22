@@ -57,14 +57,13 @@ class Jira:
             params=params,
         )
 
-        if response.status_code in [200, 201, 204]:
-            try:
-                return response.json()
-            except json.JSONDecodeError:
-                return {
-                    "status_code": response.status_code,
-                    "response": response.text or "No response",
-                }
+        if response.status_code == 200 or response.status_code == 201:
+            return response.json()
+        elif response.status_code == 204:
+            return {
+                "status_code": 204,
+                "response": "No content",
+            }
 
         raise Exception(
             "Failed to make a request to Jira. Status code:"
