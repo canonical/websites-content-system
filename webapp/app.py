@@ -143,7 +143,6 @@ def set_owner():
 @login_required
 @validate()
 def request_changes(body: ChangesRequestModel):
-
     # Make a request to JIRA to create a task
     try:
         create_jira_task(app, body.model_dump())
@@ -222,9 +221,9 @@ def remove_webpage(body: RemoveWebpageModel):
                     if status_change["status_code"] != 204:
                         return (
                             jsonify(
-                                {
-                                    "error": f"failed to change status of Jira task {task.jira_id}"
-                                }
+    {
+        "error": f"failed to change status of Jira task {task.jira_id}"
+    }
                             ),
                             500,
                         )
@@ -242,9 +241,9 @@ def remove_webpage(body: RemoveWebpageModel):
 
         return (
             jsonify(
-                {
-                    "message": "request for removal of webpage is processed successfully"
-                }
+    {
+        "message": "request for removal of webpage is processed successfully"
+    }
             ),
             201,
         )
@@ -256,9 +255,9 @@ def remove_webpage(body: RemoveWebpageModel):
         ):
             return (
                 jsonify(
-                    {
-                        "error": "provided parameters are incorrect of incomplete"
-                    }
+    {
+        "error": "provided parameters are incorrect of incomplete"
+    }
                 ),
                 400,
             )
@@ -278,9 +277,9 @@ def remove_webpage(body: RemoveWebpageModel):
 
     return (
         jsonify(
-            {
-                "message": f"request for removal of {webpage.name} processed successfully"
-            }
+    {
+        "message": f"removal of {webpage.name} processed successfully"
+    }
         ),
         201,
     )
