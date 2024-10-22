@@ -59,6 +59,11 @@ class Jira:
 
         if response.status_code == 200 or response.status_code == 201:
             return response.json()
+        elif response.status_code == 204:
+            return {
+                "status_code": 204,
+                "response": "No content",
+            }
 
         raise Exception(
             "Failed to make a request to Jira. Status code:"
@@ -157,8 +162,8 @@ class Jira:
                 "issuetype": {"id": issue_type},
                 "labels": self.labels,
                 "reporter": {"id": reporter_jira_id},
-                "duedate": due_date,
                 "parent": parent,
+                "duedate": due_date,
                 "project": {"id": "10492"},  # Web and Design-ENG
                 "components": [
                     {"id": "12655"},  # Sites Tribe
@@ -177,6 +182,7 @@ class Jira:
         reporter_id: str,
         webpage_id: int,
         due_date: datetime,
+        summary: str,
     ):
         """Creates a new issue in Jira.
 
@@ -244,6 +250,25 @@ class Jira:
             parent=self.copy_updates_epic,
             reporter_jira_id=reporter_jira_id,
             due_date=due_date,
+        )
+
+    def change_issue_status(self, issue_id: str, transition_id: str) -> bool:
+        """Change the status of a Jira issue.
+
+        Args:
+            issue_id (str): The ID of the Jira issue (e.g., "JIRA-123").
+            transition_id (str): Transition_ID for the desired status.
+
+        Returns:
+            Bool: True if status was changed successfully else False.
+        """
+        payload = {
+            "transition": {"id": transition_id},
+        }
+        return self.__request__(
+            method="POST",
+            url=f"{self.url}/rest/api/3/issue/{issue_id}/transitions",
+            data=payload,
         )
 
 

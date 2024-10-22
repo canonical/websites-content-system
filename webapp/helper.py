@@ -33,6 +33,7 @@ def create_jira_task(app, task):
         webpage_id=task["webpage_id"],
         request_type=task["type"],
         description=task["description"],
+        summary=task["summary"] or "",
     )
 
     # Create jira task in the database
@@ -132,12 +133,8 @@ def create_copy_doc(app, webpage):
 def build_tree(session, page, webpages):
     child_pages = list(filter(lambda p: p.parent_id == page["id"], webpages))
     for child_page in child_pages:
-        project = get_or_create(
-            session, Project, id=child_page.project_id
-        )
-        owner = get_or_create(
-            session, User, id=child_page.owner_id
-        )
+        project = get_or_create(session, Project, id=child_page.project_id)
+        owner = get_or_create(session, User, id=child_page.owner_id)
         new_child = convert_webpage_to_dict(child_page, owner, project)
         new_child["children"] = []
         page["children"].append(new_child)
@@ -147,17 +144,12 @@ def build_tree(session, page, webpages):
 def get_tree_struct(session, webpages):
     webpages_list = list(webpages)
     parent_page = next(
-        filter(lambda p: p.parent_id is None, webpages_list),
-        None
+        filter(lambda p: p.parent_id is None, webpages_list), None
     )
 
-    if (parent_page):
-        project = get_or_create(
-            session, Project, id=parent_page.project_id
-        )
-        owner = get_or_create(
-            session, User, id=parent_page.owner_id
-        )
+    if parent_page:
+        project = get_or_create(session, Project, id=parent_page.project_id)
+        owner = get_or_create(session, User, id=parent_page.owner_id)
         tree = convert_webpage_to_dict(parent_page, owner, project)
         tree["children"] = []
         build_tree(session, tree, webpages_list)

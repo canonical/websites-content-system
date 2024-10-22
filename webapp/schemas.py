@@ -1,7 +1,7 @@
 from functools import wraps
-
+from pydantic import BaseModel, field_validator
+from datetime import datetime
 from typing import List, Optional
-from pydantic import BaseModel
 
 
 def validate_input(model):
@@ -25,6 +25,19 @@ class ChangesRequestModel(BaseModel):
     webpage_id: int
     type: int
     description: str
+
+
+class RemoveWebpageModel(BaseModel):
+    webpage_id: int
+    due_date: str = ""
+    reporter_id: int = None
+    description: str = ""
+
+    @field_validator("due_date")
+    @classmethod
+    def date_validation(cls, value: str) -> str:
+        assert datetime.strptime(value, "%Y-%m-%d") >= datetime.now()
+        return value
 
 
 class UserModel(BaseModel):

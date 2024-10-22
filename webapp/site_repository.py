@@ -10,11 +10,18 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import select, delete
 
 from webapp.models import (
-  Project, User, Webpage, db, get_or_create, WebpageStatus
+    Project,
+    User,
+    Webpage,
+    db,
+    get_or_create,
+    WebpageStatus,
 )
 from webapp.parse_tree import scan_directory
 from webapp.helper import (
-  get_project_id, get_tree_struct, convert_webpage_to_dict
+    get_project_id,
+    get_tree_struct,
+    convert_webpage_to_dict,
 )
 
 
@@ -45,7 +52,7 @@ class SiteRepository:
         app: Flask,
         branch="main",
         task_locks: dict = None,
-        db: SQLAlchemy = None
+        db: SQLAlchemy = None,
     ):
         base_dir = app.config["BASE_DIR"]
         self.REPOSITORY_DIRECTORY = f"{base_dir}/repositories"

@@ -20,6 +20,7 @@ def init_cache(app: Flask):
     app.config["CACHE"] = cache
     return cache
 
+
 class Cache(ABC):
     """Abstract Cache class"""
 
