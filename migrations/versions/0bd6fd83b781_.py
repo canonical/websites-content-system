@@ -6,8 +6,6 @@ Create Date: 2024-10-23 18:30:22.821928
 
 """
 
-from datetime import datetime
-
 import sqlalchemy as sa
 from alembic import op
 from sqlalchemy.sql import text
@@ -20,7 +18,7 @@ depends_on = None
 
 
 def upgrade():
-    with op.batch_alter_table("jira_tasks", schema=None) as batch_op:
+    with op.batch_alter_table("jira_tasks", schema=None):
         # ### Use a raw sql comment to add USING clause ###
         conn = op.get_bind()
         conn.execute(

@@ -225,9 +225,9 @@ def remove_webpage(body: RemoveWebpageModel):
                     if status_change["status_code"] != 204:
                         return (
                             jsonify(
-    {
-        "error": f"failed to change status of Jira task {task.jira_id}"
-    }
+                                {
+                                    "error": f"failed to change status of Jira task {task.jira_id}"  # noqa
+                                }
                             ),
                             500,
                         )
@@ -244,11 +244,7 @@ def remove_webpage(body: RemoveWebpageModel):
             return jsonify({"error": "unable to delete the webpage"}), 500
 
         return (
-            jsonify(
-    {
-        "message": "request for removal of webpage is processed successfully"
-    }
-            ),
+            jsonify({"message": "Webpage has been removed successfully"}),
             201,
         )
 
@@ -258,11 +254,7 @@ def remove_webpage(body: RemoveWebpageModel):
             and User.query.filter_by(id=body.reporter_id).one_or_none()
         ):
             return (
-                jsonify(
-    {
-        "error": "provided parameters are incorrect of incomplete"
-    }
-                ),
+                jsonify({"error": "provided parameters are incorrect"}),
                 400,
             )
         task_details = {
@@ -281,9 +273,7 @@ def remove_webpage(body: RemoveWebpageModel):
 
     return (
         jsonify(
-    {
-        "message": f"removal of {webpage.name} processed successfully"
-    }
+            {"message": f"removal of {webpage.name} processed successfully"}
         ),
         201,
     )
