@@ -1,38 +1,42 @@
-import requests
 from os import environ
+
+import requests
 from flask import jsonify, render_template, request
 from flask_pydantic import validate
-from webapp.tasks import LOCKS
-from webapp.sso import login_required
-from webapp.site_repository import SiteRepository
+
+from webapp import create_app
+from webapp.enums import JiraStatusTransitionCodes
+from webapp.helper import (
+    create_copy_doc,
+    create_jira_task,
+    get_or_create_user_id,
+    get_project_id,
+    get_webpage_id,
+)
+from webapp.models import (
+    JiraTask,
+    Reviewer,
+    User,
+    Webpage,
+    WebpageStatus,
+    db,
+    get_or_create,
+)
 from webapp.schemas import (
     ChangesRequestModel,
     CreatePageModel,
     RemoveWebpageModel,
 )
-from webapp.models import (
-    Reviewer,
-    Webpage,
-    JiraTask,
-    db,
-    get_or_create,
-    WebpageStatus,
-    User,
-)
-from webapp import create_app
-from webapp.enums import JiraStatusTransitionCodes
-from webapp.helper import (
-    create_jira_task,
-    get_or_create_user_id,
-    get_project_id,
-    get_webpage_id,
-    create_copy_doc,
-)
+from webapp.site_repository import SiteRepository
+from webapp.sso import login_required
+from webapp.tasks import LOCKS
 
 app = create_app()
 
 
-@app.route("/api/get-tree/<string:uri>/<string:branch>", methods=["GET"])
+@app.route(
+    "/api/get-tree/<string:uri>", methods=["GET"], defaults={"branch": "main"}
+)
 @app.route(
     "/api/get-tree/<string:uri>/<string:branch>/<string:no_cache>",
     methods=["GET"],
