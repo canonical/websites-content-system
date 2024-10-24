@@ -72,6 +72,7 @@ def convert_webpage_to_dict(webpage, owner, project):
     owner = webpage_dict.pop("owner", None)
     project = webpage_dict.pop("project", None)
     reviewers = webpage_dict.pop("reviewers", None)
+    jira_tasks = webpage_dict.pop("jira_tasks", None)
 
     # Serialize owner fields
     if owner:
@@ -112,6 +113,25 @@ def convert_webpage_to_dict(webpage, owner, project):
     else:
         reviewers_list = []
 
+    # Serialize jira_tasks fields
+    if jira_tasks:
+        jira_tasks_list = []
+        for jira_task in jira_tasks:
+            jira_task_dict = jira_task.__dict__.copy()
+            jira_task_dict.pop("_sa_instance_state", None)
+            jira_task_dict["created_at"] = jira_task.created_at.isoformat()
+            jira_task_dict["updated_at"] = jira_task.updated_at.isoformat()
+            # Expand the user object
+            jira_task_user_dict = jira_task.user.__dict__.copy()
+            jira_task_user_dict.pop("created_at")
+            jira_task_user_dict.pop("updated_at")
+            if jira_task_user_dict["_sa_instance_state"]:
+                jira_task_user_dict.pop("_sa_instance_state", None)
+            jira_task_dict = {**jira_task_dict, **jira_task_user_dict}
+            jira_tasks_list.append(jira_task_dict)
+    else:
+        jira_tasks_list = []
+
     # Serialize object fields
     webpage_dict["status"] = webpage.status.value
     webpage_dict["created_at"] = webpage.created_at.isoformat()
@@ -119,6 +139,7 @@ def convert_webpage_to_dict(webpage, owner, project):
     webpage_dict["owner"] = owner_dict
     webpage_dict["project"] = project_dict
     webpage_dict["reviewers"] = reviewers_list
+    webpage_dict["jira_tasks"] = jira_tasks_list
 
     return webpage_dict
 

@@ -15,6 +15,7 @@ export interface IPage {
   owner: IUser;
   reviewers: IUser[];
   status: (typeof PageStatus)[keyof typeof PageStatus];
+  jira_tasks: any[];
   children: IPage[];
 }
 
@@ -36,4 +37,18 @@ export interface INewPage {
 
 export interface INewPageResponse {
   copy_doc: string;
+}
+
+export const ChangeRequestType = {
+  COPY_UPDATE: 0,
+  PAGE_REFRESH: 1,
+  NEW_WEBPAGE: 2,
+};
+
+export interface IRequestChanges {
+  due_date: string;
+  reporter_id: number;
+  webpage_id: number;
+  type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType];
+  description: string;
 }

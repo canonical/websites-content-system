@@ -1,7 +1,7 @@
 import { BasicApiClass } from "./BasicApiClass";
 
 import { ENDPOINTS, REST_TYPES } from "@/services/api/constants";
-import type { INewPage, INewPageResponse, IPagesResponse } from "@/services/api/types/pages";
+import type { INewPage, INewPageResponse, IPagesResponse, IRequestChanges } from "@/services/api/types/pages";
 import { type IUser } from "@/services/api/types/users";
 
 export class PagesApiClass extends BasicApiClass {
@@ -25,5 +25,9 @@ export class PagesApiClass extends BasicApiClass {
 
   public createPage(page: INewPage): Promise<INewPageResponse> {
     return this.callApi(ENDPOINTS.createNewPage, REST_TYPES.POST, page);
+  }
+
+  public requestChanges(body: IRequestChanges): Promise<void> {
+    return this.callApi(ENDPOINTS.requestChanges, REST_TYPES.POST, body);
   }
 }

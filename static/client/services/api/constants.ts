@@ -5,6 +5,7 @@ export const ENDPOINTS = {
   setOwner: "/api/set-owner",
   setReviewers: "/api/set-reviewers",
   createNewPage: "/api/create-page",
+  requestChanges: "/api/request-changes",
 };
 
 export const REST_TYPES = {
