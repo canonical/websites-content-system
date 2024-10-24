@@ -19,6 +19,7 @@ from webapp.models import (
     User,
     Webpage,
     WebpageStatus,
+    Project,
     db,
     get_or_create,
 )
@@ -35,7 +36,8 @@ app = create_app()
 
 
 @app.route(
-    "/api/get-tree/<string:uri>", methods=["GET"], defaults={"branch": "main"}
+    "/api/get-tree/<string:uri>/<string:branch>",
+    methods=["GET"],
 )
 @app.route(
     "/api/get-tree/<string:uri>/<string:branch>/<string:no_cache>",
@@ -149,7 +151,14 @@ def set_owner():
 def request_changes(body: ChangesRequestModel):
     # Make a request to JIRA to create a task
     try:
-        create_jira_task(app, body.model_dump())
+        params = body.model_dump()
+        create_jira_task(app, params)
+
+        webpage = Webpage.query.filter_by(id=params["webpage_id"]).first()
+        project = Project.query.filter_by(id=webpage.project_id).first()
+        site_repository = SiteRepository(project.name, app, task_locks=LOCKS)
+        # clean the cache for a new Jira task to appear in the tree
+        site_repository.invalidate_cache()
     except Exception as e:
         return jsonify(str(e)), 500
 

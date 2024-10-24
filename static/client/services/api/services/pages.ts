@@ -1,5 +1,5 @@
 import { api } from "@/services/api";
-import type { INewPage, INewPageResponse, IPagesResponse } from "@/services/api/types/pages";
+import type { INewPage, INewPageResponse, IPagesResponse, IRequestChanges } from "@/services/api/types/pages";
 import type { IUser } from "@/services/api/types/users";
 
 export const getPages = async (domain: string, noCache?: boolean): Promise<IPagesResponse> => {
@@ -16,6 +16,10 @@ export const setReviewers = async (users: IUser[], webpageId: number): Promise<v
 
 export const createPage = async (page: INewPage): Promise<INewPageResponse> => {
   return api.pages.createPage(page);
+};
+
+export const requestChanges = async (body: IRequestChanges): Promise<void> => {
+  return api.pages.requestChanges(body);
 };
 
 export * as PagesServices from "./pages";
