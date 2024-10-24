@@ -6,6 +6,14 @@ export const PageStatus = {
   TO_DELETE: "TO_DELETE",
 };
 
+export interface IJiraTask {
+  created_at: string;
+  jira_id: string;
+  id: number;
+  name: string;
+  status: string;
+}
+
 export interface IPage {
   id?: number;
   name: string;
@@ -15,7 +23,7 @@ export interface IPage {
   owner: IUser;
   reviewers: IUser[];
   status: (typeof PageStatus)[keyof typeof PageStatus];
-  jira_tasks: any[];
+  jira_tasks: IJiraTask[];
   children: IPage[];
 }
 
