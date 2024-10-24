@@ -4,6 +4,7 @@ import { Button } from "@canonical/react-components";
 
 import { type IWebpageProps } from "./Webpage.types";
 
+import JiraTasks from "@/components/JiraTasks";
 import NewPageModal from "@/components/NewPageModal";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
 import config from "@/config";
@@ -94,6 +95,12 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
           <OwnerAndReviewers page={page} />
         </div>
       </div>
+      {page.jira_tasks?.length ? (
+        <div className="l-webpage--tasks row">
+          <p className="p-text--small-caps">Related Jira Tickets</p>
+          <JiraTasks tasks={page.jira_tasks} />
+        </div>
+      ) : null}
       {modalOpen && <NewPageModal copyDocLink={page.copy_doc_link} onClose={handleModalClose} webpage={page} />}
     </div>
   );

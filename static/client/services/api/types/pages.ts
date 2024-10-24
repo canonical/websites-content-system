@@ -12,6 +12,7 @@ export interface IJiraTask {
   id: number;
   name: string;
   status: string;
+  summary: string;
 }
 
 export interface IPage {
@@ -58,5 +59,6 @@ export interface IRequestChanges {
   reporter_id: number;
   webpage_id: number;
   type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType];
+  summary?: string;
   description: string;
 }
