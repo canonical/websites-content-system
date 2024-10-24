@@ -7,15 +7,7 @@ import type { INewPageModalProps } from "./NewPageModal.types";
 import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType } from "@/services/api/types/pages";
-
-function getNowStr() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // Months are 0-based, so we add 1
-  const day = String(today.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-}
+import { DatesServices } from "@/services/dates";
 
 const NewPageModal = ({ copyDocLink, onClose, webpage }: INewPageModalProps): JSX.Element => {
   const [dueDate, setDueDate] = useState<string>();
@@ -73,7 +65,7 @@ const NewPageModal = ({ copyDocLink, onClose, webpage }: INewPageModalProps): JS
       close={onClose}
       title="Submit new page for publication"
     >
-      <Input label="Due date" min={getNowStr()} onChange={handleChangeDueDate} required type="date" />
+      <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
       <Textarea label="Description" onChange={handleDescrChange} />
       <Input

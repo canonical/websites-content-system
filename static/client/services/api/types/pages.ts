@@ -12,6 +12,7 @@ export interface IJiraTask {
   id: number;
   name: string;
   status: string;
+  summary: string;
 }
 
 export interface IPage {
