@@ -43,10 +43,11 @@ const NewPageModal = ({ copyDocLink, onClose, webpage }: INewPageModalProps): JS
         webpage_id: webpage.id,
         reporter_id: webpage.owner.id,
         type: ChangeRequestType.NEW_WEBPAGE,
-        description: `Copy doc link: ${webpage.copy_doc_link}\n${descr}`,
+        description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
       }).then(() => {
         setIsLoading(false);
         onClose();
+        window.location.reload();
       });
     }
   }, [dueDate, descr, webpage, onClose]);

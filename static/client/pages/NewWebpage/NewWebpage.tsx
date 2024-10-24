@@ -84,7 +84,6 @@ const NewWebpage = (): JSX.Element => {
       if (project) {
         const isNewPageExist = TreeServices.findPage(project.templates, `${location}/${titleValue}`);
         if (isNewPageExist) {
-          console.log("new page exists, should redirect");
           // TODO: there is a max depth React error on this line, needs more investigation
           setSelectedProject(project);
           window.location.href = `/webpage/${project.name}${location}/${titleValue}`;

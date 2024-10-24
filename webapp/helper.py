@@ -33,7 +33,6 @@ def create_jira_task(app, task):
         webpage_id=task["webpage_id"],
         request_type=task["type"],
         description=task["description"],
-        summary=task["summary"] or "",
     )
 
     # Create jira task in the database

@@ -34,6 +34,7 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
 
   const isNew = useMemo(() => page.status === PageStatus.NEW, [page]);
   const pageName = useMemo(() => page.name.split("/").reverse()[0], [page]);
+  const hasJiraTasks = useMemo(() => page.jira_tasks?.length, [page]);
 
   return (
     <div className="l-webpage">
@@ -61,7 +62,7 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
       </div>
       <div className="l-webpage--buttons">
         <>
-          {isNew && (
+          {isNew && !hasJiraTasks && (
             <Button appearance="positive" onClick={createTask}>
               Submit for publication...
             </Button>

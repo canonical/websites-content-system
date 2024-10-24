@@ -182,7 +182,6 @@ class Jira:
         reporter_id: str,
         webpage_id: int,
         due_date: datetime,
-        summary: str,
     ):
         """Creates a new issue in Jira.
 
