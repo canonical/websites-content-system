@@ -182,6 +182,7 @@ class Jira:
         reporter_id: str,
         webpage_id: int,
         due_date: datetime,
+        summary: str,
     ):
         """Creates a new issue in Jira.
 
@@ -204,13 +205,14 @@ class Jira:
         # Get the reporter ID
         reporter_jira_id = self.get_reporter_jira_id(reporter_id)
 
-        # Determine summary message
-        if request_type == self.COPY_UPDATE:
-            summary = f"Copy update {webpage.name}"
-        elif request_type == self.PAGE_REFRESH:
-            summary = f"Page refresh for {webpage.name}"
-        elif request_type == self.NEW_WEBPAGE:
-            summary = f"New webpage for {webpage.name}"
+        # Determine summary message in case it's not provided by a user
+        if not summary:
+            if request_type == self.COPY_UPDATE:
+                summary = f"Copy update {webpage.name}"
+            elif request_type == self.PAGE_REFRESH:
+                summary = f"Page refresh for {webpage.name}"
+            elif request_type == self.NEW_WEBPAGE:
+                summary = f"New webpage for {webpage.name}"
 
         # Create the issue depending on the request type
         if (

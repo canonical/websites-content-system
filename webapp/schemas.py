@@ -25,6 +25,7 @@ class ChangesRequestModel(BaseModel):
     webpage_id: int
     type: int
     description: str
+    summary: str
 
 
 class RemoveWebpageModel(BaseModel):
