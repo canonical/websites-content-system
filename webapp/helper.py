@@ -1,4 +1,11 @@
 from webapp.models import JiraTask, User, Project, Webpage, db, get_or_create
+from enum import Enum
+
+
+class RequestType(Enum):
+    COPY_UPDATE = 0
+    PAGE_REFRESH = 1
+    NEW_WEBPAGE = 2
 
 
 def get_or_create_user_id(user):
@@ -26,14 +33,28 @@ def create_jira_task(app, body):
     """
     # TODO: If an epic already exists for this request, add subtasks to it.
 
+    # Get the webpage
+    webpage_id = body["webpage_id"]
+    webpage = Webpage.query.filter_by(id=webpage_id).first()
+    if not webpage:
+        raise Exception(f"Webpage with ID {webpage_id} not found")
+
+    # Determine summary message in case it's not provided by a user
+    summary = body.get("summary")
+    if len(summary) == 0:
+        if body["type"] == RequestType.COPY_UPDATE.value:
+            summary = f"Copy update {webpage.name}"
+        elif body["type"] == RequestType.PAGE_REFRESH.value:
+            summary = f"Page refresh for {webpage.name}"
+        elif body["type"] == RequestType.NEW_WEBPAGE.value:
+            summary = f"New webpage for {webpage.name}"
+        else:
+            summary = ""
+
     jira = app.config["JIRA"]
-    summary = ""
-    if "summary" in body.keys():
-        summary = body["summary"]
     issue = jira.create_issue(
         due_date=body["due_date"],
         reporter_id=body["reporter_id"],
-        webpage_id=body["webpage_id"],
         request_type=body["type"],
         description=body["description"],
         summary=summary,
@@ -46,7 +67,7 @@ def create_jira_task(app, body):
         jira_id=issue["key"],
         webpage_id=body["webpage_id"],
         user_id=body["reporter_id"],
-        summary=summary
+        summary=summary,
     )
 
 
