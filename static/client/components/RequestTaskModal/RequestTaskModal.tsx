@@ -6,7 +6,7 @@ import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
 import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
-import { ChangeRequestType } from "@/services/api/types/pages";
+import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 import { DatesServices } from "@/services/dates";
 
 const RequestTaskModal = ({
@@ -57,7 +57,11 @@ const RequestTaskModal = ({
         }).then(() => {
           setIsLoading(false);
           onClose();
-          window.location.href = "/";
+          if (webpage.status === PageStatus.NEW) {
+            window.location.href = "/";
+          } else {
+            window.location.reload();
+          }
         });
       } else {
         PagesServices.requestChanges({
