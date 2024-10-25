@@ -48,18 +48,31 @@ const RequestTaskModal = ({
   const handleSubmit = useCallback(() => {
     if (dueDate && webpage?.id) {
       setIsLoading(true);
-      PagesServices.requestChanges({
-        due_date: dueDate,
-        webpage_id: webpage.id,
-        reporter_id: webpage.owner.id,
-        type: changeType,
-        summary,
-        description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
-      }).then(() => {
-        setIsLoading(false);
-        onClose();
-        window.location.reload();
-      });
+      if (changeType === ChangeRequestType.PAGE_REMOVAL) {
+        PagesServices.requestRemoval({
+          due_date: dueDate,
+          webpage_id: webpage.id,
+          reporter_id: webpage.owner.id,
+          description: descr,
+        }).then(() => {
+          setIsLoading(false);
+          onClose();
+          window.location.href = "/";
+        });
+      } else {
+        PagesServices.requestChanges({
+          due_date: dueDate,
+          webpage_id: webpage.id,
+          reporter_id: webpage.owner.id,
+          type: changeType,
+          summary,
+          description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
+        }).then(() => {
+          setIsLoading(false);
+          onClose();
+          window.location.reload();
+        });
+      }
     }
   }, [changeType, dueDate, summary, descr, webpage, onClose]);
 
@@ -71,10 +84,17 @@ const RequestTaskModal = ({
         return "Submit changes for page refresh";
       case ChangeRequestType.NEW_WEBPAGE:
         return "Submit new page for publication";
+      case ChangeRequestType.PAGE_REMOVAL:
+        return "Submit request for page removal";
       default:
         return "Submit request";
     }
   }, [changeType]);
+
+  const submitButtonEnabled = useMemo(
+    () => dueDate && (changeType === ChangeRequestType.PAGE_REMOVAL || checked),
+    [dueDate, changeType, checked],
+  );
 
   return (
     <Modal
@@ -83,7 +103,7 @@ const RequestTaskModal = ({
           <Button className="u-no-margin--bottom" onClick={onClose}>
             Cancel
           </Button>
-          <Button appearance="positive" disabled={!dueDate || !checked} onClick={handleSubmit}>
+          <Button appearance="positive" disabled={!submitButtonEnabled} onClick={handleSubmit}>
             {isLoading ? <Spinner /> : "Submit"}
           </Button>
         </>
@@ -108,24 +128,26 @@ const RequestTaskModal = ({
       <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
       <Textarea label="Description" onChange={handleDescrChange} />
-      <Input
-        checked={checked}
-        label={
-          <span>
-            I have added all the content to the{" "}
-            <a href={copyDocLink} rel="noreferrer" target="_blank">
-              copy doc
-            </a>
-            , and it is consistent with our{" "}
-            <a href={config.copyStyleGuideLink} rel="noreferrer" target="_blank">
-              copy style guides
-            </a>
-          </span>
-        }
-        onChange={handleChangeConsent}
-        required
-        type="checkbox"
-      />
+      {changeType !== ChangeRequestType.PAGE_REMOVAL && (
+        <Input
+          checked={checked}
+          label={
+            <span>
+              I have added all the content to the{" "}
+              <a href={copyDocLink} rel="noreferrer" target="_blank">
+                copy doc
+              </a>
+              , and it is consistent with our{" "}
+              <a href={config.copyStyleGuideLink} rel="noreferrer" target="_blank">
+                copy style guides
+              </a>
+            </span>
+          }
+          onChange={handleChangeConsent}
+          required
+          type="checkbox"
+        />
+      )}
     </Modal>
   );
 };

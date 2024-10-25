@@ -38,6 +38,11 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
     setModalOpen(true);
   }, []);
 
+  const requestRemoval = useCallback(() => {
+    setChangeType(ChangeRequestType.PAGE_REMOVAL);
+    setModalOpen(true);
+  }, []);
+
   const handleModalClose = useCallback(() => {
     setModalOpen(false);
   }, []);
@@ -94,6 +99,9 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
               <i className="p-icon--external-link" />
             </Button>
           )}
+          <Button appearance="neutral" onClick={requestRemoval}>
+            Request removal
+          </Button>
         </>
       </div>
       <div className="row">
