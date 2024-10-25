@@ -19,7 +19,11 @@ const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): JSX.El
     (option?: IUser) => () => {
       const newReviewers = currentReviewers.filter((r) => r.id !== option?.id);
       setCurrentReviewers(newReviewers);
-      if (page?.id) PagesServices.setReviewers(newReviewers, page.id);
+      if (page?.id)
+        PagesServices.setReviewers(newReviewers, page.id).then(() => {
+          // reload the page for the reviewer to be removed from the pages tree
+          window.location.reload();
+        });
       if (onSelectReviewers) onSelectReviewers(newReviewers);
     },
     [currentReviewers, page, onSelectReviewers],
@@ -32,9 +36,10 @@ const Reviewers = ({ page, onSelectReviewers }: IOwnerAndReviewersProps): JSX.El
       if (!currentReviewers.find((r) => r.email === option.email)) {
         const newReviewers = [...currentReviewers, option];
         if (page?.id) {
-          PagesServices.setReviewers(newReviewers, page.id);
-          // mutate the tree structure element to reflect the recent change
-          page.reviewers = newReviewers;
+          PagesServices.setReviewers(newReviewers, page.id).then(() => {
+            // reload the page for the new reviewer to appear in the pages tree
+            window.location.reload();
+          });
         }
         setOptions([]);
         setCurrentReviewers(newReviewers);

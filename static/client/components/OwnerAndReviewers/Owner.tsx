@@ -27,9 +27,10 @@ const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element =>
   const selectOwner = useCallback(
     (option: IUser) => {
       if (page?.id) {
-        PagesServices.setOwner(option, page.id);
-        // mutate the tree structure element to reflect the recent change
-        page.owner = option;
+        PagesServices.setOwner(option, page.id).then(() => {
+          // reload the page for the new owner to appear in the pages tree
+          window.location.reload();
+        });
       }
       setOptions([]);
       setCurrentOwner(option);

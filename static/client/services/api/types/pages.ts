@@ -52,6 +52,7 @@ export const ChangeRequestType = {
   COPY_UPDATE: 0,
   PAGE_REFRESH: 1,
   NEW_WEBPAGE: 2,
+  PAGE_REMOVAL: 3,
 };
 
 export interface IRequestChanges {
@@ -60,5 +61,12 @@ export interface IRequestChanges {
   webpage_id: number;
   type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType];
   summary?: string;
+  description: string;
+}
+
+export interface IRequestRemoval {
+  due_date: string;
+  reporter_id: number;
+  webpage_id: number;
   description: string;
 }

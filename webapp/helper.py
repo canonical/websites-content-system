@@ -188,7 +188,10 @@ def build_tree(session, page, webpages):
 
 
 def get_tree_struct(session, webpages):
-    webpages_list = list(webpages)
+    # sort webpages list by their name
+    webpages_list = sorted(
+        list(webpages), key=lambda p: p.name.rsplit("/", 1)[-1]
+    )
     parent_page = next(
         filter(lambda p: p.parent_id is None, webpages_list), None
     )
