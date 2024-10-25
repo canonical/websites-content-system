@@ -6,7 +6,8 @@ from datetime import datetime
 import requests
 from requests.auth import HTTPBasicAuth
 
-from webapp.models import User, Webpage, db
+from webapp.models import User, db
+from webapp.helper import RequestType
 
 
 class Jira:
@@ -16,9 +17,6 @@ class Jira:
     }
     EPIC = "10000"
     SUBTASK = "10013"
-    COPY_UPDATE = 0
-    PAGE_REFRESH = 1
-    NEW_WEBPAGE = 2
 
     def __init__(
         self,
@@ -180,8 +178,8 @@ class Jira:
         request_type: int,
         description: str,
         reporter_id: str,
-        webpage_id: int,
         due_date: datetime,
+        summary: str,
     ):
         """Creates a new issue in Jira.
 
@@ -190,32 +188,19 @@ class Jira:
                 Task.
             description (str): The description of the issue.
             reporter_id (str): The ID of the reporter.
-            webpage_id (int): The ID of the webpage.
             due_date (datetime): The due date of the issue.
 
         Returns:
             dict: The response from the Jira API.
         """
-        # Get the webpage
-        webpage = Webpage.query.filter_by(id=webpage_id).first()
-        if not webpage:
-            raise Exception(f"Webpage with ID {webpage_id} not found")
 
         # Get the reporter ID
         reporter_jira_id = self.get_reporter_jira_id(reporter_id)
 
-        # Determine summary message
-        if request_type == self.COPY_UPDATE:
-            summary = f"Copy update {webpage.name}"
-        elif request_type == self.PAGE_REFRESH:
-            summary = f"Page refresh for {webpage.name}"
-        elif request_type == self.NEW_WEBPAGE:
-            summary = f"New webpage for {webpage.name}"
-
         # Create the issue depending on the request type
         if (
-            request_type == self.NEW_WEBPAGE
-            or request_type == self.PAGE_REFRESH
+            request_type == RequestType.NEW_WEBPAGE.value
+            or request_type == RequestType.PAGE_REFRESH.value
         ):
             # Create epic
             epic = self.create_task(
