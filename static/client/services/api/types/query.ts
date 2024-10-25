@@ -1,3 +1,7 @@
+import type { QueryObserverResult } from "react-query";
+
+import type { IPagesResponse } from "./pages";
+
 export interface IApiBasicError {
   type: string;
   title: string;
@@ -8,7 +12,8 @@ export interface IApiBasicError {
 interface IUseQueryHookBase<T extends unknown> {
   isLoading: boolean;
   data: T | undefined;
-  refetch?: () => void;
+  refetch?: () => Promise<QueryObserverResult<IPagesResponse, IApiBasicError>[]>;
+  isFetching?: boolean;
 }
 
 export interface IUseQueryHookRest<T extends unknown> extends IUseQueryHookBase<T> {

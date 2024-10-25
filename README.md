@@ -119,19 +119,19 @@ $ docker inspect <postgres-container-id> | grep IPAddress
           {
             "children": [],
             "description": "One page",
-            "link": null,
+            "copy_doc_link": null,
             "name": "/blog/article",
             "title": null
           }
         ],
         "description": null,
-        "link": "https://docs.google.com/document/d/edit",
+        "copy_doc_link": "https://docs.google.com/document/d/edit",
         "name": "/blog/",
         "title": null
       }
     ],
     "description": null,
-    "link": "https://docs.google.com/document/d//edit",
+    "copy_doc_link": "https://docs.google.com/document/d//edit",
     "name": "/",
     "title": null
   }

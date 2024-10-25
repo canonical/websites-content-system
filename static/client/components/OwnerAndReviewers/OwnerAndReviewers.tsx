@@ -2,11 +2,11 @@ import Owner from "./Owner";
 import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
 import Reviewers from "./Reviewers";
 
-const OwnerAndReviewers = ({ page }: IOwnerAndReviewersProps): JSX.Element => (
+const OwnerAndReviewers = ({ page, onSelectOwner, onSelectReviewers }: IOwnerAndReviewersProps): JSX.Element => (
   <>
-    <Owner page={page} />
+    <Owner onSelectOwner={onSelectOwner} page={page} />
     <div className="u-sv3" />
-    <Reviewers page={page} />
+    <Reviewers onSelectReviewers={onSelectReviewers} page={page} />
   </>
 );
 

@@ -6,7 +6,8 @@ from datetime import datetime
 import requests
 from requests.auth import HTTPBasicAuth
 
-from webapp.models import User, Webpage, db
+from webapp.models import User, db
+from webapp.helper import RequestType
 
 
 class Jira:
@@ -16,9 +17,6 @@ class Jira:
     }
     EPIC = "10000"
     SUBTASK = "10013"
-    COPY_UPDATE = 0
-    PAGE_REFRESH = 1
-    NEW_WEBPAGE = 2
 
     def __init__(
         self,
@@ -59,6 +57,11 @@ class Jira:
 
         if response.status_code == 200 or response.status_code == 201:
             return response.json()
+        elif response.status_code == 204:
+            return {
+                "status_code": 204,
+                "response": "No content",
+            }
 
         raise Exception(
             "Failed to make a request to Jira. Status code:"
@@ -157,8 +160,8 @@ class Jira:
                 "issuetype": {"id": issue_type},
                 "labels": self.labels,
                 "reporter": {"id": reporter_jira_id},
-                "duedate": due_date,
                 "parent": parent,
+                "duedate": due_date,
                 "project": {"id": "10492"},  # Web and Design-ENG
                 "components": [
                     {"id": "12655"},  # Sites Tribe
@@ -175,8 +178,8 @@ class Jira:
         request_type: int,
         description: str,
         reporter_id: str,
-        webpage_id: int,
         due_date: datetime,
+        summary: str,
     ):
         """Creates a new issue in Jira.
 
@@ -185,32 +188,19 @@ class Jira:
                 Task.
             description (str): The description of the issue.
             reporter_id (str): The ID of the reporter.
-            webpage_id (int): The ID of the webpage.
             due_date (datetime): The due date of the issue.
 
         Returns:
             dict: The response from the Jira API.
         """
-        # Get the webpage
-        webpage = Webpage.query.filter_by(id=webpage_id).first()
-        if not webpage:
-            raise Exception(f"Webpage with ID {webpage_id} not found")
 
         # Get the reporter ID
         reporter_jira_id = self.get_reporter_jira_id(reporter_id)
 
-        # Determine summary message
-        if request_type == self.COPY_UPDATE:
-            summary = f"Copy update {webpage.name}"
-        elif request_type == self.PAGE_REFRESH:
-            summary = f"Page refresh for {webpage.name}"
-        elif request_type == self.NEW_WEBPAGE:
-            summary = f"New webpage for {webpage.name}"
-
         # Create the issue depending on the request type
         if (
-            request_type == self.NEW_WEBPAGE
-            or request_type == self.PAGE_REFRESH
+            request_type == RequestType.NEW_WEBPAGE.value
+            or request_type == RequestType.PAGE_REFRESH.value
         ):
             # Create epic
             epic = self.create_task(
@@ -244,6 +234,25 @@ class Jira:
             parent=self.copy_updates_epic,
             reporter_jira_id=reporter_jira_id,
             due_date=due_date,
+        )
+
+    def change_issue_status(self, issue_id: str, transition_id: str) -> bool:
+        """Change the status of a Jira issue.
+
+        Args:
+            issue_id (str): The ID of the Jira issue (e.g., "JIRA-123").
+            transition_id (str): Transition_ID for the desired status.
+
+        Returns:
+            Bool: True if status was changed successfully else False.
+        """
+        payload = {
+            "transition": {"id": transition_id},
+        }
+        return self.__request__(
+            method="POST",
+            url=f"{self.url}/rest/api/3/issue/{issue_id}/transitions",
+            data=payload,
         )
 
 

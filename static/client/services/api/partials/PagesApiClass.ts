@@ -1,12 +1,18 @@
 import { BasicApiClass } from "./BasicApiClass";
 
 import { ENDPOINTS, REST_TYPES } from "@/services/api/constants";
-import type { IPagesResponse } from "@/services/api/types/pages";
+import type {
+  INewPage,
+  INewPageResponse,
+  IPagesResponse,
+  IRequestChanges,
+  IRequestRemoval,
+} from "@/services/api/types/pages";
 import { type IUser } from "@/services/api/types/users";
 
 export class PagesApiClass extends BasicApiClass {
-  public getPages(domain: string): Promise<IPagesResponse> {
-    return this.callApi<IPagesResponse>(ENDPOINTS.getPagesTree(domain), REST_TYPES.GET);
+  public getPages(domain: string, noCache?: boolean): Promise<IPagesResponse> {
+    return this.callApi<IPagesResponse>(ENDPOINTS.getPagesTree(domain, noCache), REST_TYPES.GET);
   }
 
   public setOwner(user: IUser | {}, webpageId: number): Promise<void> {
@@ -21,5 +27,17 @@ export class PagesApiClass extends BasicApiClass {
       user_structs: users,
       webpage_id: webpageId,
     });
+  }
+
+  public createPage(page: INewPage): Promise<INewPageResponse> {
+    return this.callApi(ENDPOINTS.createNewPage, REST_TYPES.POST, page);
+  }
+
+  public requestChanges(body: IRequestChanges): Promise<void> {
+    return this.callApi(ENDPOINTS.requestChanges, REST_TYPES.POST, body);
+  }
+
+  public requestRemoval(body: IRequestRemoval): Promise<void> {
+    return this.callApi(ENDPOINTS.requestRemoval, REST_TYPES.POST, body);
   }
 }

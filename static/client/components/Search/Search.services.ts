@@ -4,11 +4,11 @@ import type { IPage, IPagesResponse } from "@/services/api/types/pages";
 
 const checkMatches = (pages: IPage[], value: string, matches: IMatch[], project: string) => {
   pages.forEach((page) => {
-    if (page.name?.indexOf(value) >= 0 || page.title?.indexOf(value) >= 0) {
+    if (page.name?.indexOf(value) >= 0 || (page.title && page.title.indexOf(value) >= 0)) {
       matches.push({
         name: page.name,
         project,
-        title: page.title,
+        title: page.title || "",
       });
     }
     if (page.children?.length) {

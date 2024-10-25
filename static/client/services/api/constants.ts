@@ -1,8 +1,12 @@
 export const ENDPOINTS = {
-  getPagesTree: (domain: string) => `/get-tree/${domain}`,
-  getUsers: (inputStr: string) => `/get-users/${inputStr}`,
-  setOwner: "/set-owner",
-  setReviewers: "/set-reviewers",
+  getPagesTree: (domain: string, noCache?: boolean, branch: string = "main") =>
+    `/api/get-tree/${domain}/${branch}${noCache ? "/True" : ""}`,
+  getUsers: (inputStr: string) => `/api/get-users/${inputStr}`,
+  setOwner: "/api/set-owner",
+  setReviewers: "/api/set-reviewers",
+  createNewPage: "/api/create-page",
+  requestChanges: "/api/request-changes",
+  requestRemoval: "/api/remove-webpage",
 };
 
 export const REST_TYPES = {

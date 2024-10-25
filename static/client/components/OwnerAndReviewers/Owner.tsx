@@ -7,31 +7,36 @@ import type { IOwnerAndReviewersProps } from "./OwnerAndReviewers.types";
 import { PagesServices } from "@/services/api/services/pages";
 import { type IUser } from "@/services/api/types/users";
 
-const Owner = ({ page }: IOwnerAndReviewersProps): JSX.Element => {
+const Owner = ({ page, onSelectOwner }: IOwnerAndReviewersProps): JSX.Element => {
   const [currentOwner, setCurrentOwner] = useState<IUser | null>(null);
   const { options, setOptions, handleChange } = useUsersRequest();
 
   useEffect(() => {
-    setCurrentOwner(page.owner);
+    if (page) setCurrentOwner(page.owner);
   }, [page]);
 
   const handleRemoveOwner = useCallback(
     () => () => {
       setCurrentOwner(null);
-      PagesServices.setOwner({}, page.id);
+      if (page?.id) PagesServices.setOwner({}, page.id);
+      if (onSelectOwner) onSelectOwner(null);
     },
-    [page],
+    [page, onSelectOwner],
   );
 
   const selectOwner = useCallback(
     (option: IUser) => {
-      PagesServices.setOwner(option, page.id);
+      if (page?.id) {
+        PagesServices.setOwner(option, page.id).then(() => {
+          // reload the page for the new owner to appear in the pages tree
+          window.location.reload();
+        });
+      }
       setOptions([]);
       setCurrentOwner(option);
-      // mutate the tree structure element to reflect the recent change
-      page.owner = option;
+      if (onSelectOwner) onSelectOwner(option);
     },
-    [page, setOptions],
+    [page, setOptions, onSelectOwner],
   );
 
   return (
