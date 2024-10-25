@@ -1,15 +1,21 @@
-import { type ChangeEvent, useCallback, useState } from "react";
+import { type ChangeEvent, useCallback, useMemo, useState } from "react";
 
-import { Button, Input, Modal, Spinner, Textarea } from "@canonical/react-components";
+import { Button, Input, Modal, RadioInput, Spinner, Textarea } from "@canonical/react-components";
 
-import type { INewPageModalProps } from "./NewPageModal.types";
+import type { IRequestTaskModalProps } from "./RequestTaskModal.types";
 
 import config from "@/config";
 import { PagesServices } from "@/services/api/services/pages";
 import { ChangeRequestType } from "@/services/api/types/pages";
 import { DatesServices } from "@/services/dates";
 
-const NewPageModal = ({ copyDocLink, onClose, webpage }: INewPageModalProps): JSX.Element => {
+const RequestTaskModal = ({
+  changeType,
+  copyDocLink,
+  onTypeChange,
+  onClose,
+  webpage,
+}: IRequestTaskModalProps): JSX.Element => {
   const [dueDate, setDueDate] = useState<string>();
   const [checked, setChecked] = useState(false);
   const [summary, setSummary] = useState<string>();
@@ -32,6 +38,13 @@ const NewPageModal = ({ copyDocLink, onClose, webpage }: INewPageModalProps): JS
     setDescr(e.target.value);
   }, []);
 
+  const handleTypeChange = useCallback(
+    (type: (typeof ChangeRequestType)[keyof typeof ChangeRequestType]) => () => {
+      onTypeChange(type);
+    },
+    [onTypeChange],
+  );
+
   const handleSubmit = useCallback(() => {
     if (dueDate && webpage?.id) {
       setIsLoading(true);
@@ -39,7 +52,7 @@ const NewPageModal = ({ copyDocLink, onClose, webpage }: INewPageModalProps): JS
         due_date: dueDate,
         webpage_id: webpage.id,
         reporter_id: webpage.owner.id,
-        type: ChangeRequestType.NEW_WEBPAGE,
+        type: changeType,
         summary,
         description: `Copy doc link: ${webpage.copy_doc_link} \n${descr}`,
       }).then(() => {
@@ -48,7 +61,20 @@ const NewPageModal = ({ copyDocLink, onClose, webpage }: INewPageModalProps): JS
         window.location.reload();
       });
     }
-  }, [dueDate, summary, descr, webpage, onClose]);
+  }, [changeType, dueDate, summary, descr, webpage, onClose]);
+
+  const title = useMemo(() => {
+    switch (changeType) {
+      case ChangeRequestType.COPY_UPDATE:
+        return "Submit changes for copy update";
+      case ChangeRequestType.PAGE_REFRESH:
+        return "Submit changes for page refresh";
+      case ChangeRequestType.NEW_WEBPAGE:
+        return "Submit new page for publication";
+      default:
+        return "Submit request";
+    }
+  }, [changeType]);
 
   return (
     <Modal
@@ -63,8 +89,22 @@ const NewPageModal = ({ copyDocLink, onClose, webpage }: INewPageModalProps): JS
         </>
       }
       close={onClose}
-      title="Submit new page for publication"
+      title={title}
     >
+      {[ChangeRequestType.COPY_UPDATE, ChangeRequestType.PAGE_REFRESH].indexOf(changeType) >= 0 && (
+        <>
+          <RadioInput
+            checked={changeType === ChangeRequestType.COPY_UPDATE}
+            label="Copy update"
+            onClick={handleTypeChange(ChangeRequestType.COPY_UPDATE)}
+          />
+          <RadioInput
+            checked={changeType === ChangeRequestType.PAGE_REFRESH}
+            label="Page refresh"
+            onClick={handleTypeChange(ChangeRequestType.PAGE_REFRESH)}
+          />
+        </>
+      )}
       <Input label="Due date" min={DatesServices.getNowStr()} onChange={handleChangeDueDate} required type="date" />
       <Input label="Summary" onChange={handleSummaryChange} type="text" />
       <Textarea label="Description" onChange={handleDescrChange} />
@@ -90,4 +130,4 @@ const NewPageModal = ({ copyDocLink, onClose, webpage }: INewPageModalProps): JS
   );
 };
 
-export default NewPageModal;
+export default RequestTaskModal;

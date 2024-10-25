@@ -5,13 +5,16 @@ import { Button } from "@canonical/react-components";
 import { type IWebpageProps } from "./Webpage.types";
 
 import JiraTasks from "@/components/JiraTasks";
-import NewPageModal from "@/components/NewPageModal";
 import OwnerAndReviewers from "@/components/OwnerAndReviewers";
+import RequestTaskModal from "@/components/RequestTaskModal";
 import config from "@/config";
-import { PageStatus } from "@/services/api/types/pages";
+import { ChangeRequestType, PageStatus } from "@/services/api/types/pages";
 
 const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [changeType, setChangeType] = useState<(typeof ChangeRequestType)[keyof typeof ChangeRequestType]>(
+    ChangeRequestType.COPY_UPDATE,
+  );
 
   const openCopyDoc = useCallback(() => {
     window.open(page.copy_doc_link);
@@ -25,7 +28,13 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
     }
   }, [page, project]);
 
-  const createTask = useCallback(() => {
+  const createNewPage = useCallback(() => {
+    setChangeType(ChangeRequestType.NEW_WEBPAGE);
+    setModalOpen(true);
+  }, []);
+
+  const requestChanges = useCallback(() => {
+    setChangeType(ChangeRequestType.COPY_UPDATE);
     setModalOpen(true);
   }, []);
 
@@ -64,8 +73,13 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
       <div className="l-webpage--buttons">
         <>
           {isNew && !hasJiraTasks && (
-            <Button appearance="positive" onClick={createTask}>
+            <Button appearance="positive" onClick={createNewPage}>
               Submit for publication...
+            </Button>
+          )}
+          {!isNew && (
+            <Button appearance="positive" onClick={requestChanges}>
+              Request changes
             </Button>
           )}
           {page.copy_doc_link && (
@@ -101,7 +115,15 @@ const Webpage = ({ page, project }: IWebpageProps): JSX.Element => {
           <JiraTasks tasks={page.jira_tasks} />
         </div>
       ) : null}
-      {modalOpen && <NewPageModal copyDocLink={page.copy_doc_link} onClose={handleModalClose} webpage={page} />}
+      {modalOpen && (
+        <RequestTaskModal
+          changeType={changeType}
+          copyDocLink={page.copy_doc_link}
+          onClose={handleModalClose}
+          onTypeChange={setChangeType}
+          webpage={page}
+        />
+      )}
     </div>
   );
 };

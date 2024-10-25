@@ -124,6 +124,12 @@ def set_reviewers():
             db.session, Reviewer, user_id=user_id, webpage_id=webpage_id
         )
 
+    webpage = Webpage.query.filter_by(id=webpage_id).first()
+    project = Project.query.filter_by(id=webpage.project_id).first()
+    site_repository = SiteRepository(project.name, app, task_locks=LOCKS)
+    # clean the cache for a the new reviewers to appear in the tree
+    site_repository.invalidate_cache()
+
     return jsonify({"message": "Successfully set reviewers"}), 200
 
 
@@ -141,6 +147,11 @@ def set_owner():
     if webpage:
         webpage.owner_id = user_id
         db.session.commit()
+
+        project = Project.query.filter_by(id=webpage.project_id).first()
+        site_repository = SiteRepository(project.name, app, task_locks=LOCKS)
+        # clean the cache for a new owner to appear in the tree
+        site_repository.invalidate_cache()
 
     return jsonify({"message": "Successfully set owner"}), 200
 
