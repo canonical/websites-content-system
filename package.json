@@ -51,7 +51,7 @@
     "eslint-plugin-react": "7.35.0",
     "jsdom": "21.1.2",
     "npm-package-json-lint": "8.0.0",
-    "postcss": "8.4.39",
+    "postcss": "8.4.49",
     "postcss-cli": "10.1.0",
     "prettier": "3.3.3",
     "sass": "1.77.8",
