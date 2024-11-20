@@ -69,8 +69,15 @@ docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
 docker run -d -p 6379:6379 valkey/valkey
 ```
 
-First, install the dependencies.
+#### Virtual Environment
+Set up a virtual environment to install project dependencies:
+```bash
+$ sudo apt install python3-venv
+$ python3 -m venv .venv
+$ source .venv/bin/activate
+```
 
+Then, install the dependencies:
 ```bash
 $ python -m pip install -r requirements.txt
 ```
@@ -80,8 +87,8 @@ Then modify the .env file, and change the following to match your valkey and pos
 ```
 # .env
 VALKEY_HOST=localhost
-VALKEY_PORT=5379
-SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/postgres
+VALKEY_PORT=6379
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
 ```
 
 and load the variables into the shell environment.
