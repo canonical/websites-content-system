@@ -117,14 +117,14 @@ You can optionally use dotrun to start the service. When the 1.1.0-rc1 branch is
 $ dotrun build && dotrun
 ```
 
-### Note for using dotrun on mac
+#### Note for using dotrun on mac
 Since macs don't support host mode on docker, you'll have to get the valkey and postgres ip addresses manually from the running docker containers, and replace the host values in the .env file *before* running dotrun
 ```bash
 $ docker inspect <valkey-container-id> | grep IPAddress
 $ docker inspect <postgres-container-id> | grep IPAddress
 ```
 
-## API Requests
+### API Requests
 
 #### Getting the website page structure as a JSON tree
 
@@ -168,7 +168,7 @@ $ docker inspect <postgres-container-id> | grep IPAddress
 #### Making a webpage update request
 
 <details>
- <summary><code>POST</code> <code><b>/request-changes</b></code>
+ <summary><code>POST</code> <code><b>/request-changes</b></code></summary>
 </details>
 
 ```json
