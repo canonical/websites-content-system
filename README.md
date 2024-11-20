@@ -103,7 +103,14 @@ Start the server.
 $ flask --app webapp/app run --debug
 ```
 
-#### Locally, with dotrun
+### Running locally, with dotrun
+
+Please note, make sure the containers for postgres and valkey are already running. If not, run:
+```bash
+docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
+docker run -d -p 6379:6379 valkey/valkey
+```
+
 You can optionally use dotrun to start the service. When the 1.1.0-rc1 branch is merged, then we can use dotrun without the `--release` flag.
 
 ```
