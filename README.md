@@ -43,7 +43,17 @@ You'll need to install [docker](https://docs.docker.com/engine/install/) and [do
 Once done, run:
 
 ```
-$ docker compose up
+$ docker compose up -d
+```
+
+Verify everything went well and the containers are running, run:
+```
+$ docker ps -a
+```
+
+If any container was exited due to any reason, view its logs using:
+```
+$ docker compose logs {service_name}
 ```
 
 ### Running Locally
