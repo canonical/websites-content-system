@@ -33,7 +33,10 @@ GOOGLE_PRIVATE_KEY=base64encodedprivatekey
 GOOGLE_PRIVATE_KEY_ID=privatekeyid
 ```
 
-### Using docker
+### Important Notes
+- Make sure you have a valid <code>GOOGLE_PRIVATE_KEY</code> and <code>GOOGLE_PRIVATE_KEY_ID</code> specified in the .env. The base64 decoder parses these keys and throws error if invalid.
+
+### Running with docker
 
 You'll need to install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/).
 
