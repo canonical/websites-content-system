@@ -28,6 +28,8 @@ pids
 *.pid
 *.seed
 .*-metadata
+.pytest_cache
+.ruff_cache
 
 # [deps] Local dependencies
 .bundle/
