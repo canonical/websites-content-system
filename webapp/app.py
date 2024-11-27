@@ -56,8 +56,10 @@ def get_tree(uri: str, branch: str = "main", no_cache: bool = False):
         }
     )
 
-    DEVELOPMENT_MODE = environ.get("DEVEL", True)
-    if DEVELOPMENT_MODE:
+    # Disable caching for this response
+    response.cache_control.no_store = True
+    # Allow CORS in development mode
+    if app.config["DEVELOPMENT_MODE"]:
         response.headers.add("Access-Control-Allow-Origin", "*")
 
     return response
