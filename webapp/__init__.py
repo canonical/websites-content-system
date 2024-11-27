@@ -1,3 +1,4 @@
+import flask
 from flask import Flask
 
 from webapp.cache import init_cache
@@ -9,12 +10,22 @@ from webapp.sso import init_sso
 from webapp.tasks import init_tasks
 
 
+def set_cache_control_headers(response):
+    if flask.request.path.startswith("/api/get-tree"):
+        # Our status endpoints need to be uncached
+        # to report accurate information at all times
+        response.cache_control.no_store = True
+
+
 def create_app():
     app = Flask(
         __name__, template_folder="../templates", static_folder="../static"
     )
     app.config.from_pyfile("settings.py")
     app.context_processor(base_context)
+
+    # Set cache control headers
+    app.after_request(set_cache_control_headers)
 
     # Initialize database
     init_db(app)
