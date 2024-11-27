@@ -12,8 +12,9 @@ from webapp.tasks import init_tasks
 
 def set_cache_control_headers(response):
     if flask.request.path.startswith("/api/get-tree"):
-        # Our status endpoints need to be uncached
-        # to report accurate information at all times
+        # Our tree endpoints need to be uncached
+        # to prevent caching empty trees. We instead use
+        # a locally implemented cache for tree responses
         response.cache_control.no_store = True
 
 
