@@ -25,7 +25,7 @@ class GoogleDriveClient:
         Build a google drive service object.
 
         Args:
-            credentials (dict): A dict containing keys for google authentication.
+            credentials (dict): A dict containing google authentication keys.
 
         Returns:
             googleapiclient.discovery.Resource: A google drive service object.
@@ -43,9 +43,9 @@ class GoogleDriveClient:
         mime_type="'application/vnd.google-apps.folder'",
     ) -> Optional[str]:
         """
-        Check whether an item exists in Google Drive. Optionally, check if the item
-        exists in a specific parent folder. If there are several matches, we take the
-        result closest to the site (project) name.
+        Check whether an item exists in Google Drive. Optionally, check if the
+        item exists in a specific parent folder. If there are several matches,
+        we take the result closest to the site (project) name.
 
         Args:
             folder_name (str): The name of the folder to check.
@@ -127,12 +127,12 @@ class GoogleDriveClient:
 
     def build_webpage_folder(self, webpage) -> str:
         """
-        Create a folder hierarchy in Google Drive for a webpage. The path is derived
-        from the webpage's URL, with each part of the path representing a folder.
-        The topmost folder will be the project name.
+        Create a folder hierarchy in Google Drive for a webpage. The path is
+        derived from the webpage's URL, with each part of the path representing
+        a folder. The topmost folder will be the project name.
 
         Args:
-            webpage (Webpage): The webpage object to create a folder hierarchy for.
+            webpage (Webpage): The webpage object to create a folder hierarchy.
 
         Returns:
             str: The id of the folder, which is a leaf node in the hierarchy.
