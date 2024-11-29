@@ -47,6 +47,12 @@ def init_sso(app: flask.Flask):
 
         return flask.redirect("/")
 
+    # Allow CORS
+    @app.after_request
+    def after_request_func(response):
+        response.headers["Access-Control-Allow-Origin"] = SSO_LOGIN_URL
+        return response
+
 
 def login_required(func):
     """

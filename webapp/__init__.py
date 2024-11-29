@@ -1,4 +1,4 @@
-from flask import Flask
+from canonicalwebteam.flask_base.app import FlaskBase
 
 from webapp.cache import init_cache
 from webapp.context import base_context
@@ -10,8 +10,11 @@ from webapp.tasks import init_tasks
 
 
 def create_app():
-    app = Flask(
-        __name__, template_folder="../templates", static_folder="../static"
+    app = FlaskBase(
+        __name__,
+        "cs.canonical.com",
+        template_folder="../templates",
+        static_folder="../static",
     )
     app.config.from_pyfile("settings.py")
     app.context_processor(base_context)
