@@ -14,7 +14,7 @@ activate() {
 {
     activate
 
-    RUN_COMMAND="talisker.gunicorn webapp.app:app --name talisker-$(hostname) --bind $1"
+    RUN_COMMAND="gunicorn webapp.app:app --name $(hostname) --workers=2 --bind $1"
 
     if [ -z ${FLASK_DEBUG+x} ]; then
         RUN_COMMAND="${RUN_COMMAND} --reload --log-level debug --timeout 9999"
