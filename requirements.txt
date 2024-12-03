@@ -9,5 +9,5 @@ multiprocess==0.70.16
 psycopg2-binary==2.9.9
 pytest==8.3.3
 PyYAML==6.0.2
-requests==2.32.2
+requests==2.32.3
 valkey==6.0.0b1
