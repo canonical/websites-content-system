@@ -1481,15 +1481,12 @@
   resolved "https://registry.yarnpkg.com/@pkgr/core/-/core-0.1.1.tgz#1ec17e2edbec25c8306d424ecfbf13c7de1aaa31"
   integrity sha512-cq8o4cWH0ibXh9VGi5P20Tu9XF/0fFXl9EUinr9QfTM7a7p0oTA4iJRCQWppXR1Pg8dSM0UCItCkPwsk9qWWYA==
 
-"@playwright/test@1.32.2":
-  version "1.32.2"
-  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.32.2.tgz#3cbd76b3f94d0f7f50bf054dbd02e504e85e3865"
-  integrity sha512-nhaTSDpEdTTttdkDE8Z6K3icuG1DVRxrl98Qq0Lfc63SS9a2sjc9+x8ezysh7MzCKz6Y+nArml3/mmt+gqRmQQ==
+"@playwright/test@1.49.0":
+  version "1.49.0"
+  resolved "https://registry.yarnpkg.com/@playwright/test/-/test-1.49.0.tgz#74227385b58317ee076b86b56d0e1e1b25cff01e"
+  integrity sha512-DMulbwQURa8rNIQrf94+jPJQ4FmOVdpE5ZppRNvWVjvhC+6sOeo28r8MgIpQRYouXRtt/FCCXU7zn20jnHR4Qw==
   dependencies:
-    "@types/node" "*"
-    playwright-core "1.32.2"
-  optionalDependencies:
-    fsevents "2.3.2"
+    playwright "1.49.0"
 
 "@remix-run/router@1.17.1":
   version "1.17.1"
@@ -5351,10 +5348,19 @@ pkg-types@^1.0.3, pkg-types@^1.1.1, pkg-types@^1.1.3:
     mlly "^1.7.1"
     pathe "^1.1.2"
 
-playwright-core@1.32.2:
-  version "1.32.2"
-  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.32.2.tgz#608810c3c4486fb86a224732ac0d3560a96ded8b"
-  integrity sha512-zD7aonO+07kOTthsrCR3YCVnDcqSHIJpdFUtZEMOb6//1Rc7/6mZDRdw+nlzcQiQltOOsiqI3rrSyn/SlyjnJQ==
+playwright-core@1.49.0:
+  version "1.49.0"
+  resolved "https://registry.yarnpkg.com/playwright-core/-/playwright-core-1.49.0.tgz#8e69ffed3f41855b854982f3632f2922c890afcb"
+  integrity sha512-R+3KKTQF3npy5GTiKH/T+kdhoJfJojjHESR1YEWhYuEKRVfVaxH3+4+GvXE5xyCngCxhxnykk0Vlah9v8fs3jA==
+
+playwright@1.49.0:
+  version "1.49.0"
+  resolved "https://registry.yarnpkg.com/playwright/-/playwright-1.49.0.tgz#df6b9e05423377a99658202844a294a8afb95d0a"
+  integrity sha512-eKpmys0UFDnfNb3vfsf8Vx2LEOtflgRebl0Im2eQQnYMA4Aqd+Zw8bEOB+7ZKvN76901mRnqdsiOGKxzVTbi7A==
+  dependencies:
+    playwright-core "1.49.0"
+  optionalDependencies:
+    fsevents "2.3.2"
 
 plur@^4.0.0:
   version "4.0.0"
@@ -6711,10 +6717,10 @@ use-ssr@^1.0.25:
   resolved "https://registry.yarnpkg.com/use-ssr/-/use-ssr-1.0.25.tgz#c7f54b59d6e52db26749b1d4115a650101a190bd"
   integrity sha512-VYF8kJKI+X7+U4XgGoUER2BUl0vIr+8OhlIhyldgSGE0KHMoDRXPvWeHUUeUktq7ACEOVLzXGq1+QRxcvtwvyQ==
 
-use-sync-external-store@1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz#7dbefd6ef3fe4e767a0cf5d7287aacfb5846928a"
-  integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==
+use-sync-external-store@1.2.2:
+  version "1.2.2"
+  resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.2.tgz#c3b6390f3a30eba13200d2302dcdf1e7b57b2ef9"
+  integrity sha512-PElTlVMwpblvbNqQ82d2n6RjStvdSoNe9FG28kNfz3WiXilJm4DdNkEzRhCZuIDwY8U08WVihhGR5iRqAwfDiw==
 
 use-sync-external-store@^1.2.0:
   version "1.2.2"
@@ -6776,7 +6782,18 @@ vite-node@1.6.0:
     picocolors "^1.0.0"
     vite "^5.0.0"
 
-vite@5.3.4, vite@^5.0.0:
+vite@5.3.6:
+  version "5.3.6"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-5.3.6.tgz#e097c0a7b79adb2e60bec9ef7907354f09d027bd"
+  integrity sha512-es78AlrylO8mTVBygC0gTC0FENv0C6T496vvd33ydbjF/mIi9q3XQ9A3NWo5qLGFKywvz10J26813OkLvcQleA==
+  dependencies:
+    esbuild "^0.21.3"
+    postcss "^8.4.39"
+    rollup "^4.13.0"
+  optionalDependencies:
+    fsevents "~2.3.3"
+
+vite@^5.0.0:
   version "5.3.4"
   resolved "https://registry.yarnpkg.com/vite/-/vite-5.3.4.tgz#b36ebd47c8a5e3a8727046375d5f10bf9fdf8715"
   integrity sha512-Cw+7zL3ZG9/NZBB8C+8QbQZmR54GwqIz+WMI4b3JgdYJvX+ny9AjJXqkGQlDXSXRP9rP0B4tbciRMOVEKulVOA==
@@ -7059,9 +7076,9 @@ yocto-queue@^1.0.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-1.1.1.tgz#fef65ce3ac9f8a32ceac5a634f74e17e5b232110"
   integrity sha512-b4JR1PFR10y1mKjhHY9LaGo6tmrgjit7hxVIeAmyMw3jegXR4dhYqLaQF5zMXZxY7tLpMyJeLjr1C4rLmkVe8g==
 
-zustand@4.5.4:
-  version "4.5.4"
-  resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.5.4.tgz#63abdd81edfb190bc61e0bbae045cc4d52158a05"
-  integrity sha512-/BPMyLKJPtFEvVL0E9E9BTUM63MNyhPGlvxk1XjrfWTUlV+BR8jufjsovHzrtR6YNcBEcL7cMHovL1n9xHawEg==
+zustand@4.5.5:
+  version "4.5.5"
+  resolved "https://registry.yarnpkg.com/zustand/-/zustand-4.5.5.tgz#f8c713041543715ec81a2adda0610e1dc82d4ad1"
+  integrity sha512-+0PALYNJNgK6hldkgDq2vLrw5f6g/jCInz52n9RTpropGgeAf/ioFUCdtsjCqu4gNhW9D01rUQBROoRjdzyn2Q==
   dependencies:
-    use-sync-external-store "1.2.0"
+    use-sync-external-store "1.2.2"

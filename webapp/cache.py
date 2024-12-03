@@ -15,7 +15,8 @@ def init_cache(app: Flask):
     except ConnectionError as e:
         cache = FileCache(app)
         app.logger.info(
-            e, "Valkey cache is not available. Using FileCache instead."
+            f"Error: {e} \nValkey cache is not available."
+            " Using FileCache instead."
         )
     app.config["CACHE"] = cache
     return cache

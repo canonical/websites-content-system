@@ -31,3 +31,4 @@ GOOGLE_CREDENTIALS = {
     "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/websites-copy-docs-627%40web-engineering-436014.iam.gserviceaccount.com",  # noqa: E501
     "universe_domain": "googleapis.com",
 }
+DEVELOPMENT_MODE = environ.get("DEVEL", True)

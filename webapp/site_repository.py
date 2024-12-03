@@ -1,28 +1,29 @@
 import os
 import re
 import subprocess
+from contextlib import contextmanager
 from multiprocessing import Lock
 from pathlib import Path
 from typing import Callable, TypedDict
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import select, delete
+from sqlalchemy import delete, select
 
+from webapp.helper import (
+    convert_webpage_to_dict,
+    get_project_id,
+    get_tree_struct,
+)
 from webapp.models import (
     Project,
     User,
     Webpage,
+    WebpageStatus,
     db,
     get_or_create,
-    WebpageStatus,
 )
 from webapp.parse_tree import scan_directory
-from webapp.helper import (
-    get_project_id,
-    get_tree_struct,
-    convert_webpage_to_dict,
-)
 
 
 class SiteRepositoryError(Exception):
@@ -95,6 +96,28 @@ class SiteRepository:
             "Error configuring git",
         )
 
+    @contextmanager
+    def __masked_parent_git__(self):
+        """
+        When cloning repositories using sparse-checkout, we temporarily move
+        the parent git folder to *.git-bak.
+        This is to prevent an issue where the sparse checkout also checks
+        out other git repositories in the tree.
+        """
+        parent_path = f"{self.app.config['BASE_DIR']}/.git"
+        tmp_path = f"{self.app.config['BASE_DIR']}/.git-bak"
+        self.__run__(
+            f"mv {parent_path} {tmp_path}",
+            "Error masking parent git folder",
+        )
+        try:
+            yield
+        finally:
+            self.__run__(
+                f"mv {tmp_path} {parent_path}",
+                "Error unmasking parent git folder",
+            )
+
     def __exec__(self, command_str: str):
         """
         Execute a command and return the output
@@ -112,13 +135,13 @@ class SiteRepository:
 
     def __decorate_errors__(self, func: Callable, msg: str):
         """
-        Decorator to catch OSError and raise SiteRepositoryError
+        Decorator to catch Exceptions and raise SiteRepositoryError
         """
 
         def wrapper(*args, **kwargs):
             try:
                 return func(*args, **kwargs)
-            except OSError as e:
+            except Exception as e:
                 # Silently ignore "directory already exists" errors
                 if re.search(r"destination path (.*) already exists", str(e)):
                     return 0
@@ -141,10 +164,23 @@ class SiteRepository:
         command_str = self.__sanitize_command__(command_str)
         return self.__decorate_errors__(self.__exec__, msg)(command_str)
 
-    def __check_git_uri__(self, uri: str):
+    def __create_git_uri__(self, uri: str):
         """
-        Check if the uri is a valid git uri
+        Create a github url
         """
+
+        repo_org = self.app.config["REPO_ORG"]
+        token = self.app.config["GH_TOKEN"]
+
+        uri = f"{repo_org}/{uri}.git"
+
+        # Add token to URI
+        uri = re.sub(
+            "//github",
+            f"//{token}@github",
+            uri,
+        )
+
         if not uri.endswith(".git"):
             raise SiteRepositoryError(
                 f"Invalid git uri. {uri} Please confirm "
@@ -156,21 +192,7 @@ class SiteRepository:
                 "that the uri uses https"
             )
 
-    def __create_git_uri__(self, uri: str):
-        """
-        Create a github url
-        """
-        repo_org = self.app.config["REPO_ORG"]
-        token = self.app.config["GH_TOKEN"]
-
-        # Add token to URI
-        uri = re.sub(
-            "//github",
-            f"//{token}@github",
-            uri,
-        )
-
-        return f"{repo_org}/{uri}.git"
+        return uri
 
     def delete_local_files(self):
         """
@@ -195,10 +217,28 @@ class SiteRepository:
         Clone the repository.
         """
         github_url = self.__create_git_uri__(repository_uri)
-        self.__check_git_uri__(github_url)
-        return self.__run__(
-            f"git clone {github_url}", f"Error cloning repository {github_url}"
-        )
+
+        with self.__masked_parent_git__():
+            # Switch to the ./repositories directory for cloned repositories
+            os.chdir(self.REPOSITORY_DIRECTORY)
+
+            # Clone the repository
+            self.__run__(
+                f"git clone --no-checkout --depth 1 {github_url}",
+                "Error cloning repository",
+            )
+
+            # Change directory to the repository
+            os.chdir(self.repo_path)
+
+            # Set sparse-checkout
+            self.__run__(
+                "git sparse-checkout set templates",
+                "Error setting sparse-checkout",
+            )
+
+            # Return directory cursor to parent directory
+            os.chdir(self.app.config["BASE_DIR"])
 
     def checkout_branch(self, branch: str):
         """
@@ -229,15 +269,11 @@ class SiteRepository:
 
         # Clone the repository, if it doesn't exist
         if not self.repository_exists():
-            # Switch to the ./repositories directory for cloned repositories
-            os.chdir(self.REPOSITORY_DIRECTORY)
             try:
                 self.__configure_git__()
             except SiteRepositoryError as e:
                 self.logger.error(e)
             self.clone_repo(self.repository_uri)
-            # Configure git immediately after cloning
-            os.chdir(self.repo_path)
 
         # Checkout updates to the repository on the specified branch
         self.checkout_updates()
