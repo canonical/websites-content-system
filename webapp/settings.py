@@ -23,7 +23,7 @@ JIRA_URL = environ.get("JIRA_URL")
 JIRA_LABELS = environ.get("JIRA_LABELS")
 JIRA_COPY_UPDATES_EPIC = environ.get("JIRA_COPY_UPDATES_EPIC")
 GOOGLE_DRIVE_FOLDER_ID = environ.get("GOOGLE_DRIVE_FOLDER_ID")
-COPYD0C_TEMPLATE_ID = environ.get("COPYD0C_TEMPLATE_ID")
+COPYDOC_TEMPLATE_ID = environ.get("COPYDOC_TEMPLATE_ID")
 GOOGLE_CREDENTIALS = {
     "type": "service_account",
     "project_id": "web-engineering-436014",

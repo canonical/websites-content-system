@@ -33,6 +33,7 @@ def versioned_static(filename):
 def base_context():
     return dict(versioned_static=versioned_static)
 
+
 def clear_trailing_slash():
     """
     Remove trailing slashes from all routes
