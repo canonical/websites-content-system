@@ -15,11 +15,11 @@ from webapp.helper import (
 )
 from webapp.models import (
     JiraTask,
+    Project,
     Reviewer,
     User,
     Webpage,
     WebpageStatus,
-    Project,
     db,
     get_or_create,
 )
