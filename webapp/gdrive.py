@@ -187,9 +187,12 @@ class GoogleDriveClient:
                 .execute()
             )
             return copy
-        except HttpError as error:
+        except Exception as error:
+            import os
             raise ValueError(
-                f"An error occurred when copying copydoc template: {error}"
+                f"An error occurred when copying copydoc template:\n\tArgs: \nfileID: {fileID}, name: {name}, "
+                f"\nEnv variables\n\t {os.getenv('GOOGLE_DRIVE_FOLDER_ID')}, {os.getenv('COPYD0C_TEMPLATE_ID')}, \n"
+                f"parents: {parents}\n{error}\nError: {error}"
             )
 
     def create_copydoc_from_template(self, webpage: Webpage) -> dict:
