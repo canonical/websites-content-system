@@ -190,9 +190,7 @@ class GoogleDriveClient:
         except Exception as error:
             import os
             raise ValueError(
-                f"An error occurred when copying copydoc template:\n\tArgs: \nfileID: {fileID}, name: {name}, "
-                f"\nEnv variables\n\t {os.getenv('GOOGLE_DRIVE_FOLDER_ID')}, {os.getenv('COPYD0C_TEMPLATE_ID')}, \n"
-                f"parents: {parents}\n{error}\nError: {error}"
+                f"An error occurred when copying copydoc template: {error}"
             )
 
     def create_copydoc_from_template(self, webpage: Webpage) -> dict:
@@ -222,7 +220,7 @@ def init_gdrive(app: Flask) -> None:
         app.config["gdrive"] = GoogleDriveClient(
             credentials=app.config["GOOGLE_CREDENTIALS"],
             drive_folder_id=app.config["GOOGLE_DRIVE_FOLDER_ID"],
-            copydoc_template_id=app.config["COPYD0C_TEMPLATE_ID"],
+            copydoc_template_id=app.config["COPYDOC_TEMPLATE_ID"],
         )
     except Exception as error:
         app.logger.info(f"Unable to initialize gdrive: {error}")
