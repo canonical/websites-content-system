@@ -7,3 +7,6 @@ line-length = 79
 # overlap with the use of a formatter, like Black, but we can override this behavior by
 # explicitly adding the rule.
 extend-select = ["E501"]
+
+[tool.ruff.lint.per-file-ignores]
+"webapp/tests/test_gdrive.py" = ["F401", "F811"]
