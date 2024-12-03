@@ -78,7 +78,7 @@ class Webpage(db.Model, DateTimeMixin):
     copy_doc_link: str = Column(String)
     parent_id: int = Column(Integer, ForeignKey("webpages.id"))
     owner_id: int = Column(Integer, ForeignKey("users.id"))
-    status: str = Column(Enum(WebpageStatus), default=WebpageStatus.NEW)
+    status: str = Column(Enum(WebpageStatus), default=WebpageStatus.AVAILABLE)
 
     project = relationship("Project", back_populates="webpages")
     owner = relationship("User", back_populates="webpages")

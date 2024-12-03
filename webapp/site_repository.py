@@ -384,6 +384,7 @@ class SiteRepository:
             if tree := self.get_tree_from_cache():
                 return tree
 
+        self.invalidate_cache()
         return self.get_new_tree()
 
     def __create_webpage_for_node__(
