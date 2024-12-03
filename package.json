@@ -64,7 +64,7 @@
     "stylelint-prettier": "3.0.0",
     "stylelint-scss": "4.6.0",
     "ts-loader": "9.5.1",
-    "typescript": "5.5.3",
+    "typescript": "5.7.2",
     "unplugin-auto-import": "0.17.6",
     "vite": "5.3.6",
     "vitest": "1.6.0",
