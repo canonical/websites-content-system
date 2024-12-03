@@ -538,12 +538,3 @@ class SiteRepository:
             # If child nodes exist, add their names to the list
             if child.get("children"):
                 self.add_pages_to_list(child, page_list)
-
-    def get_webpages(self):
-        """
-        Return a list of webpages from the associated parsed tree.
-        """
-        tree = self.get_tree()
-        webpages = []
-        self.add_pages_to_list(tree, webpages)
-        return webpages
