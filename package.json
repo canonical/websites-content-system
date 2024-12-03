@@ -24,7 +24,7 @@
     "react-query": "3.39.3",
     "react-router-dom": "6.24.1",
     "vanilla-framework": "4.16.0",
-    "zustand": "4.5.4"
+    "zustand": "4.5.5"
   },
   "devDependencies": {
     "@playwright/test": "1.32.2",
