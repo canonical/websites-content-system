@@ -15,11 +15,11 @@ PORT=8104
 FLASK_DEBUG=true
 SECRET_KEY=secret_key
 DEVEL=True
-VALKEY_HOST=0.0.0.0
+VALKEY_HOST=valkey
 VALKEY_PORT=6379
 GH_TOKEN=ghp_somepersonaltoken
 REPO_ORG=https://github.com/canonical
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/content
+DATABASE_URL=postgresql://postgres:postgres@postgres:5432/postgres
 TASK_DELAY=30
 DIRECTORY_API_TOKEN=token
 JIRA_EMAIL=example@canonical.com
@@ -33,14 +33,27 @@ GOOGLE_PRIVATE_KEY=base64encodedprivatekey
 GOOGLE_PRIVATE_KEY_ID=privatekeyid
 ```
 
-### Using docker
+### Important Notes
+- Make sure you have a valid <code>GOOGLE_PRIVATE_KEY</code> and <code>GOOGLE_PRIVATE_KEY_ID</code> specified in the .env. The base64 decoder parses these keys and throws error if invalid.
+
+### Running with docker
 
 You'll need to install [docker](https://docs.docker.com/engine/install/) and [docker-compose](https://docs.docker.com/compose/install/).
 
 Once done, run:
 
 ```
-$ docker compose up
+$ docker compose up -d
+```
+
+Verify everything went well and the containers are running, run:
+```
+$ docker ps -a
+```
+
+If any container was exited due to any reason, view its logs using:
+```
+$ docker compose logs {service_name}
 ```
 
 ### Running Locally
@@ -56,8 +69,15 @@ docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
 docker run -d -p 6379:6379 valkey/valkey
 ```
 
-First, install the dependencies.
+#### Virtual Environment
+Set up a virtual environment to install project dependencies:
+```bash
+$ sudo apt install python3-venv
+$ python3 -m venv .venv
+$ source .venv/bin/activate
+```
 
+Then, install the dependencies:
 ```bash
 $ python -m pip install -r requirements.txt
 ```
@@ -67,8 +87,8 @@ Then modify the .env file, and change the following to match your valkey and pos
 ```
 # .env
 VALKEY_HOST=localhost
-VALKEY_PORT=5379
-SQLALCHEMY_DATABASE_URI=postgresql://postgres:postgres@localhost:5432/postgres
+VALKEY_PORT=6379
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/postgres
 ```
 
 and load the variables into the shell environment.
@@ -83,21 +103,28 @@ Start the server.
 $ flask --app webapp/app run --debug
 ```
 
-#### Locally, with dotrun
+### Running locally, with dotrun
+
+Please note, make sure the containers for postgres and valkey are already running. If not, run:
+```bash
+docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres
+docker run -d -p 6379:6379 valkey/valkey
+```
+
 You can optionally use dotrun to start the service. When the 1.1.0-rc1 branch is merged, then we can use dotrun without the `--release` flag.
 
 ```
 $ dotrun build && dotrun
 ```
 
-### Note for using dotrun on mac
+#### Note for using dotrun on mac
 Since macs don't support host mode on docker, you'll have to get the valkey and postgres ip addresses manually from the running docker containers, and replace the host values in the .env file *before* running dotrun
 ```bash
 $ docker inspect <valkey-container-id> | grep IPAddress
 $ docker inspect <postgres-container-id> | grep IPAddress
 ```
 
-## API Requests
+### API Requests
 
 #### Getting the website page structure as a JSON tree
 
@@ -141,7 +168,7 @@ $ docker inspect <postgres-container-id> | grep IPAddress
 #### Making a webpage update request
 
 <details>
- <summary><code>POST</code> <code><b>/request-changes</b></code>
+ <summary><code>POST</code> <code><b>/request-changes</b></code></summary>
 </details>
 
 ```json

@@ -45,7 +45,13 @@ def init_sso(app: flask.Flask):
         if "openid" in flask.session and flask.request.path == "/logout":
             flask.session.pop("openid")
 
-        return flask.redirect("/")
+        return flask.redirect("/login")
+
+    # Allow CORS
+    @app.after_request
+    def after_request_func(response):
+        response.headers["Access-Control-Allow-Origin"] = SSO_LOGIN_URL
+        return response
 
 
 def login_required(func):
