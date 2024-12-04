@@ -18,7 +18,7 @@ class GoogleDriveClient:
     ):
         self.service = self._build_service(credentials)
         self.GOOGLE_DRIVE_FOLDER_ID = drive_folder_id
-        self.COPYD0C_TEMPLATE_ID = copydoc_template_id
+        self.COPYDOC_TEMPLATE_ID = copydoc_template_id
 
     def _build_service(self, credentials: dict) -> Any:
         """
@@ -187,7 +187,7 @@ class GoogleDriveClient:
                 .execute()
             )
             return copy
-        except HttpError as error:
+        except Exception as error:
             raise ValueError(
                 f"An error occurred when copying copydoc template: {error}"
             )
@@ -208,7 +208,7 @@ class GoogleDriveClient:
 
         # Clone the template document to the new folder
         return self.copy_file(
-            fileID=self.COPYD0C_TEMPLATE_ID,
+            fileID=self.COPYDOC_TEMPLATE_ID,
             name=webpage.url,
             parents=[webpage_folder],
         )
@@ -219,7 +219,7 @@ def init_gdrive(app: Flask) -> None:
         app.config["gdrive"] = GoogleDriveClient(
             credentials=app.config["GOOGLE_CREDENTIALS"],
             drive_folder_id=app.config["GOOGLE_DRIVE_FOLDER_ID"],
-            copydoc_template_id=app.config["COPYD0C_TEMPLATE_ID"],
+            copydoc_template_id=app.config["COPYDOC_TEMPLATE_ID"],
         )
     except Exception as error:
         app.logger.info(f"Unable to initialize gdrive: {error}")
