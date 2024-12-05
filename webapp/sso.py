@@ -42,7 +42,7 @@ def init_sso(app: flask.Flask):
 
     @app.route("/logout")
     def logout():
-        if "openid" in flask.session and flask.request.path == "/logout":
+        if "openid" in flask.session:
             flask.session.pop("openid")
 
         return flask.redirect("/login_page")
