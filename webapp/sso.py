@@ -45,7 +45,11 @@ def init_sso(app: flask.Flask):
         if "openid" in flask.session and flask.request.path == "/logout":
             flask.session.pop("openid")
 
-        return flask.redirect("/login")
+        return flask.redirect("/login_page")
+
+    @app.route("/login_page")
+    def login_page():
+        return flask.render_template("login.html")
 
 
 def login_required(func):
@@ -67,6 +71,6 @@ def login_required(func):
         if "openid" in flask.session:
             return func(*args, **kwargs)
 
-        return flask.redirect("/login?next=" + flask.request.path)
+        return flask.redirect("/login_page" + flask.request.path)
 
     return is_user_logged_in
