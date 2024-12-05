@@ -26,7 +26,7 @@ def create_app():
     app.context_processor(base_context)
 
     # Add CORS headers
-    CORS(app, origins=["login.ubuntu.com"])
+    CORS(app, origins=["https://login.ubuntu.com"])
 
     # Initialize database
     init_db(app)
