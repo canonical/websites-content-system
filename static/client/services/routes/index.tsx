@@ -17,7 +17,7 @@ export function generateRoutes(project: string, pages: IPage[]): JSX.Element[] {
           </MainLayout>
         }
         key={page.name}
-        path={`/webpage/${project}${page.name}`}
+        path={`/app/webpage/${project}${page.name}`}
       />
       <Route
         element={
@@ -26,7 +26,7 @@ export function generateRoutes(project: string, pages: IPage[]): JSX.Element[] {
           </MainLayout>
         }
         key="new-webpage"
-        path="/new-webpage"
+        path="/app/new-webpage"
       />
       {page.children?.length && generateRoutes(project, page.children)}
     </React.Fragment>

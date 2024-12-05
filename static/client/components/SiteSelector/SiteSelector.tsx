@@ -19,7 +19,7 @@ const SiteSelector = (): JSX.Element | null => {
   useEffect(() => {
     if (projects.length && !selectedProject) {
       // get project name from URL
-      const match = location.pathname.match(/\/webpage\/([^/]+)/);
+      const match = location.pathname.match(/\/app\/webpage\/([^/]+)/);
       let projectFromURL;
       if (match) {
         projectFromURL = projects.find((p) => p.name === match[1]);

@@ -19,7 +19,7 @@ const Navigation = (): JSX.Element => {
   }, []);
 
   const handleNewPageClick = useCallback(() => {
-    navigate("/new-webpage");
+    navigate("/app/new-webpage");
   }, [navigate]);
 
   return (
