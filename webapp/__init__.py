@@ -79,9 +79,14 @@ def set_cache_control_headers(response):
     Default caching rules that should work for most pages
     """
 
-    if flask.request.path.startswith("/_status"):
+    if flask.request.path.startswith(
+        "/_status"
+    ) or flask.request.path.startswith("/"):
         # Our status endpoints need to be uncached
-        # to report accurate information at all times
+        # to report accurate information at all times.
+        # The base path is also uncached to ensure that we don't cache the base
+        # state after logging in. We can do this as we serve a single page app
+        # from a unique url.
         response.cache_control.no_store = True
 
     elif (
