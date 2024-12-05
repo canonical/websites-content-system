@@ -10,7 +10,7 @@ const Main = (): React.ReactNode => {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<MainLayout />} path="/" />
+        <Route element={<MainLayout />} path="/app" />
         {data?.length &&
           data.map(
             (project) =>
