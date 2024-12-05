@@ -2,6 +2,7 @@ import hashlib
 import os
 
 import flask
+from flask_cors import CORS
 from werkzeug.debug import DebuggedApplication
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -23,6 +24,9 @@ def create_app():
     )
     app.config.from_pyfile("settings.py")
     app.context_processor(base_context)
+
+    # Add CORS headers
+    CORS(app, origins=["login.ubuntu.com"])
 
     # Initialize database
     init_db(app)
