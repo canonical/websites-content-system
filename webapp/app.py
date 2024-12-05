@@ -58,9 +58,8 @@ def get_tree(uri: str, branch: str = "main", no_cache: bool = False):
 
     # Disable caching for this response
     response.cache_control.no_store = True
-    # Allow CORS in development mode
-    if app.config["DEVELOPMENT_MODE"]:
-        response.headers.add("Access-Control-Allow-Origin", "*")
+    # Allow CORS
+    response.headers.add("Access-Control-Allow-Origin", "*")
 
     return response
 
