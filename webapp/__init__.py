@@ -1,4 +1,5 @@
 import hashlib
+import logging
 import os
 
 import flask
@@ -14,6 +15,7 @@ from webapp.models import init_db
 from webapp.sso import init_sso
 from webapp.tasks import init_tasks
 
+logging.getLogger('flask_cors').level = logging.DEBUG
 
 def create_app():
     app = FlaskBase(
@@ -26,7 +28,7 @@ def create_app():
     app.context_processor(base_context)
 
     # Add CORS headers
-    #CORS(app, origins=["https://login.ubuntu.com"])
+    CORS(app)
 
     # Initialize database
     init_db(app)
