@@ -51,6 +51,8 @@ def init_sso(app: flask.Flask):
     @app.route("/login_page")
     def login_page():
         next = flask.request.args.get("next", "/app")
+        if "openid" in flask.session:
+            return flask.redirect(next)
         return flask.render_template("login.html", next=next)
 
 
