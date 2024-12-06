@@ -9,7 +9,7 @@ describe("MainLayout", () => {
     const queryClient = new QueryClient();
     render(
       <QueryClientProvider client={queryClient}>
-        <MemoryRouter initialEntries={["/"]} key="testkey">
+        <MemoryRouter initialEntries={["/app"]} key="testkey">
           <MainLayout />
         </MemoryRouter>
       </QueryClientProvider>,

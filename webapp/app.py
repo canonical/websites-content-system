@@ -348,14 +348,14 @@ def create_page(body: CreatePageModel):
 
 
 # Client-side routes
-@app.route("/")
-@app.route("/new-webpage")
+@app.route("/app")
+@app.route("/app/new-webpage")
 @login_required
 def index():
     return render_template("index.html")
 
 
-@app.route("/webpage/<path:path>")
+@app.route("/app/webpage/<path:path>")
 @login_required
 def webpage(path):
     return render_template("index.html")
