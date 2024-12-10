@@ -74,7 +74,7 @@ const Search = (): JSX.Element => {
           <ul className="l-search-dropdown">
             {matches.map((match) => (
               <li className="l-search-item" onClick={handleSelect(match)} onMouseDown={handleOptionMouseDown}>
-                {match.name} - {match.title}
+                {`${match.project}${match.name}`} {match.title && `- ${match.title}`}
               </li>
             ))}
           </ul>
