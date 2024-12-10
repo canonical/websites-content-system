@@ -40,7 +40,7 @@ const Search = (): JSX.Element => {
         const project = SearchServices.getProjectByName(data, selectedItem.project);
         if (project) setSelectedProject(project);
       }
-      navigate(`/webpage/${selectedItem.project}${selectedItem.name}`);
+      navigate(`/app/webpage/${selectedItem.project}${selectedItem.name}`);
     },
     [data, navigate, searchRef, selectedProject, setSelectedProject],
   );
