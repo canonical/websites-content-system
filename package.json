@@ -12,7 +12,8 @@
     "serve": "./entrypoint 0.0.0.0:${PORT}",
     "start": "yarn run build && concurrently --raw 'yarn run watch' 'yarn run serve'",
     "test": "vitest",
-    "watch": "watch -p 'static/client/**/*.{js,jsx,ts,tsx,scss}' -c 'yarn run build'"
+    "watch": "watch -p 'static/client/**/*.{js,jsx,ts,tsx,scss}' -c 'yarn run build'",
+    "dev": "vite"
   },
   "dependencies": {
     "@canonical/react-components": "0.60.0",
