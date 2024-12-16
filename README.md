@@ -124,6 +124,12 @@ $ docker inspect <valkey-container-id> | grep IPAddress
 $ docker inspect <postgres-container-id> | grep IPAddress
 ```
 
+### Hot module reloading
+To ensure hot module reloading, make sure to do the following changes.
+- Add <code>FLASK_ENV=development</code> in .env.local file.
+- Comment out <code>"process.env.NODE_ENV": '"production"'</code> in vite.config.ts file.
+- Run the vite dev server locally, using <code>yarn run dev</code>.
+
 ### API Requests
 
 #### Getting the website page structure as a JSON tree

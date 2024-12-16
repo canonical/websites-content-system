@@ -352,10 +352,14 @@ def create_page(body: CreatePageModel):
 @app.route("/new-webpage")
 @login_required
 def index():
-    return render_template("index.html")
+    return render_template(
+        "index.html", is_dev=environ.get("FLASK_ENV") == "development"
+    )
 
 
 @app.route("/webpage/<path:path>")
 @login_required
 def webpage(path):
-    return render_template("index.html")
+    return render_template(
+        "index.html", is_dev=environ.get("FLASK_ENV") == "development"
+    )

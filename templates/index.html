@@ -1,6 +1,20 @@
 {% extends "base.html" %}
-
 {% block content %}
-  <main id="root"></main>
-  <script src="{{ versioned_static('build/websites-content-system.umd.js') }}"></script>
+  <main id="root">
+  </main>
+  {% if is_dev %}
+    <script type="module">
+    import RefreshRuntime from 'http://localhost:5173/@react-refresh'
+    RefreshRuntime.injectIntoGlobalHook(window)
+    window.$RefreshReg$ = () => {}
+    window.$RefreshSig$ = () => (type) => type
+    window.__vite_plugin_react_preamble_installed__ = true
+    </script>
+    <!-- In development, use Vite dev server's hot reloading files -->
+    <script type="module" src="http://localhost:5173/@vite/client"></script>
+    <script type="module" src="http://localhost:5173/static/client/main.tsx"></script>
+  {% else %}
+    <!-- In production, use the versioned build files -->
+    <script src="{{ versioned_static('build/websites-content-system.umd.js') }}"></script>
+  {% endif %}
 {% endblock %}
