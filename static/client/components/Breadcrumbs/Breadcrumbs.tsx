@@ -9,7 +9,7 @@ const Breadcrumbs = () => {
   const [breadcrumbs, setBreadcrumbs] = useState<IBreadcrumb[]>([]);
 
   useEffect(() => {
-    const pageIndex = location.pathname.indexOf("webpage/");
+    const pageIndex = location.pathname.indexOf("app/webpage/");
     if (pageIndex > 0) {
       const parts = location.pathname.substring(pageIndex + 8).split("/");
       if (parts.length) {
@@ -18,7 +18,7 @@ const Breadcrumbs = () => {
           accumulatedPath = `${accumulatedPath}/${part}`;
           return {
             name: part,
-            link: `/webpage${accumulatedPath}`,
+            link: `app/webpage${accumulatedPath}`,
           };
         });
         setBreadcrumbs(paths);

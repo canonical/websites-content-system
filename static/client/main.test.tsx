@@ -1,6 +1,7 @@
 /* eslint-disable testing-library/no-node-access */
+import { act } from "react";
+
 import { waitFor } from "@testing-library/react";
-import { act } from "react-dom/test-utils";
 
 describe("main", () => {
   beforeAll(() => {
