@@ -42,7 +42,9 @@ def request_changes(body: ChangesRequestModel):
 
         webpage = Webpage.query.filter_by(id=params["webpage_id"]).first()
         project = Project.query.filter_by(id=webpage.project_id).first()
-        site_repository = SiteRepository(project.name, current_app, task_locks=LOCKS)
+        site_repository = SiteRepository(
+            project.name, current_app, task_locks=LOCKS
+        )
         # clean the cache for a new Jira task to appear in the tree
         site_repository.invalidate_cache()
     except Exception as e:
@@ -113,7 +115,9 @@ def remove_webpage(body: RemoveWebpageModel):
             jira_tasks = JiraTask.query.filter_by(webpage_id=webpage_id).all()
             if jira_tasks:
                 for task in jira_tasks:
-                    status_change = current_app.config["JIRA"].change_issue_status(
+                    status_change = current_app.config[
+                        "JIRA"
+                    ].change_issue_status(
                         issue_id=task.jira_id,
                         transition_id=JiraStatusTransitionCodes.REJECTED.value,
                     )
@@ -135,7 +139,9 @@ def remove_webpage(body: RemoveWebpageModel):
         except Exception as e:
             # Rollback if there's any error
             db.session.rollback()
-            current_app.logger.info(e, "Error deleting webpage from the database")
+            current_app.logger.info(
+                e, "Error deleting webpage from the database"
+            )
             return jsonify({"error": "unable to delete the webpage"}), 500
 
         return (
@@ -145,7 +151,8 @@ def remove_webpage(body: RemoveWebpageModel):
 
     if webpage.status == WebpageStatus.AVAILABLE:
         if not (
-            body.reporter_id and User.query.filter_by(id=body.reporter_id).one_or_none()
+            body.reporter_id
+            and User.query.filter_by(id=body.reporter_id).one_or_none()
         ):
             return (
                 jsonify({"error": "provided parameters are incorrect"}),
@@ -166,12 +173,16 @@ def remove_webpage(body: RemoveWebpageModel):
         db.session.commit()
 
     project = Project.query.filter_by(id=webpage.project_id).first()
-    site_repository = SiteRepository(project.name, current_app, task_locks=LOCKS)
+    site_repository = SiteRepository(
+        project.name, current_app, task_locks=LOCKS
+    )
     # clean the cache for a page to be removed from the tree
     site_repository.invalidate_cache()
 
     return (
-        jsonify({"message": f"removal of {webpage.name} processed successfully"}),
+        jsonify(
+            {"message": f"removal of {webpage.name} processed successfully"}
+        ),
         200,
     )
 

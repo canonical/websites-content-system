@@ -75,11 +75,15 @@ def set_reviewers():
 
     # Create new reviewer rows
     for user_id in user_ids:
-        get_or_create(db.session, Reviewer, user_id=user_id, webpage_id=webpage_id)
+        get_or_create(
+            db.session, Reviewer, user_id=user_id, webpage_id=webpage_id
+        )
 
     webpage = Webpage.query.filter_by(id=webpage_id).first()
     project = Project.query.filter_by(id=webpage.project_id).first()
-    site_repository = SiteRepository(project.name, current_app, task_locks=LOCKS)
+    site_repository = SiteRepository(
+        project.name, current_app, task_locks=LOCKS
+    )
     # clean the cache for a the new reviewers to appear in the tree
     site_repository.invalidate_cache()
 
@@ -102,7 +106,9 @@ def set_owner():
         db.session.commit()
 
         project = Project.query.filter_by(id=webpage.project_id).first()
-        site_repository = SiteRepository(project.name, current_app, task_locks=LOCKS)
+        site_repository = SiteRepository(
+            project.name, current_app, task_locks=LOCKS
+        )
         # clean the cache for a new owner to appear in the tree
         site_repository.invalidate_cache()
 
