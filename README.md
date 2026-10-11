@@ -151,7 +151,7 @@ $ celery -A webapp.app.celery_app worker -B  --loglevel=DEBUG
 Without celery or rabbitmq, you can start with flask to use native task processing.
 
 ```bash
-$ flask --app webapp/app run --debug
+$ flask --app webapp/app run --debug -p 8000
 ```
 
 ### Running locally, with dotrun
